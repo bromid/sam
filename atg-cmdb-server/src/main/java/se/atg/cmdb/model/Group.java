@@ -16,20 +16,23 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.ui.rest.Defaults;
 
-@JsonPropertyOrder({"id","name","description","groups","applications","tags","meta"})
+@JsonPropertyOrder({ "id", "name", "description", "groups", "applications", "tags", "meta" })
 public class Group extends Base {
 
-	@NotNull @Size(min = 1)
+	@NotNull
+	@Size(min = 1)
 	public String id;
-	@NotNull @Size(min = 1)
+	@NotNull
+	@Size(min = 1)
 	public String name;
-	@Size(min = 1, max=500)
+	@Size(min = 1, max = 500)
 	public String description;
 	public List<Group> groups;
 	public List<ApplicationLink> applications;
 	public List<Tag> tags;
 
-	public Group() {}
+	public Group() {
+	}
 
 	@SuppressWarnings("unchecked")
 	public Group(Document bson) {
@@ -51,9 +54,9 @@ public class Group extends Base {
 		if (this.groups == null) {
 			return Collections.emptyList();
 		}
-	
+
 		final Stream<Object> typeErasure = (Stream) this.groups.stream();
-		final List<String> groups = typeErasure.map(t->t.toString()).collect(Collectors.toList());
+		final List<String> groups = typeErasure.map(t -> t.toString()).collect(Collectors.toList());
 		this.groups.clear();
 		return groups;
 	}

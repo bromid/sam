@@ -135,10 +135,39 @@ public class Main {
 				.append("name", "atg.se")
 				.append("description", "Atg.se Betting Tjänstelager")
 			);
+
 			groups.insertOne(new Document()
 				.append("id", "tillsammans")
 				.append("name", "Tillsammans")
 				.append("description", "tillsammans.atg.se")
+			);
+
+			groups.insertOne(new Document()
+				.append("id", "org-it")
+				.append("name", "ATG IT")
+			);
+			groups.insertOne(new Document()
+				.append("id", "org-it-spel")
+				.append("name", "ATG IT Spelsektionen")
+				.append("groups", Lists.newArrayList("atg-se"))
+			);
+			groups.insertOne(new Document()
+				.append("id", "org-it-sport")
+				.append("name", "ATG IT Sportsektionen")
+			);			
+			groups.insertOne(new Document()
+				.append("id", "org-it-prod")
+				.append("name", "ATG IT Produktionssektionen")
+				.append("groups", Lists.newArrayList("org-netman", "org-sysman"))
+			);
+			groups.insertOne(new Document()
+				.append("id", "org-netman")
+				.append("name", "ATG IT Netman")
+				.append("groups", Lists.newArrayList("track-infra"))
+			);
+			groups.insertOne(new Document()
+				.append("id", "org-sysman")
+				.append("name", "ATG IT Sysman")
 			);
 
 			logger.info("Number of servers: {}", servers.count());
