@@ -1,0 +1,21 @@
+mongoDB:
+  dbName: test
+  username: uid
+  password: pwd
+  connections:
+    - host: localhost
+      port: 27017
+
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 8081
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+      logFormat: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
