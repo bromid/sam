@@ -1,6 +1,11 @@
 package se.atg.cmdb.helpers;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -11,13 +16,31 @@ import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.SecurityContext;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import com.mongodb.client.model.Filters;
 
 import io.dropwizard.jersey.validation.Validators;
+import jersey.repackaged.com.google.common.collect.Lists;
+import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.User;
 
 public abstract class RESTHelper {
 
 	private static final ValidatorFactory VALIDATOR_FACTORY = Validators.newValidatorFactory();
+
+	public static Optional<Bson> parseFilterFromQuery(String queryString, String fieldName) {
+
+		if (queryString == null || queryString.isEmpty()) {
+			return Optional.empty();
+		}
+
+		final String[] array = queryString.split(",");
+		if (array.length == 1) {
+			return Optional.of(Filters.eq(fieldName, array[0])); 
+		}
+		return Optional.of(Filters.all(fieldName, Arrays.asList(array)));
+	}
 
 	public static String verifyHash(Document bson, String etag) {
 
@@ -43,5 +66,21 @@ public abstract class RESTHelper {
 
 	public static User getUser(SecurityContext securityContext) {
 		return (User) securityContext.getUserPrincipal();
+	}
+
+	public static <T> PaginatedCollection<T> paginatedList(Stream<T> stream) {
+
+		final List<T> list = stream.collect(Collectors.toList());
+		return paginatedList(list);
+	}
+
+	public static <T> PaginatedCollection<T> paginatedList(Iterable<T> iterable) {
+
+		final List<T> list = Lists.newArrayList(iterable);
+		return paginatedList(list);
+	}
+
+	public static <T> PaginatedCollection<T> paginatedList(List<T> list) {
+		return new PaginatedCollection<T>(list);
 	}
 }

@@ -1,17 +1,20 @@
 package se.atg.cmdb.ui.rest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.Status;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +29,10 @@ import com.mongodb.client.model.Projections;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import se.atg.cmdb.helpers.RESTHelper;
 import se.atg.cmdb.helpers.TreeHelper;
 import se.atg.cmdb.model.Group;
+import se.atg.cmdb.model.PaginatedCollection;
 
 @Path("/")
 @Api("groups")
@@ -49,18 +54,21 @@ public class GroupResource {
 	@GET
 	@Path("group")
 	@ApiOperation("Fetch all groups")
-	public List<Group> getGroups() {
-
+	public PaginatedCollection<Group> getGroups(
+		@ApiParam("A comma separated list of tags") @QueryParam("tags") String tags 
+	) {
+		final Optional<Bson> tagsFilter = RESTHelper.parseFilterFromQuery(tags, tags);
 		final Map<String, Group> groups = getAllGroups();
-		return getRootGroupIds()
+		return RESTHelper.paginatedList(
+			getRootGroupIds(tagsFilter)
 			.stream()
 			.map(t->createTree(t, groups))
-			.collect(Collectors.toList());
+		);
 	}
 
 	@GET
 	@Path("group/{id}")
-	@ApiOperation("Fetch all groups")
+	@ApiOperation("Fetch group")
 	public Group getGroup(
 		@ApiParam("id") @PathParam("id") String id
 	) {
@@ -88,25 +96,41 @@ public class GroupResource {
 
 	/*
 	 * Fetch root groups. That's all groups that has no inbound references from any other group.
-	 *  - Add empty groups field (if field is missing)
-	 *  - Unwind groups field to be able to self-join
-	 *  - Self join on inbound references: group.groups -> group.id
-	 *  - Group on id to get distinct group names
+	 *  - 
+	 *  - 
+	 *  - 
+	 *  - 
 	 */
-	private List<String> getRootGroupIds() {
-		return Lists.newArrayList(database
+	private List<String> getRootGroupIds(Optional<Bson> filter) {
+
+		final List<Bson> pipeline = new ArrayList<>(5);
+
+		// Optional filter
+		if (filter.isPresent()) {
+			pipeline.add(Aggregates.match(filter.get()));
+		}
+
+		// Add empty groups field (if field is missing)
+		pipeline.add(Aggregates.project(Projections.fields(
+			Projections.include("id"),
+			Projections.computed("groups", new Document().append("$ifNull", Lists.newArrayList("$groups", "[]")))
+		)));
+
+		// Unwind groups field to be able to self-join
+		pipeline.add(Aggregates.unwind("$groups"));
+
+		// Self join on inbound references: group.groups -> group.id and filter on no inbound references
+		pipeline.add(Aggregates.lookup(GROUP_COLLECTION, "id", "groups", "groups"));
+		pipeline.add(Aggregates.match(Filters.size("groups", 0)));
+
+		// Group on id to get distinct group names
+		pipeline.add(Aggregates.group("$id"));
+
+		return database
 			.getCollection(GROUP_COLLECTION)
-			.aggregate(Lists.newArrayList(
-				Aggregates.project(Projections.fields(
-					Projections.include("id"),
-					Projections.computed("groups", new Document().append("$ifNull", Lists.newArrayList("$groups", "[]")))
-				)),
-				Aggregates.unwind("$groups"),
-				Aggregates.lookup(GROUP_COLLECTION, "id", "groups", "groups"),
-				Aggregates.match(Filters.size("groups", 0)),
-				Aggregates.group("$id")
-			)).map(t->t.getString("_id"))
-		);
+			.aggregate(pipeline)
+			.map(t->t.getString("_id"))
+			.into(Lists.newArrayList());
 	}
 
 	private static Group createTree(String groupId, Map<String, Group> groups) {

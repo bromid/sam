@@ -1,6 +1,5 @@
 package se.atg.cmdb.ui.rest;
 
-import java.util.List;
 import java.util.function.Function;
 
 import javax.validation.Valid;
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -30,8 +28,10 @@ import com.mongodb.client.model.Filters;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import se.atg.cmdb.helpers.RESTHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
+import se.atg.cmdb.model.PaginatedCollection;
 
 @Path("/")
 @Api("applications")
@@ -52,7 +52,7 @@ public class ApplicationResource {
 	@GET
 	@Path("app")
 	@ApiOperation("Fetch all applications")
-	public List<Application> getApplications() {
+	public PaginatedCollection<Application> getApplications() {
 		return getApplications(MongoCollection::find);
 	}
 
@@ -84,8 +84,8 @@ public class ApplicationResource {
 			.build();
 	}
 
-	private List<Application> getApplications(Function<MongoCollection<Document>,FindIterable<Document>> find) {
-		return Lists.newArrayList(
+	private PaginatedCollection<Application> getApplications(Function<MongoCollection<Document>,FindIterable<Document>> find) {
+		return RESTHelper.paginatedList(
 			find.apply(database.getCollection(APPLICATION_COLLECTION))
 			.map(Application::new)
 		);

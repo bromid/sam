@@ -1,6 +1,5 @@
 package se.atg.cmdb.ui.text;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import org.bson.Document;
@@ -10,15 +9,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
-import com.mongodb.client.model.Projections;
-import com.mongodb.client.model.Sorts;
 
-import se.atg.cmdb.model.Server;
+import se.atg.cmdb.model.Group;
 
 public class Main {
 
@@ -97,12 +92,14 @@ public class Main {
 
 			final MongoCollection<Document> groups = database.getCollection("groups");
 			groups.drop();
+			groups.createIndex(new Document().append("id", 1), new IndexOptions().unique(true));
 
 			groups.insertOne(new Document()
 				.append("id", "atg-se")
 				.append("name", "atg.se")
 				.append("description", "www.atg.se")
 				.append("groups", Lists.newArrayList("atg-web", "atg-service","atg-virtual-racing"))
+				.append("tags", Lists.newArrayList("webapp"))
 			);
 			groups.insertOne(new Document()
 				.append("id", "atg-virtual-racing")
@@ -140,16 +137,18 @@ public class Main {
 				.append("id", "tillsammans")
 				.append("name", "Tillsammans")
 				.append("description", "tillsammans.atg.se")
+				.append("tags", Lists.newArrayList("webapp", "weblogic"))
 			);
 
 			groups.insertOne(new Document()
 				.append("id", "org-it")
 				.append("name", "ATG IT")
+				.append("groups", Lists.newArrayList("org-it-spel", "org-it-sport", "org-it-prod"))
 			);
 			groups.insertOne(new Document()
 				.append("id", "org-it-spel")
 				.append("name", "ATG IT Spelsektionen")
-				.append("groups", Lists.newArrayList("atg-se"))
+				//.append("groups", Lists.newArrayList("atg-se", "tillsammans"))
 			);
 			groups.insertOne(new Document()
 				.append("id", "org-it-sport")
@@ -163,13 +162,25 @@ public class Main {
 			groups.insertOne(new Document()
 				.append("id", "org-netman")
 				.append("name", "ATG IT Netman")
-				.append("groups", Lists.newArrayList("track-infra"))
+				.append("groups", Lists.newArrayList("netman-infrastructure-tracks"))
+			);
+			groups.insertOne(new Document()
+				.append("id", "netman-infrastructure-tracks")
+				.append("name", "Netman banutrustning")
+				.append("tags", Lists.newArrayList("switches", "routers"))
 			);
 			groups.insertOne(new Document()
 				.append("id", "org-sysman")
 				.append("name", "ATG IT Sysman")
 			);
 
+			groups.find(Filters.eq("tags", "webapp"))
+				.map(Group::new)
+				.forEach((Consumer<Group>)
+					System.out::println
+				);
+			
+			/*
 			logger.info("Number of servers: {}", servers.count());
 			logger.info("Server: {}", servers.find().first().toJson());
 
@@ -218,6 +229,7 @@ public class Main {
 			for (Server server: serverDocs) {
 				System.out.println(server);
 			}
+			*/
 		}
 		logger.info("End");
 	}

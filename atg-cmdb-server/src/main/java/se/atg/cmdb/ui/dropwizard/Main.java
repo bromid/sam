@@ -50,7 +50,7 @@ public class Main extends Application<CMDBConfiguration> {
 
 	@Override
 	public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
-		bootstrap.addBundle(new AssetsBundle("/docs","/docs","index.html"));
+		bootstrap.addBundle(new AssetsBundle("/assets","/","index.html"));
 	}
 
 	@Override
@@ -117,6 +117,7 @@ public class Main extends Application<CMDBConfiguration> {
 	    config.setTitle("ATG Configuration Management Database");
 	    config.setVersion("1.0.0");
 	    config.setResourcePackage("se.atg.cmdb.ui.rest");
+	    config.setBasePath("services");
 	    config.setScan(true);
 	}
 }

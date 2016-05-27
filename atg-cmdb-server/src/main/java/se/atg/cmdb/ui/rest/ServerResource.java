@@ -1,7 +1,6 @@
 package se.atg.cmdb.ui.rest;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.function.Function;
 
 import javax.annotation.security.RolesAllowed;
@@ -27,7 +26,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -42,6 +40,7 @@ import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.helpers.JSONHelper;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.helpers.RESTHelper;
+import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
 import se.atg.cmdb.model.ServerLink;
 import se.atg.cmdb.model.User;
@@ -67,7 +66,7 @@ public class ServerResource {
 	@Path("server")
 	@RolesAllowed(Roles.READ)
 	@ApiOperation("Fetch all servers")
-	public List<Server> getServers() {
+	public PaginatedCollection<Server> getServers() {
 		return getServers(MongoCollection::find);
 	}
 
@@ -75,7 +74,7 @@ public class ServerResource {
 	@Path("server/{environment}")
 	@RolesAllowed(Roles.READ)
 	@ApiOperation("Fetch all servers in an environment")
-	public List<Server> getServersInEnvironment(
+	public PaginatedCollection<Server> getServersInEnvironment(
 		@ApiParam("Test environment") @PathParam("environment") String environment
 	) {
 		return getServers(t->t.find(Filters.eq("environment", environment)));
@@ -156,8 +155,8 @@ public class ServerResource {
 		return linkResponse(Status.OK, existing, uriInfo);
 	}
 
-	private List<Server> getServers(Function<MongoCollection<Document>, FindIterable<Document>> find) {
-		return Lists.newArrayList(
+	private PaginatedCollection<Server> getServers(Function<MongoCollection<Document>, FindIterable<Document>> find) {
+		return RESTHelper.paginatedList(
 			find.apply(database.getCollection(SERVER_COLLECTION)).map(Server::new)
 		);
 	}
