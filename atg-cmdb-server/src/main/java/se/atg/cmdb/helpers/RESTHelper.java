@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,6 +15,7 @@ import javax.validation.ValidatorFactory;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriBuilder;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -29,7 +31,7 @@ public abstract class RESTHelper {
 
 	private static final ValidatorFactory VALIDATOR_FACTORY = Validators.newValidatorFactory();
 
-	public static Optional<Bson> parseFilterFromQuery(String queryString, String fieldName) {
+	public static Optional<Function<String,Bson>> parseFilterFromQuery(String queryString) {
 
 		if (queryString == null || queryString.isEmpty()) {
 			return Optional.empty();
@@ -37,9 +39,9 @@ public abstract class RESTHelper {
 
 		final String[] array = queryString.split(",");
 		if (array.length == 1) {
-			return Optional.of(Filters.eq(fieldName, array[0])); 
+			return Optional.of(t->Filters.eq(t, array[0]));
 		}
-		return Optional.of(Filters.all(fieldName, Arrays.asList(array)));
+		return Optional.of(t->Filters.all(t, Arrays.asList(array)));
 	}
 
 	public static String verifyHash(Document bson, String etag) {
@@ -68,19 +70,32 @@ public abstract class RESTHelper {
 		return (User) securityContext.getUserPrincipal();
 	}
 
-	public static <T> PaginatedCollection<T> paginatedList(Stream<T> stream) {
+	public static <T> PaginatedCollection<T> paginatedList(UriBuilder uriBuilder, Integer limit, Integer start, Stream<T> stream) {
 
-		final List<T> list = stream.collect(Collectors.toList());
-		return paginatedList(list);
+		Stream<T> limitedStream = stream;
+		if (start != null && start > 0) {
+			limitedStream = limitedStream.skip(start);
+		}
+		if (limit != null && limit > 0) {
+			limitedStream = limitedStream.limit(limit+1);
+		}
+		final List<T> list = limitedStream.collect(Collectors.toList());
+		return paginatedList(uriBuilder, limit, start, list);
 	}
 
 	public static <T> PaginatedCollection<T> paginatedList(Iterable<T> iterable) {
 
 		final List<T> list = Lists.newArrayList(iterable);
-		return paginatedList(list);
+		return paginatedList(null, null, null, list);
 	}
 
-	public static <T> PaginatedCollection<T> paginatedList(List<T> list) {
-		return new PaginatedCollection<T>(list);
+	public static <T> PaginatedCollection<T> paginatedList(Integer limit, Integer start, Iterable<T> iterable) {
+
+		final List<T> list = Lists.newArrayList(iterable);
+		return paginatedList(null, limit, start, list);
+	}
+
+	public static <T> PaginatedCollection<T> paginatedList(UriBuilder uriBuilder, Integer limit, Integer start, List<T> list) {
+		return new PaginatedCollection<T>(uriBuilder, Optional.ofNullable(limit), Optional.ofNullable(start), list);
 	}
 }

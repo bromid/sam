@@ -1,8 +1,11 @@
 package se.atg.cmdb.ui.text;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,10 +13,10 @@ import com.google.common.collect.Lists;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
-
-import se.atg.cmdb.model.Group;
+import com.mongodb.client.model.Projections;
 
 public class Main {
 
@@ -134,30 +137,41 @@ public class Main {
 			);
 
 			groups.insertOne(new Document()
+				.append("id", "webappar")
+				.append("groups", Lists.newArrayList("tillsammans"))
+				.append("tags", Lists.newArrayList("webapp"))
+			);
+			groups.insertOne(new Document()
 				.append("id", "tillsammans")
 				.append("name", "Tillsammans")
 				.append("description", "tillsammans.atg.se")
 				.append("tags", Lists.newArrayList("webapp", "weblogic"))
+			);
+			groups.insertOne(new Document()
+				.append("id", "travsport")
+				.append("tags", Lists.newArrayList("webapp", "weblogic", "sportsystem"))
 			);
 
 			groups.insertOne(new Document()
 				.append("id", "org-it")
 				.append("name", "ATG IT")
 				.append("groups", Lists.newArrayList("org-it-spel", "org-it-sport", "org-it-prod"))
+				.append("tags", Lists.newArrayList("webapp"))
 			);
 			groups.insertOne(new Document()
 				.append("id", "org-it-spel")
 				.append("name", "ATG IT Spelsektionen")
-				//.append("groups", Lists.newArrayList("atg-se", "tillsammans"))
+				.append("groups", Lists.newArrayList("tillsammans"))
 			);
 			groups.insertOne(new Document()
 				.append("id", "org-it-sport")
 				.append("name", "ATG IT Sportsektionen")
+				.append("groups", Lists.newArrayList("travsport"))
 			);			
 			groups.insertOne(new Document()
 				.append("id", "org-it-prod")
 				.append("name", "ATG IT Produktionssektionen")
-				.append("groups", Lists.newArrayList("org-netman", "org-sysman"))
+				.append("groups", Lists.newArrayList("org-netman", "org-sysman", "travsport"))
 			);
 			groups.insertOne(new Document()
 				.append("id", "org-netman")
@@ -174,12 +188,21 @@ public class Main {
 				.append("name", "ATG IT Sysman")
 			);
 
-			groups.find(Filters.eq("tags", "webapp"))
-				.map(Group::new)
-				.forEach((Consumer<Group>)
-					System.out::println
-				);
-			
+			final List<Bson> pipeline = new ArrayList<>(5);
+			pipeline.add(Aggregates.match(Filters.eq("tags", "webapp")));
+			pipeline.add(Aggregates.project(Projections.fields(
+				Projections.include("id"),
+				Projections.computed("groups", new Document().append("$ifNull", Lists.newArrayList("$groups", "[]")))
+			)));
+			pipeline.add(Aggregates.unwind("$groups"));
+			pipeline.add(Aggregates.lookup("groups", "id", "groups", "inbound_links"));
+			//pipeline.add(Aggregates.match(Filters.or(Filters.size("inbound_links", 0), Filters.not(Filters.eq("inbound_links.tags", "webapp")))));
+			//pipeline.add(Aggregates.group("$id"));
+
+			groups
+				.aggregate(pipeline)
+				.forEach((Consumer<Document>) System.out::println);
+
 			/*
 			logger.info("Number of servers: {}", servers.count());
 			logger.info("Server: {}", servers.find().first().toJson());
