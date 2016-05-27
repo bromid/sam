@@ -3,7 +3,9 @@ package se.atg.cmdb.model;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -37,7 +39,18 @@ public class Application extends Base {
 		this.attributes = Mapper.mapAttributes(bson);
 	}
 
+	@Override
 	public String toString() {
-		return ReflectionToStringBuilder.toString(this, Defaults.STYLE);
+		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
 	}
 }

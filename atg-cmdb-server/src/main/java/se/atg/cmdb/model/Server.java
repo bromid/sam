@@ -7,7 +7,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -45,8 +47,19 @@ public class Server extends Base {
 		this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromId);
 	}
 
+	@Override
 	public String toString() {
-		return ReflectionToStringBuilder.toString(this, Defaults.STYLE);
+		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
 	}
 
 	public static class OS {
@@ -70,8 +83,19 @@ public class Server extends Base {
 			return new OS(bson);
 		}
 
+		@Override
 		public String toString() {
-			return ReflectionToStringBuilder.toString(this, Defaults.STYLE);
+			return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
+
+		@Override
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
 		}
 	}
 
@@ -88,8 +112,19 @@ public class Server extends Base {
 			this.attributes = Mapper.mapAttributes(bson);
 		}
 
+		@Override
 		public String toString() {
-			return ReflectionToStringBuilder.toString(this, Defaults.STYLE);
+			return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			return EqualsBuilder.reflectionEquals(this, obj);
+		}
+
+		@Override
+		public int hashCode() {
+			return HashCodeBuilder.reflectionHashCode(this);
 		}
 	}
 
