@@ -20,6 +20,7 @@ public abstract class TreeHelper {
 
 	private static <T> T recursiveCreateTree(T rootNode, Map<String, T> nodes, NodeState nodeState, Map<String, NodeState> loopCheck, Function<T,List<String>> getSubNodes, BiConsumer<T,T> addSubNode) {
 
+		if (nodeState == null) return null;
 		if (nodeState.onStack) return null;
 		if (nodeState.visit()) return rootNode;
 
