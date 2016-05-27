@@ -1,4 +1,4 @@
-package se.atg.cmdb.ui.rest;
+package se.atg.cmdb.ui.rest.integrationtest;
 
 import org.junit.runner.JUnitCore;
 

@@ -25,7 +25,6 @@ import com.mongodb.client.MongoDatabase;
 
 import se.atg.cmdb.model.Meta;
 import se.atg.cmdb.model.Server;
-import se.atg.cmdb.model.ServerLink;
 
 public class ServerIntegrationTest {
 
@@ -46,22 +45,14 @@ public class ServerIntegrationTest {
 		servers.drop();
 	}
 
-	private WebTarget createClient() {
-
-		final ClientConfig config = new ClientConfig();
-		config.register(ObjectMapperProvider.class);
-
-		final Client client = ClientBuilder.newClient(config);
-		client.register(HttpAuthenticationFeature.basic("integration-test", "secret"));
-		return client
-			.property(HttpUrlConnectorProvider.SET_METHOD_WORKAROUND, true)
-			.target(CMDB_URL)
-			.path("services");
-	}
-
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		mongoClient.dropDatabase("test");
+	}
+
+	@After
+	public void tearDown(){
+		servers.drop();
 	}
 
 	@Test(expected=NotFoundException.class)
@@ -72,30 +63,19 @@ public class ServerIntegrationTest {
 			.get(Server.class);
 	}
 
-
-	@After
-	public void tearDown(){
-		servers.drop();
-	}
-
 	@Test
 	public void addNewServer(){
 
 		final Server server = new Server() {{
-				environment = "ci";
-				hostname = "somehost.hh.atg.se";
-				os = new OS(){
-					{
-						name = "RedHat";
-						type = "Linux";
-						version = "6.7";
-					}
-				};
-			}
-		};
-
+			environment = "ci";
+			hostname = "somehost.hh.atg.se";
+			os = new OS() {{
+				name = "RedHat";
+				type = "Linux";
+				version = "6.7";
+			}};
+		}};
 		createServer(server);
-
 
 		final Server response = getServer(server.environment, server.hostname);
 
@@ -131,10 +111,8 @@ public class ServerIntegrationTest {
 				version = "6.7";
 			}};
 		}};
-		
 		createServer(server);
-		
-		
+
 		final Server serverPatch = new Server() {{
 			environment = "ci";
 			hostname = "somehost.hh.atg.se";
@@ -151,15 +129,24 @@ public class ServerIntegrationTest {
 			.build("PATCH", Entity.entity(serverPatch, MediaType.APPLICATION_JSON))
 			.invoke();
 		Assert.assertEquals(Status.OK.getStatusCode(), patchResponse.getStatusInfo().getStatusCode());
-		
-		
+
 		Server response = getServer("ci", "somehost.hh.atg.se");
 		final Meta responseMeta = response.meta;
 		response.meta = null;
-		
-		Assert.assertEquals("6.9", response.os.version);
-		
-	
 
+		Assert.assertEquals("6.9", response.os.version);
+	}
+
+	private static WebTarget createClient() {
+
+		final ClientConfig config = new ClientConfig();
+		config.register(ObjectMapperProvider.class);
+
+		final Client client = ClientBuilder.newClient(config);
+		client.register(HttpAuthenticationFeature.basic("integration-test", "secret"));
+		return client
+			.property(HttpUrlConnectorProvider.SET_METHOD_WORKAROUND, true)
+			.target(CMDB_URL)
+			.path("services");
 	}
 }
