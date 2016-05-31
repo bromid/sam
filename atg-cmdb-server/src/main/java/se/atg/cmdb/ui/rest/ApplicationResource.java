@@ -50,14 +50,14 @@ public class ApplicationResource {
 	}
 
 	@GET
-	@Path("app")
+	@Path("application")
 	@ApiOperation("Fetch all applications")
 	public PaginatedCollection<Application> getApplications() {
 		return getApplications(MongoCollection::find);
 	}
 
 	@GET
-	@Path("app/{id}")
+	@Path("application/{id}")
 	@ApiOperation("Fetch application")
 	public Application getApplication(
 		@ApiParam @PathParam("id") String id
@@ -66,7 +66,7 @@ public class ApplicationResource {
 	}
 
 	@PUT
-	@Path("app")
+	@Path("application")
 	@ApiOperation("Create a new application")
 	public Response createServer(
 		@ApiParam("Application") @Valid Application application,
@@ -77,7 +77,7 @@ public class ApplicationResource {
 		final Document doc = Document.parse(objectMapper.writeValueAsString(application));
 		database.getCollection(APPLICATION_COLLECTION).insertOne(doc);
 
-		final ApplicationLink response = new ApplicationLink(uriInfo.getBaseUri(), application.id);
+		final ApplicationLink response = new ApplicationLink(uriInfo.getBaseUri(), application.id, application.name);
 		return Response
 			.created(response.link.getUri())
 			.entity(response)

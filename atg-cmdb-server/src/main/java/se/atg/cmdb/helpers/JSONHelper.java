@@ -2,6 +2,7 @@ package se.atg.cmdb.helpers;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -17,7 +18,7 @@ public abstract class JSONHelper {
 	
 	static final Logger logger = LoggerFactory.getLogger(JSONHelper.class);
 
-	public static boolean updateMetaForUpdate(Document bson, String updatedBy) {
+	public static boolean updateMetaForUpdate(Document bson, Optional<String> hash, String updatedBy) {
 
 		final Document meta = (Document) bson.remove("meta");
 
@@ -25,9 +26,8 @@ public abstract class JSONHelper {
 		meta.put("refreshed", now);
 		meta.put("refreshedBy", updatedBy);
 
-		final String existingHash = Mapper.getHash(meta);
 		final String newHash = DigestUtils.sha1Hex(bson.toJson());
-		if (newHash.equals(existingHash)) {
+		if (hash.isPresent() && hash.get().equals(newHash)) {
 			bson.put("meta", meta);
 			return false;
 		} else {

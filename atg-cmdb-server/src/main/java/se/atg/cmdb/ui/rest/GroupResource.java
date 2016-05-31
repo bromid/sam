@@ -16,7 +16,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +26,12 @@ import com.google.common.collect.Maps;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Projections;
+import com.mongodb.client.model.UnwindOptions;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.RESTHelper;
 import se.atg.cmdb.helpers.TreeHelper;
 import se.atg.cmdb.model.Group;
@@ -43,8 +43,6 @@ import se.atg.cmdb.model.Tag;
 @Produces(Defaults.MEDIA_TYPE_JSON)
 public class GroupResource {
 
-	static final String APPLICATION_COLLECTION = "applications";
-	static final String GROUP_COLLECTION = "groups";
 	static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
 	private final MongoDatabase database;
@@ -95,13 +93,14 @@ public class GroupResource {
 	}
 
 	/*
-	 * Fetch all groups joined (mongodb lookup) with their applications.
+	 * Fetch all groups joined (mongodb lookup) with their applications and assets.
 	 */
 	private Map<String,Group> getAllGroups() {
 		return Maps.uniqueIndex(
-			database.getCollection(GROUP_COLLECTION)
+			database.getCollection(Collections.GROUPS)
 				.aggregate(Lists.newArrayList(
-					Aggregates.lookup("applications", "id", "group", "applications")
+					Aggregates.lookup("applications", "id", "group", "applications"),
+					Aggregates.lookup("assets", "id", "group", "assets")
 				)).map(Group::new),
 			t->t.id
 		);
@@ -109,7 +108,7 @@ public class GroupResource {
 
 	private PaginatedCollection<Tag> getTags() {
         return RESTHelper.paginatedList(database
-        	.getCollection(GROUP_COLLECTION)
+        	.getCollection(Collections.GROUPS)
 	        .aggregate(Lists.newArrayList(
 	        	Aggregates.unwind("$tags"),
 	            Aggregates.group("$tags")
@@ -138,24 +137,18 @@ public class GroupResource {
 			inboundLinksFilter = Filters.or(inboundLinksFilter, Filters.not(inboundLinksTagFilter));
 		}
 
-		// Add empty groups field (if field is missing)
-		pipeline.add(Aggregates.project(Projections.fields(
-			Projections.include("id"),
-			Projections.computed("groups", new Document().append("$ifNull", Lists.newArrayList("$groups", "[]")))
-		)));
-
 		// Unwind groups field to be able to self-join
-		pipeline.add(Aggregates.unwind("$groups"));
+		pipeline.add(Aggregates.unwind("$groups", new UnwindOptions().preserveNullAndEmptyArrays(true)));
 
 		// Self join on inbound references: group.groups -> group.id and filter no inbound references
-		pipeline.add(Aggregates.lookup(GROUP_COLLECTION, "id", "groups", "inbound_links"));
+		pipeline.add(Aggregates.lookup(Collections.GROUPS, "id", "groups", "inbound_links"));
 		pipeline.add(Aggregates.match(inboundLinksFilter));
 
 		// Group on id to get distinct group names
 		pipeline.add(Aggregates.group("$id"));
 
 		return database
-			.getCollection(GROUP_COLLECTION)
+			.getCollection(Collections.GROUPS)
 			.aggregate(pipeline)
 			.map(t->t.getString("_id"))
 			.into(Lists.newArrayList());

@@ -8,25 +8,23 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.annotations.ApiModel;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.ui.rest.Defaults;
 
-@JsonPropertyOrder({"id","name","version","meta"})
+@ApiModel(description = "An application is running on a server and is identified by an id. All applications belongs to one or more groups and needs to be versioned")
+@JsonPropertyOrder({"id", "name", "version", "group", "meta"})
 public class Application extends Base {
 
-	@NotNull @Size(min = 1)
+	@NotNull @Size(min = 1, max = 50)
 	public String id;
-	@NotNull @Size(min = 1)
+	@NotNull @Size(min = 1, max = 50)
 	public String name;
-	@NotNull @Size(min = 1)
+	@NotNull @Size(min = 1, max = 50)
 	public String version;
 	public GroupLink group;
-
-	@JsonIgnore 
-	public String hash;
 
 	public Application() {}
 	public Application(Document bson) {

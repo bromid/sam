@@ -11,44 +11,43 @@ import org.glassfish.jersey.linking.InjectLink.Style;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
-import se.atg.cmdb.ui.rest.ApplicationResource;
+import se.atg.cmdb.ui.rest.AssetResource;
 
-public class ApplicationLink {
+public class AssetLink {
 
 	public final String id;
 	public final String name;
 
 	@InjectLink(
-		resource=ApplicationResource.class,
-		method="getApplication",
+		resource=AssetResource.class,
+		method="getAsset",
 		style=Style.ABSOLUTE,
 		rel="self",
 		bindings={@Binding(name="id", value="${instance.id}")}
 	)
 	public Link link;
 
-	public ApplicationLink(Document bson) {
+	public AssetLink(Document bson) {
 		this.id = bson.getString("id");
 		this.name = bson.getString("name");
 	}
 
 	@JsonCreator
-	public ApplicationLink(String id, String name) {
+	public AssetLink(String id, String name) {
 		this.id = id;
 		this.name = name;
 	}
 
-	public ApplicationLink(URI baseUri, String id, String name) {
-		this.id = id;
-		this.name = name;
-		this.link = Link.fromMethod(ApplicationResource.class, "getApplication")
+	public AssetLink(URI baseUri, String id, String name) {
+		this(id, name);
+		this.link = Link.fromMethod(AssetResource.class, "getAsset")
 			.baseUri(baseUri)
 			.rel("self")
 			.build(id);
 	}
 
-	public static ApplicationLink fromBson(Document bson) {
-		return new ApplicationLink(bson);
+	public static AssetLink fromBson(Document bson) {
+		return new AssetLink(bson);
 	}
 
 	public String getId() {

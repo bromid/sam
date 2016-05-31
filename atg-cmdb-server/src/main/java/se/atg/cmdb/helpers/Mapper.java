@@ -6,6 +6,7 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,8 +61,8 @@ public abstract class Mapper {
 		return bson.get("meta", Document.class);
 	}
 
-	public static String getHash(Document bson) {
+	public static Optional<String> getHash(Document bson) {
 		final Document meta = getMeta(bson);
-		return (meta == null) ? null : meta.getString("hash");
+		return Optional.ofNullable(meta).map(t->t.getString("hash"));
 	}
 }

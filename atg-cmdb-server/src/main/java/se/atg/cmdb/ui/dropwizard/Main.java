@@ -37,7 +37,9 @@ import se.atg.cmdb.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthorizer;
 import se.atg.cmdb.ui.dropwizard.db.MongoDBHealthCheck;
 import se.atg.cmdb.ui.rest.ApplicationResource;
+import se.atg.cmdb.ui.rest.AssetResource;
 import se.atg.cmdb.ui.rest.GroupResource;
+import se.atg.cmdb.ui.rest.SearchResource;
 import se.atg.cmdb.ui.rest.ServerResource;
 import se.atg.cmdb.ui.rest.mapper.MongoServerExceptionMapper;
 import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
@@ -74,6 +76,8 @@ public class Main extends Application<CMDBConfiguration> {
 		environment.jersey().register(new ServerResource(database, objectMapper));
 		environment.jersey().register(new ApplicationResource(database, objectMapper));
 		environment.jersey().register(new GroupResource(database, objectMapper));
+		environment.jersey().register(new AssetResource(database, objectMapper));
+		environment.jersey().register(new SearchResource(database, objectMapper));
 
 		// Authentication
 		environment.jersey().register(RolesAllowedDynamicFeature.class);
@@ -115,7 +119,7 @@ public class Main extends Application<CMDBConfiguration> {
 
 		final BeanConfig config = new BeanConfig();
 	    config.setTitle("ATG Configuration Management Database");
-	    config.setVersion("1.0.0");
+	    config.setVersion(getClass().getPackage().getImplementationVersion());
 	    config.setResourcePackage("se.atg.cmdb.ui.rest");
 	    config.setBasePath("services");
 	    config.setScan(true);

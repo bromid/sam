@@ -4,13 +4,20 @@ import java.net.URI;
 
 import javax.ws.rs.core.Link;
 
+import org.bson.Document;
+
 import se.atg.cmdb.ui.rest.ServerResource;
 
 public class ServerLink {
 
 	public final String hostname;
 	public final String environment;
-	public final Link link;
+	public Link link;
+
+	public ServerLink(Document bson) {
+		this.hostname = bson.getString("hostname");
+		this.environment = bson.getString("environment");
+	}
 
 	public ServerLink(URI baseUri, String hostname, String environment) {
 		this.hostname = hostname;

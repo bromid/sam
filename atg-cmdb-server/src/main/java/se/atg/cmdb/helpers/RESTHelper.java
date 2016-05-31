@@ -14,6 +14,8 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
@@ -44,17 +46,22 @@ public abstract class RESTHelper {
 		return Optional.of(t->Filters.all(t, Arrays.asList(array)));
 	}
 
-	public static String verifyHash(Document bson, String etag) {
+	public static Optional<String> verifyHash(Document bson, Request request) {
 
-		final String hash = Mapper.getHash(bson);
-		if (hash != null && etag != null && !hash.equals(etag)) {
-			throw new WebApplicationException("Invalid precondition. Existing hash: " + hash, 422);
-		}
-		return hash;
+		final Optional<EntityTag> entityTag = getEntityTag(bson);
+		entityTag.ifPresent(t->{
+			final ResponseBuilder response = request.evaluatePreconditions(t);
+			if (response != null) {
+				throw new WebApplicationException(response.build());
+			}
+		});
+		return entityTag.map(EntityTag::getValue);
 	}
 
-	public static EntityTag getEntityTag(Document server) {
-		return new EntityTag(Mapper.getHash(server), false);
+	public static Optional<EntityTag> getEntityTag(Document bson) {
+
+		final Optional<String> hash = Mapper.getHash(bson);
+		return hash.map(t->new EntityTag(t, false));
 	}
 
 	public static <T> void validate(T obj, Class<?>... validationGroups) {
