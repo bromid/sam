@@ -90,11 +90,11 @@ public class ServerResource {
 	}
 
 	@GET
-	@Path("server/{environment}/{name}")
+	@Path("server/{environment}/{hostname}")
 	@RolesAllowed(Roles.READ)
 	@ApiOperation(value = "Fetch a server", response=Server.class)
 	public Response getServer(
-		@ApiParam("Server hostname") @PathParam("name") String hostname,
+		@ApiParam("Server hostname") @PathParam("hostname") String hostname,
 		@ApiParam("Test environment") @PathParam("environment") String environment
 	) {
 		final Document server = findServer(Filters.and(
@@ -131,13 +131,13 @@ public class ServerResource {
 
 	@PATCH
 	@RolesAllowed(Roles.EDIT)
-	@Path("server/{environment}/{name}")
+	@Path("server/{environment}/{hostname}")
 	@ApiOperation(value = "Update server", response=ServerLink.class)
 	@ApiImplicitParams(
 		@ApiImplicitParam(name="body", paramType="body", required=true, dataType="se.atg.cmdb.model.Server")
 	)
 	public Response updateServer(
-		@ApiParam("Server hostname") @PathParam("name") String hostname,
+		@ApiParam("Server hostname") @PathParam("hostname") String hostname,
 		@ApiParam("Test environment") @PathParam("environment") String environment,
 		@ApiParam(hidden=true) JsonNode serverJson,
 		@Context UriInfo uriInfo,
@@ -145,14 +145,19 @@ public class ServerResource {
 		@Context SecurityContext securityContext
 	) throws IOException {
 
+		final Document existing = database
+			.getCollection(Collections.SERVERS)
+			.find(Filters.and(
+					Filters.eq("environment", environment),
+					Filters.eq("hostname", hostname)
+			)).first();	
+		if (existing == null) {
+			throw new WebApplicationException(Status.NOT_FOUND);
+		}
+
 		final Server server = objectMapper.treeToValue(serverJson, Server.class);
 		RESTHelper.validate(server, Server.Update.class);
 
-		final Document existing = findServer(
-			Filters.and(
-				Filters.eq("environment", environment),
-				Filters.eq("hostname", hostname)
-		));
 		final Optional<String> hash = RESTHelper.verifyHash(existing, request);
 		JSONHelper.merge(existing, serverJson, objectMapper);
 
@@ -193,8 +198,10 @@ public class ServerResource {
 		pipeline.add(Aggregates.group(
 			new Document().append("hostname", "$hostname").append("environment", "$environment"),
 			new BsonField("fqdn", new Document("$first", "$fqdn")),
+			new BsonField("description", new Document("$first", "$description")),
 			new BsonField("os", new Document("$first", "$os")),
 			new BsonField("network", new Document("$first", "$network")),
+			new BsonField("meta", new Document("$first", "$meta")),
 			new BsonField("attributes", new Document("$first", "$attributes")),
 			new BsonField("applications", new Document("$push", "$applications"))
 		));
@@ -212,7 +219,7 @@ public class ServerResource {
 			);
 		}
 		final UpdateResult result = database.getCollection(Collections.SERVERS).replaceOne(filter, server);
-		if (result.getMatchedCount() == 1) {
+		if (result.getMatchedCount() != 1) {
 			throw new WebApplicationException("Concurrent modification", 422);
 		}
 	}
@@ -223,7 +230,7 @@ public class ServerResource {
 	}
 
 	private Response linkResponse(Status status, Document bson, UriInfo uriInfo) {
-		final ServerLink response = new ServerLink(uriInfo.getBaseUri(), bson.getString("hostname"), bson.getString("environment"));
+		final ServerLink response = ServerLink.buildFromURI(uriInfo.getBaseUri(), bson.getString("hostname"), bson.getString("environment"));
 		return Response
 			.status(status)
 			.location(response.link.getUri())

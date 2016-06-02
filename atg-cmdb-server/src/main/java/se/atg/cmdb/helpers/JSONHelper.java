@@ -4,15 +4,24 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
+import javax.ws.rs.core.Link;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import se.atg.cmdb.ui.rest.serializer.LinkDeserializer;
+import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
 
 public abstract class JSONHelper {
 	
@@ -85,9 +94,18 @@ public abstract class JSONHelper {
 		});
 	}
 
-	private static Object jsonToObject(JsonNode node, ObjectMapper objectMapper) {
+	public static Object jsonToObject(JsonNode node, ObjectMapper objectMapper) {
 		try {
 			return objectMapper.treeToValue(node, Object.class);
+		} catch (JsonProcessingException exc) {
+			logger.error("Failed to generate object for: " + node, exc);
+			return null;
+		}
+	}
+
+	public static String objectToJson(Object node, ObjectMapper objectMapper) {
+		try {
+			return objectMapper.writeValueAsString(node);
 		} catch (JsonProcessingException exc) {
 			logger.error("Failed to generate object for: " + node, exc);
 			return null;
@@ -102,5 +120,30 @@ public abstract class JSONHelper {
 			logger.error("Failed to generate json for: " + node, exc);
 			return null;
 		}
+	}
+
+	public static Document entityToBson(Object entity, ObjectMapper objectMapper) {
+		try {
+			final String json = objectMapper.writeValueAsString(entity);
+			return Document.parse(json);
+		} catch (JsonProcessingException exc) {
+			logger.error("Failed to generate json for: " + entity, exc);
+			return null;
+		}
+	}
+
+	public static ObjectMapper configureObjectMapper(ObjectMapper objectMapper) {
+
+		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.registerModule(new SimpleModule() {
+			private static final long serialVersionUID = 1L;
+			{
+				addSerializer(new LinkSerializer());
+				addDeserializer(Link.class, new LinkDeserializer());
+			}
+		});
+		return objectMapper;
 	}
 }

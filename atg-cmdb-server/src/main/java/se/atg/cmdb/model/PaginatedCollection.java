@@ -7,6 +7,9 @@ import java.util.Optional;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.UriBuilder;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class PaginatedCollection<T> {
 
 	public static final String LIMIT_DESC = "Paginate the result list. A limit of 5 will return at most 5 results";
@@ -17,6 +20,21 @@ public class PaginatedCollection<T> {
 	public Collection<T> items;
 	public Link next;
 	public Link previous;
+
+	@JsonCreator
+	public PaginatedCollection(
+		@JsonProperty("limit") Integer limit,
+		@JsonProperty("start") Integer start,
+		@JsonProperty("next") Link next,
+		@JsonProperty("previous") Link previous,
+		@JsonProperty("items") Collection<T> items
+	) {
+		this.limit = limit;
+		this.start = start;
+		this.next = next;
+		this.previous = previous;
+		this.items = items;
+	}
 
 	public PaginatedCollection(UriBuilder uriBuilder, Optional<Integer> optionalLimit, Optional<Integer> optionalStart, List<T> items) {
 

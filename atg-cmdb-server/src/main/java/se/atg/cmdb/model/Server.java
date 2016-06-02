@@ -45,6 +45,10 @@ public class Server extends Asset {
 		this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
 	}
 
+	public String getFqdn() {
+		return fqdn;
+	}
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);

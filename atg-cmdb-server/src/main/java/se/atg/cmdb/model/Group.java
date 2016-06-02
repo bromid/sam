@@ -74,6 +74,10 @@ public class Group extends Base {
 		groups.add(group);
 	}
 
+	public String getId() {
+		return id;
+	}
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);

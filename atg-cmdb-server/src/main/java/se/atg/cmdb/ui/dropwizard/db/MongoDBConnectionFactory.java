@@ -14,7 +14,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 
 import io.dropwizard.lifecycle.Managed;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.lifecycle.setup.LifecycleEnvironment;
 
 public class MongoDBConnectionFactory {
 
@@ -32,14 +32,14 @@ public class MongoDBConnectionFactory {
 	private List<MongoDBAddress> connections;
 	private MongoClient mongoClient;
 
-	public MongoDatabase getDatabase(Environment environment) {
+	public MongoDatabase getDatabase(LifecycleEnvironment lifecycle) {
 
 		logger.debug("Create database {}", dbName);
-		final MongoClient client = getClient(environment);
+		final MongoClient client = getClient(lifecycle);
 		return client.getDatabase(dbName);
 	}
 
-	private MongoClient getClient(Environment environment) {
+	private MongoClient getClient(LifecycleEnvironment lifecycle) {
 		synchronized (this) {
 
 			if (mongoClient != null) {
@@ -50,7 +50,7 @@ public class MongoDBConnectionFactory {
 			//final MongoCredential credential = MongoCredential.createCredential(username, dbName, password.toCharArray());
 			//mongoClient = new MongoClient(getServerAddresses(), Arrays.asList(credential));
 			mongoClient = new MongoClient(getServerAddresses());
-			environment.lifecycle().manage(new Managed() {
+			lifecycle.manage(new Managed() {
 
                 @Override
                 public void start() throws Exception {}

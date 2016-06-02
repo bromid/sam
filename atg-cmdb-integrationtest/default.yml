@@ -1,0 +1,23 @@
+mongoDB:
+  dbName: test
+  username: uid
+  password: pwd
+  connections:
+    - host: localhost
+      port: 27017
+
+logging:
+  level: INFO
+  loggers:
+    se.atg: INFO
+    org.mongodb: INFO
+    org.glassfish.jersey.filter.LoggingFilter: ERROR
+  appenders:
+    - type: console
+
+jerseyClientConfig:
+  gzipEnabled: false
+  gzipEnabledForRequests: false
+
+testEndpoint: http://localhost:8090/services/
+    

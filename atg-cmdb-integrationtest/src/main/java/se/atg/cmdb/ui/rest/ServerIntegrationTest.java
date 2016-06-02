@@ -1,64 +1,102 @@
 package se.atg.cmdb.ui.rest;
 
+import java.util.Arrays;
+
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.bson.Document;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.HttpUrlConnectorProvider;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.mongodb.MongoClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 
-import se.atg.cmdb.model.Meta;
+import se.atg.cmdb.dao.Collections;
+import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
+import se.atg.cmdb.model.ServerLink;
+import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class ServerIntegrationTest {
 
-	private static final String CMDB_URL = "http://localhost:8090";
-	private static MongoClient mongoClient;
-	final WebTarget client = createClient();
-	final static MongoCollection<Document> servers;
-	final static MongoDatabase database;
+	@Inject 
+	private MongoDatabase database;
+	@Inject
+	private WebTarget testEndpoint;
+	@Inject
+	private Client client;
+	@Inject
+	private ObjectMapper objectMapper;
 
-	static {
-		mongoClient = new MongoClient("192.168.50.16", 27017);
-		database = mongoClient.getDatabase("test");
-		servers = database.getCollection("servers");	
+	private MongoCollection<Document> servers;
+
+	@Before
+	public void setUp() {
+		servers = database.getCollection(Collections.SERVERS);
+		servers.deleteMany(new Document());
 	}
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		servers.drop();
+	@Test
+	public void getServer() {
+
+		final Server server = new Server() {{
+			hostname = "vltma2";
+			environment = "test5";
+			fqdn = "vltma2.test1.hh.atg.se";
+			description = "Min testserver";
+		}};
+		final String json = JSONHelper.objectToJson(server, objectMapper);
+		final Document bson = JSONHelper.addMetaForCreate(json, "integration-test");
+		servers.insertOne(bson);
+
+		final Server response = getServer(server.environment, server.hostname);
+		Assert.assertNotNull(response.meta);
+
+		response.meta = null;
+		server.meta = null;
+		Assert.assertEquals(server, response);
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		mongoClient.dropDatabase("test");
-	}
+	@Test
+	public void getServers() {
 
-	@After
-	public void tearDown(){
-		servers.drop();
+		final Server server1 = new Server() {{
+			hostname = "vltma1";
+			environment = "test1";
+			fqdn = "vltma1.test1.hh.atg.se";
+		}};
+		servers.insertOne(JSONHelper.entityToBson(server1, objectMapper));		
+
+		final Server server2 = new Server() {{
+			hostname = "vltma2";
+			environment = "test1";
+			fqdn = "vltma2.test1.hh.atg.se";
+		}};
+		servers.insertOne(JSONHelper.entityToBson(server2, objectMapper));	
+
+		final PaginatedCollection<Server> response = testEndpoint.path("server")
+			.request(MediaType.APPLICATION_JSON_TYPE)
+			.get(new GenericType<PaginatedCollection<Server>>(){});
+
+		Assert.assertEquals(2, response.items.size());
+		TestHelper.assertEquals(Arrays.asList(server1, server2), response.items, Server::getFqdn);
 	}
 
 	@Test(expected=NotFoundException.class)
 	public void shouldReturnNotFoundWhenServerDoesNotExist() {
-		client
-			.path("server").path("vltma1").path("test1")
+		 testEndpoint
+			.path("server").path("test1").path("vltma1")
 			.request(MediaType.APPLICATION_JSON_TYPE)
 			.get(Server.class);
 	}
@@ -68,85 +106,94 @@ public class ServerIntegrationTest {
 
 		final Server server = new Server() {{
 			environment = "ci";
-			hostname = "somehost.hh.atg.se";
+			hostname = "somehost";
+			fqdn = "somehost.ci.hh.atg.se";
 			os = new OS() {{
 				name = "RedHat";
 				type = "Linux";
 				version = "6.7";
 			}};
 		}};
-		createServer(server);
 
-		final Server response = getServer(server.environment, server.hostname);
+		final ServerLink link = createServer(server);
+		final Server response = getServer(link);
 
-		final Meta responseMeta = response.meta;
 		response.meta = null;
 		Assert.assertEquals(response, server);
-	}
-
-	private void createServer(final Server server) {
-		client
-			.path("server")
-			.request()
-			.put(Entity.entity(server, MediaType.APPLICATION_JSON));
-	}
-
-	private Server getServer(String environment, String hostName) {
-		final Server response = client
-				.path("server").path(environment).path(hostName)
-				.request(MediaType.APPLICATION_JSON_TYPE)
-				.get(Server.class);
-		return response;
 	}
 
 	@Test
 	public void patchServer() {
 
+		/*
+		 * Create server
+		 */
 		final Server server = new Server() {{
 			environment = "ci";
-			hostname = "somehost.hh.atg.se";
+			hostname = "somehost";
+			fqdn = "somehost.ci.hh.atg.se";
 			os = new OS() {{
 				name = "RedHat";
 				type = "Linux";
 				version = "6.7";
 			}};
 		}};
-		createServer(server);
+		final ServerLink link = createServer(server);
 
+		/*
+		 * Patch server 
+		 */
 		final Server serverPatch = new Server() {{
-			environment = "ci";
-			hostname = "somehost.hh.atg.se";
+			environment = "test1";
 			os = new OS() {{
 				version = "6.9";
 			}};
 		}};
-
-		final Response patchResponse = client
-			.path("server")
-			.path("ci")
-			.path("somehost.hh.atg.se")
-			.request()
-			.build("PATCH", Entity.entity(serverPatch, MediaType.APPLICATION_JSON))
+		final Response response = client.target(link.link)
+			.request(MediaType.APPLICATION_JSON)
+			.build("PATCH", Entity.json(serverPatch))
 			.invoke();
-		Assert.assertEquals(Status.OK.getStatusCode(), patchResponse.getStatusInfo().getStatusCode());
+		TestHelper.assertSuccessful(response);
+		final ServerLink patchedServerLink = response.readEntity(ServerLink.class);
 
-		Server response = getServer("ci", "somehost.hh.atg.se");
-		final Meta responseMeta = response.meta;
-		response.meta = null;
-
-		Assert.assertEquals("6.9", response.os.version);
+		/*
+		 * Get and verify
+		 */
+		final Server patchedServer = getServer(patchedServerLink);
+		Assert.assertEquals(server.hostname, patchedServer.hostname);
+		Assert.assertEquals(server.fqdn, patchedServer.fqdn);
+		Assert.assertEquals(server.os.name, patchedServer.os.name);
+		Assert.assertEquals(server.os.type, patchedServer.os.type);
+		Assert.assertEquals(serverPatch.environment, patchedServer.environment);
+		Assert.assertEquals(serverPatch.os.version, patchedServer.os.version);
 	}
 
-	private static WebTarget createClient() {
+	private ServerLink createServer(final Server server) {
+		final Response response = testEndpoint.path("server")
+			.request(MediaType.APPLICATION_JSON_TYPE)
+			.put(Entity.json(server));
 
-		final ClientConfig config = new ClientConfig();
-		config.register(ObjectMapperProvider.class);
+		TestHelper.assertSuccessful(response);
+		Assert.assertNotNull(servers.find(Filters.eq("fqdn", server.fqdn)).first());
+		return response.readEntity(ServerLink.class);
+	}
 
-		final Client client = ClientBuilder.newClient(config);
-		client.register(HttpAuthenticationFeature.basic("integration-test", "secret"));
-		return client
-			.property(HttpUrlConnectorProvider.SET_METHOD_WORKAROUND, true)
-			.target(CMDB_URL)
-			.path("services");
+	private Server getServer(String environment, String hostName) {
+		final Response response = testEndpoint
+			.path("server").path(environment).path(hostName)
+			.request(MediaType.APPLICATION_JSON_TYPE)
+			.get();
+
+		TestHelper.assertSuccessful(response);
+		return response.readEntity(Server.class);
+	}
+
+	private Server getServer(ServerLink serverLink) {
+		final Response response = client.target(serverLink.link)
+			.request(MediaType.APPLICATION_JSON_TYPE)
+			.get();
+
+		TestHelper.assertSuccessful(response);
+		return response.readEntity(Server.class);
 	}
 }

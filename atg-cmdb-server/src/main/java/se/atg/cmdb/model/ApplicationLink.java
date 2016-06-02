@@ -4,14 +4,19 @@ import java.net.URI;
 
 import javax.ws.rs.core.Link;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLink.Style;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import se.atg.cmdb.ui.rest.ApplicationResource;
+import se.atg.cmdb.ui.rest.Defaults;
 
 public class ApplicationLink {
 
@@ -33,7 +38,10 @@ public class ApplicationLink {
 	}
 
 	@JsonCreator
-	public ApplicationLink(String id, String name) {
+	public ApplicationLink(
+		@JsonProperty("id") String id,
+		@JsonProperty("name") String name
+	) {
 		this.id = id;
 		this.name = name;
 	}
@@ -53,5 +61,20 @@ public class ApplicationLink {
 
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return HashCodeBuilder.reflectionHashCode(this);
 	}
 }
