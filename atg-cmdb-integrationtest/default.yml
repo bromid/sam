@@ -19,5 +19,5 @@ jerseyClientConfig:
   gzipEnabled: false
   gzipEnabledForRequests: false
 
-testEndpoint: http://localhost:8090/services/
+testEndpoint: http://localhost:8080/services/
     
