@@ -9,12 +9,8 @@ import javax.ws.rs.core.Link;
 import org.glassfish.jersey.linking.DeclarativeLinkingFeature;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mongodb.client.MongoDatabase;
 
 import io.dropwizard.Application;
@@ -32,15 +28,17 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
+import se.atg.cmdb.helpers.JSONHelper;
 import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthorizer;
 import se.atg.cmdb.ui.dropwizard.db.MongoDBHealthCheck;
 import se.atg.cmdb.ui.rest.ApplicationResource;
+import se.atg.cmdb.ui.rest.AssetResource;
 import se.atg.cmdb.ui.rest.GroupResource;
+import se.atg.cmdb.ui.rest.SearchResource;
 import se.atg.cmdb.ui.rest.ServerResource;
 import se.atg.cmdb.ui.rest.mapper.MongoServerExceptionMapper;
-import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
 
 public class Main extends Application<CMDBConfiguration> {
 
@@ -50,30 +48,25 @@ public class Main extends Application<CMDBConfiguration> {
 
 	@Override
 	public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
-		bootstrap.addBundle(new AssetsBundle("/assets","/","index.html"));
+		bootstrap.addBundle(new AssetsBundle("/assets", "/", "index.html"));
 	}
 
 	@Override
 	public void run(CMDBConfiguration configuration, Environment environment) throws Exception {
 
 		// Healthchecks
-		final MongoDatabase database = configuration.getDBConnectionFactory().getDatabase(environment);
+		final MongoDatabase database = configuration.getDBConnectionFactory().getDatabase(environment.lifecycle());
 		environment.healthChecks().register("mongoDB", new MongoDBHealthCheck(database));
 
 		// Jackson configuration
-		final ObjectMapper objectMapper = environment.getObjectMapper();
-		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-		objectMapper.registerModule(new JavaTimeModule());
-		objectMapper.registerModule(new SimpleModule() {
-			private static final long serialVersionUID = 1L;
-			{addSerializer(new LinkSerializer());}
-		});
+		final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper());
 
 		// REST Resources
 		environment.jersey().register(new ServerResource(database, objectMapper));
 		environment.jersey().register(new ApplicationResource(database, objectMapper));
 		environment.jersey().register(new GroupResource(database, objectMapper));
+		environment.jersey().register(new AssetResource(database, objectMapper));
+		environment.jersey().register(new SearchResource(database, objectMapper));
 
 		// Authentication
 		environment.jersey().register(RolesAllowedDynamicFeature.class);
@@ -115,7 +108,7 @@ public class Main extends Application<CMDBConfiguration> {
 
 		final BeanConfig config = new BeanConfig();
 	    config.setTitle("ATG Configuration Management Database");
-	    config.setVersion("1.0.0");
+	    config.setVersion(getClass().getPackage().getImplementationVersion());
 	    config.setResourcePackage("se.atg.cmdb.ui.rest");
 	    config.setBasePath("services");
 	    config.setScan(true);

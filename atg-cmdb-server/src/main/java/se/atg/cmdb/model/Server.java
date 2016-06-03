@@ -1,9 +1,7 @@
 package se.atg.cmdb.model;
 
 import java.util.List;
-import java.util.Map;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -12,39 +10,43 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.annotations.ApiModel;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.ui.rest.Defaults;
 
-@JsonPropertyOrder({"hostname","fqdn","environment","os","network","applications","meta"})
-public class Server extends Base {
+@ApiModel(description = "A server is an asset which can have applications. It is identified by a hostname and environment")
+@JsonPropertyOrder({"hostname","environment","fqdn","os","network","applications","meta"})
+public class Server extends Asset {
 
-	@NotNull(groups=Create.class) @Size(min = 1, groups=Update.class)
+	@NotNull(groups=Create.class) @Size(min = 1, max = 50, groups=Update.class)
 	public String hostname;
 	public String fqdn;
-	@NotNull(groups=Create.class) @Size(min = 1, groups=Update.class)
+	@NotNull(groups=Create.class) @Size(min = 1, max = 50, groups=Update.class)
 	public String environment;
-	@Valid
-	public OS os;
-	@Valid
-	public Network network;
 	public List<ApplicationLink> applications; 
-
-	@JsonIgnore 
-	public String hash;
 
 	public Server() {}
 	public Server(Document bson) {
 		super(bson);
 
-		this.hostname = bson.getString("hostname");
-		this.fqdn = bson.getString("fqdn");
-		this.environment = bson.getString("environment");
+		final Object id = bson.get("_id");
+		if (id instanceof Document && id != null) {
 
-		this.os = Mapper.mapObject(bson, "os", OS::fromBson);
-		this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromId);
+			final Document compoundId = (Document) id;
+			this.hostname = compoundId.getString("hostname");
+			this.environment = compoundId.getString("environment");			
+		} else {
+			this.hostname = bson.getString("hostname");
+			this.environment = bson.getString("environment");
+		}
+		this.fqdn = bson.getString("fqdn");
+		this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
+	}
+
+	public String getFqdn() {
+		return fqdn;
 	}
 
 	@Override
@@ -61,73 +63,4 @@ public class Server extends Base {
 	public int hashCode() {
 		return HashCodeBuilder.reflectionHashCode(this);
 	}
-
-	public static class OS {
-
-		@NotNull(groups=Create.class) @Size(min = 1, groups=Update.class)
-		public String name;
-		@NotNull(groups=Create.class) @Size(min = 1, groups=Update.class)
-		public String type;
-		public String version;
-		public Map<String, Object> attributes;
-
-		public OS() {}
-		public OS(Document bson) {
-			this.name = bson.getString("name");
-			this.type = bson.getString("type");
-			this.version = bson.getString("version");
-			this.attributes = Mapper.mapAttributes(bson);
-		}
-
-		public static OS fromBson(Document bson) {
-			return new OS(bson);
-		}
-
-		@Override
-		public String toString() {
-			return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return EqualsBuilder.reflectionEquals(this, obj);
-		}
-
-		@Override
-		public int hashCode() {
-			return HashCodeBuilder.reflectionHashCode(this);
-		}
-	}
-
-	public class Network {
-
-		public String ipv4Address;
-		public String ipv6Address;
-		public Map<String, Object> attributes;
-
-		public Network() {}
-		public Network(Document bson) {
-			this.ipv4Address = bson.getString("ipv4Address");
-			this.ipv6Address = bson.getString("ipv6Address");
-			this.attributes = Mapper.mapAttributes(bson);
-		}
-
-		@Override
-		public String toString() {
-			return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return EqualsBuilder.reflectionEquals(this, obj);
-		}
-
-		@Override
-		public int hashCode() {
-			return HashCodeBuilder.reflectionHashCode(this);
-		}
-	}
-
-	public interface Create extends Update {}
-	public interface Update extends Base.Validation {}
 }
