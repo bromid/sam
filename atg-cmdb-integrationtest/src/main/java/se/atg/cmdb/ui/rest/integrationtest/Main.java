@@ -4,7 +4,10 @@ import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import se.atg.cmdb.ui.dropwizard.CMDBConfiguration;
+import se.atg.cmdb.ui.rest.ApplicationIntegrationTest;
+import se.atg.cmdb.ui.rest.AssetIntegrationTest;
 import se.atg.cmdb.ui.rest.GroupIntegrationTest;
+import se.atg.cmdb.ui.rest.SearchIntegrationTest;
 import se.atg.cmdb.ui.rest.ServerIntegrationTest;
 
 public class Main extends Application<CMDBConfiguration> {
@@ -18,7 +21,10 @@ public class Main extends Application<CMDBConfiguration> {
 	public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
 		bootstrap.addCommand(new TestCommand(this,
 			ServerIntegrationTest.class,
-			GroupIntegrationTest.class
+			GroupIntegrationTest.class,
+			ApplicationIntegrationTest.class,
+			AssetIntegrationTest.class,
+			SearchIntegrationTest.class
 		));
 	}
 }

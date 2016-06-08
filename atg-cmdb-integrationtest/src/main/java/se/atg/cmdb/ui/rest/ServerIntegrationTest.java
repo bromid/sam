@@ -89,6 +89,11 @@ public class ServerIntegrationTest {
 			.request(MediaType.APPLICATION_JSON_TYPE)
 			.get(new GenericType<PaginatedCollection<Server>>(){});
 
+		Assert.assertNull(response.next);
+		Assert.assertNull(response.previous);
+		Assert.assertNull(response.start);
+		Assert.assertNull(response.limit);
+
 		Assert.assertEquals(2, response.items.size());
 		TestHelper.assertEquals(Arrays.asList(server1, server2), response.items, Server::getFqdn);
 	}
@@ -114,7 +119,6 @@ public class ServerIntegrationTest {
 				version = "6.7";
 			}};
 		}};
-
 		final ServerLink link = createServer(server);
 		final Server response = getServer(link);
 
@@ -169,30 +173,30 @@ public class ServerIntegrationTest {
 	}
 
 	private ServerLink createServer(final Server server) {
+
 		final Response response = testEndpoint.path("server")
 			.request(MediaType.APPLICATION_JSON_TYPE)
 			.put(Entity.json(server));
-
 		TestHelper.assertSuccessful(response);
 		Assert.assertNotNull(servers.find(Filters.eq("fqdn", server.fqdn)).first());
 		return response.readEntity(ServerLink.class);
 	}
 
 	private Server getServer(String environment, String hostName) {
+
 		final Response response = testEndpoint
 			.path("server").path(environment).path(hostName)
 			.request(MediaType.APPLICATION_JSON_TYPE)
 			.get();
-
 		TestHelper.assertSuccessful(response);
 		return response.readEntity(Server.class);
 	}
 
 	private Server getServer(ServerLink serverLink) {
+
 		final Response response = client.target(serverLink.link)
 			.request(MediaType.APPLICATION_JSON_TYPE)
 			.get();
-
 		TestHelper.assertSuccessful(response);
 		return response.readEntity(Server.class);
 	}

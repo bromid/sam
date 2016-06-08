@@ -314,7 +314,7 @@ public class CreateTestdata {
 					    "\"test\": 1" +
 					  "}" +
 				"}}")
-				.append("applications", Lists.newArrayList("atg-service-betting", "tillsammans-service"))
+				.append("applications", Lists.newArrayList(new Document().append("id", "atg-service-betting"), new Document().append("id", "tillsammans-service")))
 				.append("attributes", new Document().append("Param1","Value1").append("Param2",new Document().append("Param3", "Value3")))
 				);
 			}
