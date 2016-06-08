@@ -5,6 +5,7 @@ import java.util.Arrays;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.bson.Document;
 import org.junit.Assert;
@@ -20,6 +21,7 @@ import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JSONHelper;
 import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.PaginatedCollection;
+import se.atg.cmdb.model.Server;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class GroupIntegrationTest {
@@ -37,6 +39,20 @@ public class GroupIntegrationTest {
 	public void setUp() {
 		groups = database.getCollection(Collections.GROUPS);
 		groups.deleteMany(new Document());
+	}
+
+	@Test
+	public void testGetGroup() {
+
+		final Group group = new Group() {{
+			id = "my-group";
+			name = "My group";
+		}};
+		final Document bson = JSONHelper.entityToBson(group, objectMapper);
+		groups.insertOne(bson);		
+
+		final Group response = getGroup(group.id);
+		Assert.assertEquals(group, response);
 	}
 
 	@Test
@@ -67,20 +83,12 @@ public class GroupIntegrationTest {
 		TestHelper.assertEquals(Arrays.asList(group1, group2), response.items, Group::getId);
 	}
 
-	@Test
-	public void testGetGroup() {
+	private Group getGroup(String id) {
 
-		final Group group = new Group() {{
-			id = "my-group";
-			name = "My group";
-		}};
-		final Document bson = JSONHelper.entityToBson(group, objectMapper);
-		groups.insertOne(bson);		
-
-		final Group response = testEndpoint.path("group").path(group.id)
+		final Response response = testEndpoint.path("group").path(id)
 			.request(MediaType.APPLICATION_JSON_TYPE)
-			.get(Group.class);
-
-		Assert.assertEquals(group, response);
+			.get();
+		TestHelper.assertSuccessful(response);
+		return response.readEntity(Group.class);
 	}
 }

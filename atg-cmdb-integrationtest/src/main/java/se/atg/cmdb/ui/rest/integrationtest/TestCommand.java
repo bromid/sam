@@ -29,7 +29,7 @@ import se.atg.cmdb.ui.dropwizard.CMDBConfiguration;
 public class TestCommand extends EnvironmentCommand<CMDBConfiguration> {
 
 	static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
-	static final Logger LOGGER = LoggerFactory.getLogger(TestCommand.class);
+	static final Logger LOGGER = LoggerFactory.getLogger("integration-test");
 
 	private Class<?>[] testClasses;
 

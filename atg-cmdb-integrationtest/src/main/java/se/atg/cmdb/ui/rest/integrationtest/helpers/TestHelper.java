@@ -2,6 +2,7 @@ package se.atg.cmdb.ui.rest.integrationtest.helpers;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -13,18 +14,28 @@ import org.junit.Assert;
 
 public abstract class TestHelper {
 
+	public static <K,V> void assertEquals(Map<K, V> expectedMap, Collection<V> actual, Function<? super V,K> keyMapper) {
+		assertEquals(expectedMap, actual, keyMapper, Assert::assertEquals);
+	}
+
 	public static <K,V> void assertEquals(Collection<V> expected, Collection<V> actual, Function<? super V,K> keyMapper) {
+		assertEquals(expected, actual, keyMapper, Assert::assertEquals);
+	}
+
+	public static <K,V,T> void assertEquals(Collection<V> expected, Collection<V> actual, Function<? super V,K> keyMapper, BiConsumer<V,T> assertion) {
 
 		final Map<K, V> expectedMap = expected.stream().collect(Collectors.toMap(keyMapper, Function.identity()));
 		assertEquals(expectedMap, actual, keyMapper);
 	}
 
-	public static <K,V> void assertEquals(Map<K, V> expectedMap, Collection<V> actual, Function<? super V,K> keyMapper) {
+	public static <K,V,T> void assertEquals(Map<K, V> expectedMap, Collection<T> actual, Function<? super T,K> keyMapper, BiConsumer<V,T> assertion) {
 
 		Assert.assertEquals(expectedMap.size(), actual.size());
 		actual.forEach(t->{
-			final V expected = expectedMap.get(keyMapper.apply(t));
-			Assert.assertEquals(expected, t);
+			final K key = keyMapper.apply(t);
+			final V expected = expectedMap.get(key);
+			Assert.assertNotNull("Missing " + key, expected);
+			assertion.accept(expected, t);
 		});
 	}
 

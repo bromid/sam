@@ -22,8 +22,6 @@ public class Application extends Base {
 	public String id;
 	@NotNull @Size(min = 1, max = 50)
 	public String name;
-	@NotNull @Size(min = 1, max = 50)
-	public String version;
 	public GroupLink group;
 
 	public Application() {}
@@ -32,9 +30,12 @@ public class Application extends Base {
 
 		this.id = bson.getString("id");
 		this.name = bson.getString("name");
-		this.version = bson.getString("version");
 		this.group = Mapper.mapObject(bson, "group", GroupLink::fromId);
 		this.attributes = Mapper.mapAttributes(bson);
+	}
+
+	public String getId() {
+		return id;
 	}
 
 	@Override
@@ -51,4 +52,7 @@ public class Application extends Base {
 	public int hashCode() {
 		return HashCodeBuilder.reflectionHashCode(this);
 	}
+
+	public interface Create extends Update {}
+	public interface Update extends Base.Validation {}
 }

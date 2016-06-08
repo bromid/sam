@@ -47,8 +47,7 @@ public class ApplicationLink {
 	}
 
 	public ApplicationLink(URI baseUri, String id, String name) {
-		this.id = id;
-		this.name = name;
+		this(id, name);
 		this.link = Link.fromMethod(ApplicationResource.class, "getApplication")
 			.baseUri(baseUri)
 			.rel("self")

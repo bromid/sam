@@ -35,7 +35,6 @@ import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.UnwindOptions;
-import com.mongodb.client.result.UpdateResult;
 
 import io.dropwizard.jersey.PATCH;
 import io.swagger.annotations.Api;
@@ -45,6 +44,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.MongoHelper;
 import se.atg.cmdb.helpers.RESTHelper;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
@@ -57,12 +57,11 @@ import se.atg.cmdb.ui.dropwizard.auth.Roles;
 @Produces(Defaults.MEDIA_TYPE_JSON)
 public class ServerResource {
 
-	static final Logger logger = LoggerFactory.getLogger(ServerResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(ServerResource.class);
+	private static final Bson ALL = new BsonDocument();
 
 	private final MongoDatabase database;
 	private final ObjectMapper objectMapper;
-
-	private static final Bson ALL = new BsonDocument();
 
 	public ServerResource(MongoDatabase database, ObjectMapper objectMapper) {
 		this.database = database;
@@ -119,13 +118,15 @@ public class ServerResource {
 		@Context UriInfo uriInfo,
 		@Context SecurityContext securityContext
 	) throws JsonParseException, JsonMappingException, IOException {
+		logger.info("Create server: {}", serverJson);
 
 		final Server server = objectMapper.readValue(serverJson, Server.class);
 		RESTHelper.validate(server, Server.Create.class);
 
 		final User user = RESTHelper.getUser(securityContext);
 		final Document bson = JSONHelper.addMetaForCreate(serverJson, user.name);
-		addServer(bson);
+		database.getCollection(Collections.SERVERS).insertOne(bson);
+
 		return linkResponse(Status.CREATED, bson, uriInfo);
 	}
 
@@ -164,7 +165,7 @@ public class ServerResource {
 		final User user = RESTHelper.getUser(securityContext);
 		JSONHelper.updateMetaForUpdate(existing, hash, user.name);
 
-		updateServer(existing, hash);
+		MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
 		return linkResponse(Status.OK, existing, uriInfo);
 	}
 
@@ -193,7 +194,7 @@ public class ServerResource {
 			pipeline.add(Aggregates.match(filter));
 		}
 		pipeline.add(Aggregates.unwind("$applications", new UnwindOptions().preserveNullAndEmptyArrays(true)));
-		pipeline.add(Aggregates.lookup("applications", "applications", "id", "applications"));
+		pipeline.add(Aggregates.lookup("applications", "applications.id", "id", "applications"));
 		pipeline.add(Aggregates.unwind("$applications", new UnwindOptions().preserveNullAndEmptyArrays(true)));
 		pipeline.add(Aggregates.group(
 			new Document().append("hostname", "$hostname").append("environment", "$environment"),
@@ -207,26 +208,6 @@ public class ServerResource {
 		));
 		pipeline.add(Aggregates.sort(Sorts.ascending("_id")));
 		return pipeline;
-	}
-
-	private void updateServer(Document server, Optional<String> hash) {
-
-		Bson filter = Filters.eq("_id", server.get("_id"));
-		if (hash.isPresent()) {
-			filter = Filters.and(
-				filter,
-				Filters.eq("meta.hash", hash.get())
-			);
-		}
-		final UpdateResult result = database.getCollection(Collections.SERVERS).replaceOne(filter, server);
-		if (result.getMatchedCount() != 1) {
-			throw new WebApplicationException("Concurrent modification", 422);
-		}
-	}
-
-	private void addServer(Document server) {
-		database.getCollection(Collections.SERVERS)
-			.insertOne(server);
 	}
 
 	private Response linkResponse(Status status, Document bson, UriInfo uriInfo) {

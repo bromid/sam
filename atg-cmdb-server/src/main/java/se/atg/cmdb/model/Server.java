@@ -3,6 +3,7 @@ package se.atg.cmdb.model;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -45,8 +46,17 @@ public class Server extends Asset {
 		this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
 	}
 
+	public String getHostname() {
+		return hostname;
+	}
+
 	public String getFqdn() {
 		return fqdn;
+	}
+
+	@Null
+	public String getId() {
+		return null;
 	}
 
 	@Override

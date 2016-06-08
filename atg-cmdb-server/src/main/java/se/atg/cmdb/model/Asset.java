@@ -40,6 +40,10 @@ public class Asset extends Base {
 		this.network = Mapper.mapObject(bson, "network", Network::fromBson);
 	}
 
+	public String getId() {
+		return id;
+	}
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
