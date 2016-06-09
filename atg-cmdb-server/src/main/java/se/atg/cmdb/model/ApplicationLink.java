@@ -32,9 +32,8 @@ public class ApplicationLink {
 	)
 	public Link link;
 
-	public ApplicationLink(Document bson) {
-		this.id = bson.getString("id");
-		this.name = bson.getString("name");
+	public ApplicationLink(String id) {
+		this(id,null);
 	}
 
 	@JsonCreator
@@ -44,6 +43,11 @@ public class ApplicationLink {
 	) {
 		this.id = id;
 		this.name = name;
+	}
+
+	public ApplicationLink(Document bson) {
+		this.id = bson.getString("id");
+		this.name = bson.getString("name");
 	}
 
 	public ApplicationLink(URI baseUri, String id, String name) {

@@ -1,7 +1,5 @@
 package se.atg.cmdb.ui.text;
 
-import java.util.function.Consumer;
-
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +8,6 @@ import com.google.common.collect.Lists;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
@@ -40,94 +36,12 @@ public class CreateTestdata {
 			assets.drop();
 
 			// Add indexes
-			CreateDatabase.main(null);
+			CreateDatabase.initDatabase(database);
 
 			createServers(servers);
 			createApplications(applications);
 			createGroups(groups);
 			createAssets(assets);
-
-			/*
-			final List<Bson> pipeline = new ArrayList<>(5);
-			pipeline.add(Aggregates.match(Filters.eq("tags", "webapp")));
-			pipeline.add(Aggregates.project(Projections.fields(
-				Projections.include("id"),
-				Projections.computed("groups", new Document().append("$ifNull", Lists.newArrayList("$groups", "[]")))
-			)));
-			pipeline.add(Aggregates.unwind("$groups"));
-			pipeline.add(Aggregates.lookup("groups", "id", "groups", "inbound_links"));
-			//pipeline.add(Aggregates.match(Filters.or(Filters.size("inbound_links", 0), Filters.not(Filters.eq("inbound_links.tags", "webapp")))));
-			//pipeline.add(Aggregates.group("$id"));
-
-			groups
-				.aggregate(pipeline)
-				.forEach((Consumer<Document>) System.out::println);
-			 */
-
-			servers.aggregate(Lists.newArrayList(
-				Aggregates.unwind("$applications"),
-				Aggregates.lookup("applications", "applications", "id", "applications"),
-				Aggregates.unwind("$applications"),
-				Aggregates.group(
-					new Document().append("hostname", "$hostname").append("environment", "$environment"),
-					new BsonField("fqdn", new Document("$first", "$fqdn")),
-					new BsonField("os", new Document("$first", "$os")),
-					new BsonField("network", new Document("$first", "$network")),
-					new BsonField("attributes", new Document("$first", "$attributes")),
-					new BsonField("applications", new Document("$push", "$applications"))
-				)
-			)).forEach((Consumer<Document>) System.out::println);
-
-			/*
-			logger.info("Number of servers: {}", servers.count());
-			logger.info("Server: {}", servers.find().first().toJson());
-
-			final MongoCursor<Document> cursor = servers.find().iterator();
-			try {
-			    while (cursor.hasNext()) {
-			        System.out.println(cursor.next().toJson());
-			    }
-			} finally {
-			    cursor.close();
-			}
-
-			System.out.println("Windows i Test2");
-			servers.find(Filters.and(
-							Filters.eq("environment", "test2"),
-							Filters.eq("os.type", "Windows")
-						)
-					).projection(Projections.excludeId()
-					).sort(Sorts.descending("hostname")
-					).forEach((Consumer<Document>) System.out::println);
-
-			System.out.println("Aggregate");
-			servers.aggregate(Lists.newArrayList(
-						Aggregates.match(Filters.and(
-							Filters.eq("environment", "test2"),
-							Filters.eq("os.type", "Windows")
-						)),
-						Aggregates.unwind("$applications"),
-						Aggregates.lookup("applications", "applications", "name", "application"),
-						Aggregates.project(new Document()
-							.append("_id", 0)
-							.append("fqdn", 1)
-							.append("environment", 1)
-							.append("application.group", 1))
-					)).forEach((Consumer<Document>) System.out::println);
-
-			System.out.println("Linux i Test1");
-			final ArrayList<Server> serverDocs = Lists.newArrayList();
-			servers.find(
-				Filters.and(
-					Filters.eq("environment", "test1"),
-					Filters.eq("os.type", "Linux"))
-			).map(Server::new
-			).into(serverDocs);
-
-			for (Server server: serverDocs) {
-				System.out.println(server);
-			}
-			*/
 		}
 		logger.info("End");
 	}
@@ -159,14 +73,14 @@ public class CreateTestdata {
 			.append("id", "atg-se")
 			.append("name", "atg.se")
 			.append("description", "www.atg.se")
-			.append("groups", Lists.newArrayList("atg-web", "atg-service","atg-virtual-racing"))
+			.append("groups", Lists.newArrayList(new Document("id", "atg-web"), new Document("id", "atg-service"), new Document("id", "atg-virtual-racing")))
 			.append("tags", Lists.newArrayList("webapp"))
 		);
 		groups.insertOne(new Document()
 			.append("id", "atg-virtual-racing")
 			.append("name", "ATG Virtual Racing")
 			.append("description", "Atg.se Spel på virtuella hästar")
-			.append("groups", Lists.newArrayList("atg-service-betting", "atg-vr-video"))
+			.append("groups", Lists.newArrayList(new Document("id", "atg-service-betting"), new Document("id", "atg-vr-video")))
 		);
 		groups.insertOne(new Document()
 			.append("id", "atg-vr-video")
@@ -181,7 +95,7 @@ public class CreateTestdata {
 			.append("id", "atg-service")
 			.append("name", "atg.se")
 			.append("description", "Atg.se Tjänstelager")
-			.append("groups", Lists.newArrayList("atg-service-info", "atg-service-betting"))
+			.append("groups", Lists.newArrayList(new Document("id", "atg-service-info"), new Document("id", "atg-service-betting")))
 		);
 		groups.insertOne(new Document()
 			.append("id", "atg-service-info")
@@ -195,8 +109,9 @@ public class CreateTestdata {
 		);
 
 		groups.insertOne(new Document()
-			.append("id", "webappar")
-			.append("groups", Lists.newArrayList("tillsammans"))
+			.append("id", "webbappar")
+			.append("name", "Alla webbappar")
+			.append("groups", Lists.newArrayList(new Document("id", "tillsammans"), new Document("id", "atg-se")))
 			.append("tags", Lists.newArrayList("webapp"))
 		);
 		groups.insertOne(new Document()
@@ -213,28 +128,28 @@ public class CreateTestdata {
 		groups.insertOne(new Document()
 			.append("id", "org-it")
 			.append("name", "ATG IT")
-			.append("groups", Lists.newArrayList("org-it-spel", "org-it-sport", "org-it-prod"))
+			.append("groups", Lists.newArrayList(new Document("id", "org-it-spel"), new Document("id", "org-it-sport"), new Document("id", "org-it-prod")))
 			.append("tags", Lists.newArrayList("webapp"))
 		);
 		groups.insertOne(new Document()
 			.append("id", "org-it-spel")
 			.append("name", "ATG IT Spelsektionen")
-			.append("groups", Lists.newArrayList("tillsammans"))
+			.append("groups", Lists.newArrayList(new Document("id", "tillsammans"), new Document("id", "atg-se")))
 		);
 		groups.insertOne(new Document()
 			.append("id", "org-it-sport")
 			.append("name", "ATG IT Sportsektionen")
-			.append("groups", Lists.newArrayList("travsport"))
+			.append("groups", Lists.newArrayList(new Document("id", "travsport")))
 		);			
 		groups.insertOne(new Document()
 			.append("id", "org-it-prod")
 			.append("name", "ATG IT Produktionssektionen")
-			.append("groups", Lists.newArrayList("org-netman", "org-sysman", "travsport"))
+			.append("groups", Lists.newArrayList(new Document("id", "org-netman"), new Document("id", "org-sysman")))
 		);
 		groups.insertOne(new Document()
 			.append("id", "org-netman")
 			.append("name", "ATG IT Netman")
-			.append("groups", Lists.newArrayList("netman-infrastructure-tracks", "netman-infrastructure-hh"))
+			.append("groups", Lists.newArrayList(new Document("id", "netman-infrastructure-tracks"), new Document("id", "netman-infrastructure-hh")))
 			.append("tags", Lists.newArrayList("netman"))
 		);
 		groups.insertOne(new Document()

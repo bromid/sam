@@ -78,6 +78,6 @@ public class SearchIntegrationTest {
 		Assert.assertEquals(2, servers.size());
 
 		final Map<String, Server> expectedMap = ImmutableMap.of(server1.fqdn, server1, server3.fqdn, server3);
-		TestHelper.assertEquals(expectedMap, servers, ServerSearchResult::getFqdn, (Server expected, ServerSearchResult actual) -> expected.getHostname().equals(actual.getHostname()));
+		TestHelper.assertEquals(expectedMap, servers, ServerSearchResult::getFqdn, (actual, expected) -> Assert.assertEquals(expected.getHostname(), actual.getHostname()));
 	}
 }

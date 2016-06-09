@@ -1,5 +1,9 @@
 package se.atg.cmdb.ui.rest.integrationtest;
 
+import java.util.Optional;
+
+import org.junit.runner.Description;
+
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -20,11 +24,16 @@ public class Main extends Application<CMDBConfiguration> {
 	@Override
 	public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
 		bootstrap.addCommand(new TestCommand(this,
+			Optional.empty(),
 			ServerIntegrationTest.class,
 			GroupIntegrationTest.class,
 			ApplicationIntegrationTest.class,
 			AssetIntegrationTest.class,
 			SearchIntegrationTest.class
 		));
+	}
+
+	public static Optional<Description> testDescription(Class<?> testClass, String testMethod) {
+		return Optional.of(Description.createTestDescription(testClass, testMethod));
 	}
 }

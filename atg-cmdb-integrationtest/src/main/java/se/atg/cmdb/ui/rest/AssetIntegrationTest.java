@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -19,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
 
 import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JSONHelper;
@@ -27,7 +25,6 @@ import se.atg.cmdb.model.Asset;
 import se.atg.cmdb.model.AssetLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
-import se.atg.cmdb.model.ServerLink;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class AssetIntegrationTest {
@@ -57,16 +54,10 @@ public class AssetIntegrationTest {
 			name = "Min pryl1";
 			description = "Very useful asset";
 		}};
-		final String json = JSONHelper.objectToJson(asset1, objectMapper);
-		final Document bson = JSONHelper.addMetaForCreate(json, "integration-test");
-		assets.insertOne(bson);
+		assets.insertOne(JSONHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
 
 		final Asset response = getAsset(asset1.id);
-		Assert.assertNotNull(response.meta);
-
-		response.meta = null;
-		asset1.meta = null;
-		Assert.assertEquals(asset1, response);
+		TestHelper.isEqualExceptMeta(asset1, response);
 	}
 
 	@Test
@@ -77,14 +68,14 @@ public class AssetIntegrationTest {
 			name = "Min pryl1";
 			description = "Very useful asset";
 		}};
-		assets.insertOne(JSONHelper.entityToBson(asset1, objectMapper));		
+		assets.insertOne(JSONHelper.addMetaForCreate(asset1, "integration-test", objectMapper));		
 
 		final Asset asset2 = new Asset() {{
 			id = "my-asset2";
 			name = "Min pryl2";
 			description = "Also a very useful asset";
 		}};
-		assets.insertOne(JSONHelper.entityToBson(asset2, objectMapper));	
+		assets.insertOne(JSONHelper.addMetaForCreate(asset2, "integration-test", objectMapper));	
 
 		final PaginatedCollection<Asset> response = testEndpoint.path("asset")
 			.request(MediaType.APPLICATION_JSON_TYPE)
@@ -96,7 +87,7 @@ public class AssetIntegrationTest {
 		Assert.assertNull(response.limit);
 
 		Assert.assertEquals(2, response.items.size());
-		TestHelper.assertEquals(Arrays.asList(asset1, asset2), response.items, Asset::getId);
+		TestHelper.assertEquals(Arrays.asList(asset1, asset2), response.items, Asset::getId, TestHelper::isEqualExceptMeta);
 	}
 
 	@Test(expected=NotFoundException.class)

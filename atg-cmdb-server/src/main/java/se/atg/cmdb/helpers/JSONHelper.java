@@ -2,7 +2,9 @@ package se.atg.cmdb.helpers;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Link;
 
@@ -20,6 +22,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import se.atg.cmdb.model.Group;
+import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.rest.serializer.LinkDeserializer;
 import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
 
@@ -46,6 +50,11 @@ public abstract class JSONHelper {
 			bson.put("meta", meta);
 			return true;
 		}
+	}
+
+	public static Document addMetaForCreate(Object node, String createdBy, ObjectMapper objectMapper) {
+		final String json = JSONHelper.objectToJson(node, objectMapper, View.DB.class);
+		return addMetaForCreate(json, createdBy);
 	}
 
 	public static Document addMetaForCreate(String json, String createdBy) {
@@ -103,9 +112,9 @@ public abstract class JSONHelper {
 		}
 	}
 
-	public static String objectToJson(Object node, ObjectMapper objectMapper) {
+	public static String objectToJson(Object node, ObjectMapper objectMapper, Class<?> view) {
 		try {
-			return objectMapper.writeValueAsString(node);
+			return objectMapper.writerWithView(view).writeValueAsString(node);
 		} catch (JsonProcessingException exc) {
 			logger.error("Failed to generate object for: " + node, exc);
 			return null;
@@ -114,7 +123,7 @@ public abstract class JSONHelper {
 
 	public static Document jsonToBson(JsonNode node, ObjectMapper objectMapper) {
 		try {
-			final String json = objectMapper.writeValueAsString(node);
+			final String json = objectMapper.writerWithView(View.DB.class).writeValueAsString(node);
 			return Document.parse(json);
 		} catch (JsonProcessingException exc) {
 			logger.error("Failed to generate json for: " + node, exc);
@@ -124,7 +133,7 @@ public abstract class JSONHelper {
 
 	public static Document entityToBson(Object entity, ObjectMapper objectMapper) {
 		try {
-			final String json = objectMapper.writeValueAsString(entity);
+			final String json = objectMapper.writerWithView(View.DB.class).writeValueAsString(entity);
 			return Document.parse(json);
 		} catch (JsonProcessingException exc) {
 			logger.error("Failed to generate json for: " + entity, exc);
@@ -132,10 +141,16 @@ public abstract class JSONHelper {
 		}
 	}
 
-	public static ObjectMapper configureObjectMapper(ObjectMapper objectMapper) {
+	public static List<? extends Document> entitiesToBson(List<Group> groupsToAdd, ObjectMapper objectMapper) {
+		return groupsToAdd.stream()
+			.map(t->entityToBson(t,objectMapper))
+			.collect(Collectors.toList());
+	}
 
+	public static ObjectMapper configureObjectMapper(ObjectMapper objectMapper, Class<?> view) {
 		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		objectMapper.setConfig(objectMapper.getSerializationConfig().withView(view));
 		objectMapper.registerModule(new JavaTimeModule());
 		objectMapper.registerModule(new SimpleModule() {
 			private static final long serialVersionUID = 1L;
