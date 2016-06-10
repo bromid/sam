@@ -99,8 +99,8 @@ public class GroupResource {
 		return Maps.uniqueIndex(
 			database.getCollection(Collections.GROUPS)
 				.aggregate(Lists.newArrayList(
-					Aggregates.lookup("applications", "id", "group", "applications"),
-					Aggregates.lookup("assets", "id", "group", "assets")
+					Aggregates.lookup(Collections.APPLICATIONS, "id", "group", "applications"),
+					Aggregates.lookup(Collections.ASSETS, "id", "group", "assets")
 				)).map(Group::new),
 			t->t.id
 		);
@@ -141,7 +141,7 @@ public class GroupResource {
 		pipeline.add(Aggregates.unwind("$groups", new UnwindOptions().preserveNullAndEmptyArrays(true)));
 
 		// Self join on inbound references: group.groups -> group.id and filter no inbound references
-		pipeline.add(Aggregates.lookup(Collections.GROUPS, "id", "groups", "inbound_links"));
+		pipeline.add(Aggregates.lookup(Collections.GROUPS, "id", "groups.id", "inbound_links"));
 		pipeline.add(Aggregates.match(inboundLinksFilter));
 
 		// Group on id to get distinct group names

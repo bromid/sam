@@ -2,6 +2,7 @@ package se.atg.cmdb.model;
 
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
@@ -26,7 +27,8 @@ public class Server extends Asset {
 	public String fqdn;
 	@NotNull(groups=Create.class) @Size(min = 1, max = 50, groups=Update.class)
 	public String environment;
-	public List<ApplicationLink> applications; 
+	@Valid
+	public List<Deployment> deployments; 
 
 	public Server() {}
 	public Server(Document bson) {
@@ -43,7 +45,7 @@ public class Server extends Asset {
 			this.environment = bson.getString("environment");
 		}
 		this.fqdn = bson.getString("fqdn");
-		this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
+		this.deployments = Mapper.mapFromTwoList(bson, "deployments", "applications", Deployment::fromBson);
 	}
 
 	public String getHostname() {
@@ -54,9 +56,9 @@ public class Server extends Asset {
 		return fqdn;
 	}
 
-	@Null
+	@Null(groups={Create.class, Update.class})
 	public String getId() {
-		return null;
+		return id;
 	}
 
 	@Override

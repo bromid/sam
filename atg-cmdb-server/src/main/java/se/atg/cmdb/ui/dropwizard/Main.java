@@ -30,6 +30,7 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
 import se.atg.cmdb.helpers.JSONHelper;
 import se.atg.cmdb.model.User;
+import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthorizer;
 import se.atg.cmdb.ui.dropwizard.db.MongoDBHealthCheck;
@@ -59,7 +60,7 @@ public class Main extends Application<CMDBConfiguration> {
 		environment.healthChecks().register("mongoDB", new MongoDBHealthCheck(database));
 
 		// Jackson configuration
-		final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper());
+		final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper(), View.API.class);
 
 		// REST Resources
 		environment.jersey().register(new ServerResource(database, objectMapper));

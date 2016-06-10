@@ -15,20 +15,15 @@ public class MongoDBHealthCheck extends HealthCheck {
     }
 
 	/**
-	 * Checks if the system database, which exists in all MongoDB instances can
-	 * be reached.
-	 * 
-	 * @return A Result object
-	 * @throws Exception
+	 * Checks if the system database, available in all MongoDB instances can be reached.
 	 */
 	@Override
 	protected Result check() throws Exception {
-
 		try {
 			final Document result = mongoDatabase.runCommand(new Document("dbStats", 1));
 			return Result.healthy(result.toJson());
-		} catch (MongoClientException ex) {
-			return Result.unhealthy(ex.getMessage());
+		} catch (MongoClientException exc) {
+			return Result.unhealthy(exc);
 		}
 	}
 }

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
-import javax.validation.Valid;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -25,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,7 +46,6 @@ import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
-import se.atg.cmdb.model.ServerLink;
 import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
@@ -94,21 +91,17 @@ public class ApplicationResource {
 	@Path("application")
 	@RolesAllowed(Roles.EDIT)
 	@ApiOperation(value="Create a new application", code=201, response=ApplicationLink.class)
-	@ApiImplicitParams(
-		@ApiImplicitParam(name="body", paramType="body", required=true, dataType="se.atg.cmdb.model.Application")
-	)
-	public Response createServer(
-		@ApiParam(hidden=true) String applicationJson,
+	public Response createApplication(
+		@ApiParam("Application") Application application,
 		@Context UriInfo uriInfo,
 		@Context SecurityContext securityContext
 	) throws JsonParseException, JsonMappingException, IOException {
-		logger.info("Create application: {}", applicationJson);
+		logger.info("Create application: {}", application);
 
-		final Application application = objectMapper.readValue(applicationJson, Application.class);
 		RESTHelper.validate(application, Application.Create.class);
 
 		final User user = RESTHelper.getUser(securityContext);
-		final Document bson = JSONHelper.addMetaForCreate(applicationJson, user.name);
+		final Document bson = JSONHelper.addMetaForCreate(application, user.name, objectMapper);
 		database.getCollection(Collections.APPLICATIONS).insertOne(bson);
 
 		return linkResponse(Status.CREATED, bson, uriInfo);

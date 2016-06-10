@@ -25,9 +25,6 @@ import se.atg.cmdb.helpers.JSONHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
 import se.atg.cmdb.model.PaginatedCollection;
-import se.atg.cmdb.model.Server;
-import se.atg.cmdb.model.ServerLink;
-import se.atg.cmdb.model.Asset.OS;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class ApplicationIntegrationTest {
@@ -52,21 +49,15 @@ public class ApplicationIntegrationTest {
 	@Test
 	public void getApplication() {
 
-		final Application application = new Application() {{
+		final Application application1 = new Application() {{
 			id = "my-application1";
 			name = "My Application 1";
 			description = "Min testserver";
 		}};
-		final String json = JSONHelper.objectToJson(application, objectMapper);
-		final Document bson = JSONHelper.addMetaForCreate(json, "integration-test");
-		applications.insertOne(bson);
+		applications.insertOne(JSONHelper.addMetaForCreate(application1, "integration-test",  objectMapper));
 
-		final Application response = getApplication(application.id);
-		Assert.assertNotNull(response.meta);
-
-		response.meta = null;
-		application.meta = null;
-		Assert.assertEquals(application, response);
+		final Application response = getApplication(application1.id);
+		TestHelper.isEqualExceptMeta(application1, response);
 	}
 
 	@Test
@@ -77,14 +68,14 @@ public class ApplicationIntegrationTest {
 			name = "My Application 1";
 			description = "Min testserver";
 		}};
-		applications.insertOne(JSONHelper.entityToBson(application1, objectMapper));		
+		applications.insertOne(JSONHelper.addMetaForCreate(application1, "integration-test",  objectMapper));		
 
 		final Application application2 = new Application() {{
 			id = "my-application2";
 			name = "My Application 2";
 			description = "Min testserver";
 		}};
-		applications.insertOne(JSONHelper.entityToBson(application2, objectMapper));	
+		applications.insertOne(JSONHelper.addMetaForCreate(application2, "integration-test",  objectMapper));	
 
 		final PaginatedCollection<Application> response = testEndpoint.path("application")
 			.request(MediaType.APPLICATION_JSON_TYPE)
@@ -96,7 +87,7 @@ public class ApplicationIntegrationTest {
 		Assert.assertNull(response.limit);
 
 		Assert.assertEquals(2, response.items.size());
-		TestHelper.assertEquals(Arrays.asList(application1, application2), response.items, Application::getId);
+		TestHelper.assertEquals(Arrays.asList(application1, application2), response.items, Application::getId, TestHelper::isEqualExceptMeta);
 	}
 
 	@Test
@@ -109,9 +100,7 @@ public class ApplicationIntegrationTest {
 		}};
 		final ApplicationLink link = createApplication(application1);
 		final Application response = getApplication(link);
-
-		response.meta = null;
-		Assert.assertEquals(response, application1);
+		TestHelper.isEqualExceptMeta(application1, response);
 	}
 
 	@Test

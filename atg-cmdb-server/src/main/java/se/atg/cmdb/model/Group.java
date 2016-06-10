@@ -3,7 +3,6 @@ package se.atg.cmdb.model;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -13,6 +12,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.annotations.ApiModel;
@@ -37,28 +37,31 @@ public class Group extends Base {
 	public Group() {
 	}
 
-	@SuppressWarnings("unchecked")
+	@JsonCreator
+	public Group(String id) {
+		this.id = id;
+	}
+
 	public Group(Document bson) {
 		super(bson);
 
 		this.id = bson.getString("id");
 		this.name = bson.getString("name");
-		this.groups = bson.get("groups", List.class);
+		this.groups = Mapper.mapList(bson, "groups", Group::fromBson);
 
 		this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
 		this.assets = Mapper.mapList(bson, "assets", AssetLink::fromBson);
 		this.tags = Mapper.mapList(bson, "tags", Tag::new);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<String> resetGroups() {
 
 		if (this.groups == null) {
 			return Collections.emptyList();
 		}
-
-		final Stream<Object> typeErasure = (Stream) this.groups.stream();
-		final List<String> groups = typeErasure.map(t -> t.toString()).collect(Collectors.toList());
+		final List<String> groups = this.groups.stream()
+			.map(Group::getId)
+			.collect(Collectors.toList());
 		this.groups.clear();
 		return groups;
 	}
@@ -91,5 +94,9 @@ public class Group extends Base {
 	@Override
 	public int hashCode() {
 		return HashCodeBuilder.reflectionHashCode(this);
+	}
+
+	public static Group fromBson(Document bson) {
+		return new Group(bson);
 	}
 }

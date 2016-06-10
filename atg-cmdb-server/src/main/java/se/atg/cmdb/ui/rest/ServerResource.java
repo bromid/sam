@@ -110,21 +110,17 @@ public class ServerResource {
 	@Path("server")
 	@RolesAllowed(Roles.EDIT)
 	@ApiOperation(value = "Create a new server", code=201, response=ServerLink.class)
-	@ApiImplicitParams(
-		@ApiImplicitParam(name="body", paramType="body", required=true, dataType="se.atg.cmdb.model.Server")
-	)
 	public Response createServer(
-		@ApiParam(hidden=true) String serverJson,
+		@ApiParam("Server") Server server,
 		@Context UriInfo uriInfo,
 		@Context SecurityContext securityContext
 	) throws JsonParseException, JsonMappingException, IOException {
-		logger.info("Create server: {}", serverJson);
+		logger.info("Create server: {}", server);
 
-		final Server server = objectMapper.readValue(serverJson, Server.class);
 		RESTHelper.validate(server, Server.Create.class);
 
 		final User user = RESTHelper.getUser(securityContext);
-		final Document bson = JSONHelper.addMetaForCreate(serverJson, user.name);
+		final Document bson = JSONHelper.addMetaForCreate(server, user.name, objectMapper);
 		database.getCollection(Collections.SERVERS).insertOne(bson);
 
 		return linkResponse(Status.CREATED, bson, uriInfo);
@@ -193,8 +189,8 @@ public class ServerResource {
 		if (filter != ALL) {
 			pipeline.add(Aggregates.match(filter));
 		}
-		pipeline.add(Aggregates.unwind("$applications", new UnwindOptions().preserveNullAndEmptyArrays(true)));
-		pipeline.add(Aggregates.lookup("applications", "applications.id", "id", "applications"));
+		pipeline.add(Aggregates.unwind("$deployments", new UnwindOptions().preserveNullAndEmptyArrays(true)));
+		pipeline.add(Aggregates.lookup(Collections.APPLICATIONS, "deployments.applicationId", "id", "applications"));
 		pipeline.add(Aggregates.unwind("$applications", new UnwindOptions().preserveNullAndEmptyArrays(true)));
 		pipeline.add(Aggregates.group(
 			new Document().append("hostname", "$hostname").append("environment", "$environment"),
@@ -204,7 +200,8 @@ public class ServerResource {
 			new BsonField("network", new Document("$first", "$network")),
 			new BsonField("meta", new Document("$first", "$meta")),
 			new BsonField("attributes", new Document("$first", "$attributes")),
-			new BsonField("applications", new Document("$push", "$applications"))
+			new BsonField("applications", new Document("$push", "$applications")),
+			new BsonField("deployments", new Document("$push", "$deployments"))
 		));
 		pipeline.add(Aggregates.sort(Sorts.ascending("_id")));
 		return pipeline;

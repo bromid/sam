@@ -15,6 +15,16 @@ public abstract class Defaults {
             this.setUseIdentityHashCode(false);
         }
 
+        /*
+         * Override to not append null fields
+         */
+        @Override
+        public void append(StringBuffer buffer, String fieldName, Object value, Boolean fullDetail) {
+            if (value != null) {
+                super.append(buffer, fieldName, value, fullDetail);
+            }
+        }
+
         /**
          * <p>Ensure <code>Singleton</ode> after serialization.</p>
          * @return the singleton

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 
@@ -47,9 +48,16 @@ public class MongoDBConnectionFactory {
 			}
 
 			logger.debug("Create client {}", connections);
+
 			//final MongoCredential credential = MongoCredential.createCredential(username, dbName, password.toCharArray());
 			//mongoClient = new MongoClient(getServerAddresses(), Arrays.asList(credential));
-			mongoClient = new MongoClient(getServerAddresses());
+
+			final MongoClientOptions options = MongoClientOptions.builder()
+				.connectTimeout(1000)
+				.serverSelectionTimeout(5000)
+				.maxWaitTime(5000)
+				.build();
+			mongoClient = new MongoClient(getServerAddresses(), options);
 			lifecycle.manage(new Managed() {
 
                 @Override
