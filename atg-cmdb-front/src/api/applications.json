@@ -1,0 +1,76 @@
+{
+  "items": [
+    {
+      "id": "atg-web",
+      "name": "atg.se Web",
+      "group": {
+        "id": "atg-web",
+        "link": {
+          "rel": "self",
+          "href": "http://cmdb.ci.hh.atg.se/services/group/atg-web"
+        }
+      },
+      "attributes": {
+        "server": {
+          "name": "dropwizard",
+          "version": "0.9.1"
+        }
+      }
+    },
+    {
+      "id": "atg-service-info",
+      "name": "ATG Service Info",
+      "group": {
+        "id": "atg-service-info",
+        "link": {
+          "rel": "self",
+          "href": "http://cmdb.ci.hh.atg.se/services/group/atg-service-info"
+        }
+      }
+    },
+    {
+      "id": "atg-service-info-cache",
+      "name": "ATG Service Info Cache",
+      "group": {
+        "id": "atg-service-info",
+        "link": {
+          "rel": "self",
+          "href": "http://cmdb.ci.hh.atg.se/services/group/atg-service-info"
+        }
+      }
+    },
+    {
+      "id": "atg-service-betting",
+      "name": "ATG Service Betting",
+      "group": {
+        "id": "atg-service-betting",
+        "link": {
+          "rel": "self",
+          "href": "http://cmdb.ci.hh.atg.se/services/group/atg-service-betting"
+        }
+      }
+    },
+    {
+      "id": "tillsammans-service",
+      "name": "Tillsammans Service",
+      "group": {
+        "id": "tillsammans",
+        "link": {
+          "rel": "self",
+          "href": "http://cmdb.ci.hh.atg.se/services/group/tillsammans"
+        }
+      }
+    },
+    {
+      "id": "tillsammans-web",
+      "name": "Tillsammans Web",
+      "group": {
+        "id": "tillsammans",
+        "link": {
+          "rel": "self",
+          "href": "http://cmdb.ci.hh.atg.se/services/group/tillsammans"
+        }
+      }
+    }
+  ]
+}

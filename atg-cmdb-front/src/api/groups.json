@@ -1,0 +1,316 @@
+{
+  "items": [
+    {
+      "id": "org-it",
+      "name": "ATG IT",
+      "groups": [
+        {
+          "id": "org-it-spel",
+          "name": "ATG IT Spelsektionen",
+          "groups": [
+            {
+              "id": "tillsammans",
+              "name": "Tillsammans",
+              "description": "tillsammans.atg.se",
+              "applications": [
+                {
+                  "id": "tillsammans-service",
+                  "name": "Tillsammans Service",
+                  "link": {
+                    "rel": "self",
+                    "href": "http://cmdb.ci.hh.atg.se/services/application/tillsammans-service"
+                  }
+                },
+                {
+                  "id": "tillsammans-web",
+                  "name": "Tillsammans Web",
+                  "link": {
+                    "rel": "self",
+                    "href": "http://cmdb.ci.hh.atg.se/services/application/tillsammans-web"
+                  }
+                }
+              ],
+              "tags": [
+                {
+                  "name": "webapp",
+                  "editable": true
+                },
+                {
+                  "name": "weblogic",
+                  "editable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "org-it-sport",
+          "name": "ATG IT Sportsektionen",
+          "groups": [
+            {
+              "id": "travsport",
+              "tags": [
+                {
+                  "name": "webapp",
+                  "editable": true
+                },
+                {
+                  "name": "weblogic",
+                  "editable": true
+                },
+                {
+                  "name": "sportsystem",
+                  "editable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "org-it-prod",
+          "name": "ATG IT Produktionssektionen",
+          "groups": [
+            {
+              "id": "org-netman",
+              "name": "ATG IT Netman",
+              "groups": [
+                {
+                  "id": "netman-infrastructure-tracks",
+                  "name": "Netman nätverksutrustning på banor",
+                  "tags": [
+                    {
+                      "name": "switches",
+                      "editable": true
+                    },
+                    {
+                      "name": "routers",
+                      "editable": true
+                    }
+                  ]
+                },
+                {
+                  "id": "netman-infrastructure-hh",
+                  "name": "Netman nätverksutrustning hästsportenshus",
+                  "tags": [
+                    {
+                      "name": "switches",
+                      "editable": true
+                    },
+                    {
+                      "name": "routers",
+                      "editable": true
+                    }
+                  ],
+                  "assets": [
+                    {
+                      "id": "core-switch-hh-1",
+                      "name": "Core switch hästsportenshus 1",
+                      "link": {
+                        "rel": "self",
+                        "href": "http://cmdb.ci.hh.atg.se/services/asset/core-switch-hh-1"
+                      }
+                    },
+                    {
+                      "id": "core-switch-hh-2",
+                      "name": "Core switch hästsportenshus 2",
+                      "link": {
+                        "rel": "self",
+                        "href": "http://cmdb.ci.hh.atg.se/services/asset/core-switch-hh-2"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "tags": [
+                {
+                  "name": "netman",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "id": "org-sysman",
+              "name": "ATG IT Sysman"
+            },
+            {
+              "id": "travsport",
+              "tags": [
+                {
+                  "name": "webapp",
+                  "editable": true
+                },
+                {
+                  "name": "weblogic",
+                  "editable": true
+                },
+                {
+                  "name": "sportsystem",
+                  "editable": true
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "name": "webapp",
+          "editable": true
+        }
+      ]
+    },
+    {
+      "id": "webappar",
+      "groups": [
+        {
+          "id": "tillsammans",
+          "name": "Tillsammans",
+          "description": "tillsammans.atg.se",
+          "applications": [
+            {
+              "id": "tillsammans-service",
+              "name": "Tillsammans Service",
+              "link": {
+                "rel": "self",
+                "href": "http://cmdb.ci.hh.atg.se/services/application/tillsammans-service"
+              }
+            },
+            {
+              "id": "tillsammans-web",
+              "name": "Tillsammans Web",
+              "link": {
+                "rel": "self",
+                "href": "http://cmdb.ci.hh.atg.se/services/application/tillsammans-web"
+              }
+            }
+          ],
+          "tags": [
+            {
+              "name": "webapp",
+              "editable": true
+            },
+            {
+              "name": "weblogic",
+              "editable": true
+            }
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "name": "webapp",
+          "editable": true
+        }
+      ]
+    },
+    {
+      "id": "atg-se",
+      "name": "atg.se",
+      "description": "www.atg.se",
+      "groups": [
+        {
+          "id": "atg-web",
+          "name": "atg.se",
+          "description": "Atg.se statiska webbresurser",
+          "applications": [
+            {
+              "id": "atg-web",
+              "name": "atg.se Web",
+              "link": {
+                "rel": "self",
+                "href": "http://cmdb.ci.hh.atg.se/services/application/atg-web"
+              }
+            }
+          ]
+        },
+        {
+          "id": "atg-service",
+          "name": "atg.se",
+          "description": "Atg.se Tjänstelager",
+          "groups": [
+            {
+              "id": "atg-service-info",
+              "name": "atg.se",
+              "description": "Atg.se Info Tjänstelager",
+              "applications": [
+                {
+                  "id": "atg-service-info",
+                  "name": "ATG Service Info",
+                  "link": {
+                    "rel": "self",
+                    "href": "http://cmdb.ci.hh.atg.se/services/application/atg-service-info"
+                  }
+                },
+                {
+                  "id": "atg-service-info-cache",
+                  "name": "ATG Service Info Cache",
+                  "link": {
+                    "rel": "self",
+                    "href": "http://cmdb.ci.hh.atg.se/services/application/atg-service-info-cache"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "atg-service-betting",
+              "name": "atg.se",
+              "description": "Atg.se Betting Tjänstelager",
+              "applications": [
+                {
+                  "id": "atg-service-betting",
+                  "name": "ATG Service Betting",
+                  "link": {
+                    "rel": "self",
+                    "href": "http://cmdb.ci.hh.atg.se/services/application/atg-service-betting"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "atg-virtual-racing",
+          "name": "ATG Virtual Racing",
+          "description": "Atg.se Spel på virtuella hästar",
+          "groups": [
+            {
+              "id": "atg-service-betting",
+              "name": "atg.se",
+              "description": "Atg.se Betting Tjänstelager",
+              "applications": [
+                {
+                  "id": "atg-service-betting",
+                  "name": "ATG Service Betting",
+                  "link": {
+                    "rel": "self",
+                    "href": "http://cmdb.ci.hh.atg.se/services/application/atg-service-betting"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "atg-vr-video",
+              "name": "ATG Virtual Racing games generators"
+            }
+          ]
+        }
+      ],
+      "tags": [
+        {
+          "name": "webapp",
+          "editable": true
+        }
+      ]
+    },
+    {
+      "id": "empty-root",
+      "name": "Tom root grupp",
+      "tags": [
+        {
+          "name": "empty",
+          "editable": true
+        }
+      ]
+    }
+  ]
+}
