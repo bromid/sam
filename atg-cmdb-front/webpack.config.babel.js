@@ -1,5 +1,7 @@
 import path from 'path';
 
+const srcPath = path.join(__dirname, 'src');
+
 export default {
     devtool: 'eval',
     entry: './src/index',
@@ -12,16 +14,14 @@ export default {
             {
                 test: /\.js$/,
                 loaders: ['babel'],
-                exclude: /node_modules/,
-                include: __dirname,
+                include: srcPath,
             }, {
                 test: /\.json$/,
                 loaders: ['json'],
-                exclude: /node_modules/,
-                include: __dirname,
+                include: srcPath,
             }, {
                 test: /\.(png|jpg)$/,
-                include: __dirname,
+                include: srcPath,
                 loader: 'url?name=img/[name]-[hash].[ext]&limit=25000',
             },
         ],
