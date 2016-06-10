@@ -7,6 +7,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public abstract class Defaults {
 
 	public static final String MEDIA_TYPE_JSON = MediaType.APPLICATION_JSON + ";charset=utf-8";
+	public static final String META_TYPE_HTML = MediaType.TEXT_HTML + ";charset=utf-8";
 	public static final ToStringStyle STYLE = new ToStringStyle() {
 
         private static final long serialVersionUID = 1L;
