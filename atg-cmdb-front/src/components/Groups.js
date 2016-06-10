@@ -4,7 +4,6 @@ import * as Actions from '../actions/groupActions';
 import { List, ListItem } from 'material-ui/List';
 import LinearProgress from 'material-ui/LinearProgress';
 import Subheader from 'material-ui/Subheader';
-import Paper from 'material-ui/Paper';
 import Badge from 'material-ui/Badge';
 
 function CountBadge({ children, title, primary, secondary }) {
@@ -54,17 +53,15 @@ function Group({ group, nestedLevel = 0 }) {
 
 function Groups({ groups }) {
     return (
-        <Paper>
-            <List>
-                <Subheader>Groups</Subheader>
-                {groups.map(group => <Group group={group} key={group.id} />)}
-            </List>
-        </Paper>
+        <List>
+            <Subheader>Groups</Subheader>
+            {groups.map(group => <Group group={group} key={group.id} />)}
+        </List>
 
     );
 }
 
-const GroupContainer = React.createClass({
+const GroupsContainer = React.createClass({
     componentDidMount() {
         this.props.fetchGroups();
     },
@@ -86,4 +83,4 @@ function mapStateToProps(state) {
         isLoading: groupsIsLoading || !groups.items,
     };
 }
-export default connect(mapStateToProps, Actions)(GroupContainer);
+export default connect(mapStateToProps, Actions)(GroupsContainer);

@@ -6,7 +6,6 @@ export default {
     output: {
         path: path.join(__dirname, 'dist/static'),
         filename: 'bundle.js',
-        publicPath: '/static/',
     },
     module: {
         loaders: [
@@ -20,6 +19,10 @@ export default {
                 loaders: ['json'],
                 exclude: /node_modules/,
                 include: __dirname,
+            }, {
+                test: /\.(png|jpg)$/,
+                include: __dirname,
+                loader: 'url?name=img/[name]-[hash].[ext]&limit=25000',
             },
         ],
     },
