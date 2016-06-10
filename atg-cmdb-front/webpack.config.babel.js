@@ -4,7 +4,7 @@ export default {
     devtool: 'eval',
     entry: './src/index',
     output: {
-        path: path.join(__dirname, 'dist'),
+        path: path.join(__dirname, 'dist/static'),
         filename: 'bundle.js',
         publicPath: '/static/',
     },
@@ -20,7 +20,7 @@ export default {
                 loaders: ['json'],
                 exclude: /node_modules/,
                 include: __dirname,
-            }
+            },
         ],
     },
 };

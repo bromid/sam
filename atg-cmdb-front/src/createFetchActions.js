@@ -1,30 +1,30 @@
-import _ from "lodash";
+import _ from 'lodash';
 
-const keyRequired = (key) => {throw new Error(`${key} must be specified!`);};
+const keyRequired = (key) => { throw new Error(`${key} must be specified!`); };
 
 export default function createFetchActions(options) {
     const {
-        apiCall = keyRequired("ApiCall"),
-        requestKey = keyRequired("requestKey"),
-        receiveKey = keyRequired("receiveKey"),
+        apiCall = keyRequired('ApiCall'),
+        requestKey = keyRequired('requestKey'),
+        receiveKey = keyRequired('receiveKey'),
         payloadTransform = _.identity,
         errorTransform = _.identity,
-        shouldFetch
+        shouldFetch,
     } = options;
 
-    const requestPayload = () => ({type: requestKey});
+    const requestPayload = () => ({ type: requestKey });
 
     const receivePayload = payload => ({
         type: receiveKey,
-        payload: payloadTransform(payload)
+        payload: payloadTransform(payload),
     });
 
     const receivePayloadError = error => ({
         type: receiveKey,
         error: true,
         payload: {
-            status: errorTransform(error)
-        }
+            status: errorTransform(error),
+        },
     });
 
     return function fetchPayload() {

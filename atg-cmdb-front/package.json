@@ -4,13 +4,15 @@
   "description": "Dashboard for managing assets",
   "scripts": {
     "start": "babel-node devServer.js",
+    "prebuild": "rm -rf dist",
+    "build": "webpack",
+    "postbuild": "cp index.html dist/static/",
     "lint": "eslint src"
   },
   "repository": {
     "type": "git",
     "url": "http://github.hh.atg.se/atg/assets-dashboard"
   },
-  "license": "MIT",
   "dependencies": {
     "babel-polyfill": "^6.9.1",
     "material-ui": "^0.15.0",
