@@ -54,7 +54,7 @@ public class Main extends Application<CMDBConfiguration> {
 	@Override
 	public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
 		bootstrap.addBundle(new ViewBundle<CMDBConfiguration>(Arrays.asList(new MarkdownViewRenderer())));
-		bootstrap.addBundle(new AssetsBundle("/assets", "/", "index.html"));
+		bootstrap.addBundle(new AssetsBundle("/static", "/", "index.html"));
 	}
 
 	@Override

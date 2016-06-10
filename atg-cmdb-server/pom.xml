@@ -105,7 +105,7 @@
 	<build>
 		<resources>
 			<resource>
-				<directory>src/main/resources</directory>
+				<directory>../atg-cmdb-front/dist</directory>
 				<filtering>false</filtering>
 			</resource>
 			<resource>
