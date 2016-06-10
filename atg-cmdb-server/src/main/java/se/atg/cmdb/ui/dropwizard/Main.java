@@ -2,6 +2,7 @@ package se.atg.cmdb.ui.dropwizard;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.ws.rs.core.Link;
@@ -19,6 +20,7 @@ import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.dropwizard.views.ViewBundle;
 import io.swagger.converter.ModelConverter;
 import io.swagger.converter.ModelConverterContext;
 import io.swagger.converter.ModelConverters;
@@ -34,13 +36,15 @@ import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthorizer;
 import se.atg.cmdb.ui.dropwizard.db.MongoDBHealthCheck;
+import se.atg.cmdb.ui.dropwizard.render.MarkdownViewRenderer;
 import se.atg.cmdb.ui.rest.ApplicationResource;
 import se.atg.cmdb.ui.rest.AssetResource;
 import se.atg.cmdb.ui.rest.GroupResource;
+import se.atg.cmdb.ui.rest.InfoResource;
 import se.atg.cmdb.ui.rest.SearchResource;
 import se.atg.cmdb.ui.rest.ServerResource;
 import se.atg.cmdb.ui.rest.mapper.MongoServerExceptionMapper;
-
+	
 public class Main extends Application<CMDBConfiguration> {
 
     public static void main(String[] args) throws Exception {
@@ -49,6 +53,7 @@ public class Main extends Application<CMDBConfiguration> {
 
 	@Override
 	public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
+		bootstrap.addBundle(new ViewBundle<CMDBConfiguration>(Arrays.asList(new MarkdownViewRenderer())));
 		bootstrap.addBundle(new AssetsBundle("/assets", "/", "index.html"));
 	}
 
@@ -63,6 +68,7 @@ public class Main extends Application<CMDBConfiguration> {
 		final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper(), View.API.class);
 
 		// REST Resources
+		environment.jersey().register(new InfoResource());
 		environment.jersey().register(new ServerResource(database, objectMapper));
 		environment.jersey().register(new ApplicationResource(database, objectMapper));
 		environment.jersey().register(new GroupResource(database, objectMapper));
