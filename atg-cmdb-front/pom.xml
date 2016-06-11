@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project  xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -11,21 +12,36 @@
 	</parent>
 	<artifactId>atg-cmdb-front</artifactId>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <node.download.root>http://vlpsat61.hh.atg.se/pub/nodejs/</node.download.root>
+    <npm.download.root>http://vlpsat61.hh.atg.se/pub/nodejs/npm/</npm.download.root>
+  </properties>
+
+  <profiles>
+    <profile>
+      <id>local</id>
+      <properties>
+        <node.download.root>https://nodejs.org/dist/</node.download.root>
+        <npm.download.root>https://registry.npmjs.org/npm/-/</npm.download.root>
+      </properties>
+    </profile>
+  </profiles>
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>0.0.27</version>
+				<version>1.0</version>
 				<configuration>
-					<nodeDownloadRoot>http://vlpsat61.hh.atg.se/pub/nodejs/</nodeDownloadRoot>
-					<npmDownloadRoot>http://vlpsat61.hh.atg.se/pub/nodejs/npm/</npmDownloadRoot>
+					<nodeDownloadRoot>${node.download.root}</nodeDownloadRoot>
+					<npmDownloadRoot>${npm.download.root}</npmDownloadRoot>
 					<workingDirectory>./src/</workingDirectory>
 				</configuration>
-
 				<executions>
 					<execution>
-						<id>install node and npm</id>
+						<id>Install node and npm</id>
 						<goals>
 							<goal>install-node-and-npm</goal>
 						</goals>

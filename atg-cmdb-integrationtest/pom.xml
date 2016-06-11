@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project  xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -10,6 +11,10 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>atg-cmdb-integrationtest</artifactId>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
 	<dependencies>
 	   <dependency>
@@ -31,13 +36,17 @@
 		      <groupId>com.google.guava</groupId>
 		      <artifactId>guava</artifactId>
 	      </exclusion>
+	      <exclusion>
+          <groupId>javax.inject</groupId>
+          <artifactId>javax.inject</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>aopalliance</groupId>
+          <artifactId>aopalliance</artifactId>
+        </exclusion>
 	   </exclusions>
 		</dependency>
 	</dependencies>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 
 	<build>
 		<plugins>
@@ -76,15 +85,12 @@
 				<artifactId>maven-shade-plugin</artifactId>
 				<version>2.4.3</version>
 				<configuration>
-					<createDependencyReducedPom>true</createDependencyReducedPom>
 					<filters>
 						<filter>
-							<artifact>*:*</artifact>
-							<excludes>
-								<exclude>META-INF/*.SF</exclude>
-								<exclude>META-INF/*.DSA</exclude>
-								<exclude>META-INF/*.RSA</exclude>
-							</excludes>
+							<artifact>se.atg.cmdb:atg-cmdb-server</artifact>
+							<includes>
+							 <include>se/atg/**</include>
+							</includes>
 						</filter>
 					</filters>
 				</configuration>
@@ -96,10 +102,8 @@
 						</goals>
 						<configuration>
 							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<mainClass>se.atg.cmdb.ui.rest.integrationtest.Main</mainClass>
 								</transformer>
 							</transformers>

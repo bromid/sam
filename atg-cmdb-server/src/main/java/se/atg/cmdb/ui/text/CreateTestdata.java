@@ -11,6 +11,8 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
+import se.atg.cmdb.dao.Collections;
+
 public class CreateTestdata {
 
 	final static Logger logger = LoggerFactory.getLogger(CreateTestdata.class);
@@ -23,16 +25,16 @@ public class CreateTestdata {
 
 			final MongoDatabase database = mongoClient.getDatabase("test");
 
-			final MongoCollection<Document> servers = database.getCollection("servers");
+			final MongoCollection<Document> servers = database.getCollection(Collections.SERVERS);
 			servers.drop();
 
-			final MongoCollection<Document> applications = database.getCollection("applications");
+			final MongoCollection<Document> applications = database.getCollection(Collections.APPLICATIONS);
 			applications.drop();
 
-			final MongoCollection<Document> groups = database.getCollection("groups");
+			final MongoCollection<Document> groups = database.getCollection(Collections.GROUPS);
 			groups.drop();
 
-			final MongoCollection<Document> assets = database.getCollection("assets");
+			final MongoCollection<Document> assets = database.getCollection(Collections.ASSETS);
 			assets.drop();
 
 			// Add indexes

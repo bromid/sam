@@ -18,6 +18,9 @@ logging:
 jerseyClientConfig:
   gzipEnabled: false
   gzipEnabledForRequests: false
+  timeout: 1s
+  connectionTimeout: 1s
+  connectionRequestTimeout: 1s
 
 testEndpoint: http://localhost:8080/services/
     
