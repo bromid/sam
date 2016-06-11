@@ -14,5 +14,5 @@ export const fetchServers = () =>
 export const fetchGroups = () =>
     delay(300).then(() => groupsJSON);
 
-export const fetchApp = () =>
+export const fetchApplications = () =>
     delay(300).then(() => appJSON);
