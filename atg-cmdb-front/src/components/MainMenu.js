@@ -2,6 +2,7 @@ import React from 'react';
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
 import { CardMedia } from 'material-ui/Card';
+import { Link } from 'react-router';
 import atgLogo from '../images/atg_logo.png';
 
 function MainMenu({ mdPlus, isOpen, setMenuOpen }) {
@@ -10,10 +11,18 @@ function MainMenu({ mdPlus, isOpen, setMenuOpen }) {
             <CardMedia mediaStyle={{ margin: '34px' }}>
                 <img src={atgLogo} alt="ATG logo" />
             </CardMedia>
-            <MenuItem>Grupper</MenuItem>
-            <MenuItem>Applikationer</MenuItem>
-            <MenuItem>Servrar</MenuItem>
-            <MenuItem>Tillgångar</MenuItem>
+            <Link to="/groups">
+                <MenuItem>Grupper</MenuItem>
+            </Link>
+            <Link to="/applications">
+                <MenuItem>Applikationer</MenuItem>
+            </Link>
+            <Link to="/servers">
+                <MenuItem>Servrar</MenuItem>
+            </Link>
+            <Link to="/assets">
+                <MenuItem>Tillgångar</MenuItem>
+            </Link>
         </Drawer>
     );
 }

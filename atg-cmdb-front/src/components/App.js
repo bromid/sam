@@ -15,7 +15,7 @@ const theme = {
     },
 };
 
-const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen }) => (
+const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen, children }) => (
     <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
         <div>
             <MainMenu
@@ -29,7 +29,7 @@ const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen }) => (
                     showMenuIconButton={!mdPlus}
                     onLeftIconButtonTouchTap={openMenu}
                 />
-                <Groups />
+                {children}
             </div>
         </div>
     </MuiThemeProvider>
