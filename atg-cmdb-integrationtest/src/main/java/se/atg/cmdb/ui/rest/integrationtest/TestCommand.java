@@ -35,79 +35,77 @@ import se.atg.cmdb.ui.text.CreateDatabase;
 
 public class TestCommand extends EnvironmentCommand<CMDBConfiguration> {
 
-	static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
-	static final Logger LOGGER = LoggerFactory.getLogger("integration-test");
+  static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
+  static final Logger LOGGER = LoggerFactory.getLogger("integration-test");
 
-	private Class<?>[] testClasses;
-	private Optional<Description> testFilter;
+  private Class<?>[] testClasses;
+  private Optional<Description> testFilter;
 
-	public TestCommand(Application<CMDBConfiguration> application, Optional<Description> testFilter, Class<?>... testClasses) {
-		super(application, "test", "Runs junit tests");
-		this.testFilter = testFilter;
-		this.testClasses = testClasses;
-	}
+  public TestCommand(Application<CMDBConfiguration> application, Optional<Description> testFilter, Class<?>... testClasses) {
+    super(application, "test", "Runs junit tests");
+    this.testFilter = testFilter;
+    this.testClasses = testClasses;
+  }
 
-	@Override
-	protected Class<CMDBConfiguration> getConfigurationClass() {
-		return CMDBConfiguration.class;
-	}
+  @Override
+  protected Class<CMDBConfiguration> getConfigurationClass() {
+    return CMDBConfiguration.class;
+  }
 
-	@Override
-	protected void run(Environment environment, Namespace namespace, CMDBConfiguration configuration) throws Exception {
+  @Override
+  protected void run(Environment environment, Namespace namespace, CMDBConfiguration configuration) throws Exception {
 
-		// Jackson configuration
-		final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper(), View.API.class);
+    // Jackson configuration
+    final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper(), View.API.class);
 
-		// Jersey client configuration
-		final Client client = new JerseyClientBuilder(environment)
-			.using(configuration.getJerseyClientConfiguration())
-			.withProvider(new LoggingFilter(HTTP_LOGGER, true))
-			.withProvider(HttpAuthenticationFeature.basic("integration-test", "secret"))
-			.build("atg_cmdb_integrationtest");
+    // Jersey client configuration
+    final Client client = new JerseyClientBuilder(environment)
+      .using(configuration.getJerseyClientConfiguration())
+      .withProvider(new LoggingFilter(HTTP_LOGGER, true))
+      .withProvider(HttpAuthenticationFeature.basic("integration-test", "secret"))
+      .build("atg_cmdb_integrationtest");
 
-		// Guice injection
-		final MongoDatabase database = configuration.getDBConnectionFactory().getDatabase(environment.lifecycle());
-		final Injector injector = Guice.createInjector(new AbstractModule() {
-			protected void configure() {
-				bind(ObjectMapper.class).toInstance(objectMapper);
-				bind(MongoDatabase.class).toInstance(database);
-				bind(Client.class).toInstance(client);
-				bind(WebTarget.class).toInstance(
-					client.target(configuration.getTestEndpoint())
-				);
-			}
-		});
+    // Guice injection
+    final MongoDatabase database = configuration.getDBConnectionFactory().getDatabase(environment.lifecycle());
+    final Injector injector = Guice.createInjector(new AbstractModule() {
+      protected void configure() {
+        bind(ObjectMapper.class).toInstance(objectMapper);
+        bind(MongoDatabase.class).toInstance(database);
+        bind(Client.class).toInstance(client);
+        bind(WebTarget.class).toInstance(client.target(configuration.getTestEndpoint()));
+      }
+    });
 
-		// Init database
-		verifyDatabaseHealth(database);
-		CreateDatabase.initDatabase(database);
+    // Init database
+    verifyDatabaseHealth(database);
+    CreateDatabase.initDatabase(database);
 
-		// Run junit tests
-		final Result result = runTests(injector, testClasses, testFilter);
-		if (!result.wasSuccessful()) {
-			throw new RuntimeException("The tests were unsuccessful!");
-		}
-	}
+    // Run junit tests
+    final Result result = runTests(injector, testClasses, testFilter);
+    if (!result.wasSuccessful()) {
+      throw new RuntimeException("The tests were unsuccessful!");
+    }
+  }
 
-	private static void verifyDatabaseHealth(MongoDatabase database) {
+  private static void verifyDatabaseHealth(MongoDatabase database) {
 
-		final MongoDBHealthCheck dbHealthCheck = new MongoDBHealthCheck(database);
-		final com.codahale.metrics.health.HealthCheck.Result dbHealth = dbHealthCheck.execute();
-		if (!dbHealth.isHealthy()) {
-			throw new RuntimeException("Failed to connect to database", dbHealth.getError());
-		}
-	}
+    final MongoDBHealthCheck dbHealthCheck = new MongoDBHealthCheck(database);
+    final com.codahale.metrics.health.HealthCheck.Result dbHealth = dbHealthCheck.execute();
+    if (!dbHealth.isHealthy()) {
+      throw new RuntimeException("Failed to connect to database", dbHealth.getError());
+    }
+  }
 
-	private static Result runTests(Injector injector, Class<?>[] testClasses, Optional<Description> testFilter) throws InitializationError {
+  private static Result runTests(Injector injector, Class<?>[] testClasses, Optional<Description> testFilter) throws InitializationError {
 
-		final JUnitCore junit = new JUnitCore();
-		junit.addListener(new JUnitRunListener(LOGGER));
+    final JUnitCore junit = new JUnitCore();
+    junit.addListener(new JUnitRunListener(LOGGER));
 
-		final Request testRequest = Request.runner(new Suite(new GuiceInjectionJUnitRunner(injector), testClasses));
-		if (testFilter.isPresent()) {
-			return junit.run(testRequest.filterWith(testFilter.get()));
-		} else {
-			return junit.run(testRequest);
-		}
-	}
+    final Request testRequest = Request.runner(new Suite(new GuiceInjectionJUnitRunner(injector), testClasses));
+    if (testFilter.isPresent()) {
+      return junit.run(testRequest.filterWith(testFilter.get()));
+    } else {
+      return junit.run(testRequest);
+    }
+  }
 }

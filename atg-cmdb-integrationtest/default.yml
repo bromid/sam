@@ -23,4 +23,3 @@ jerseyClientConfig:
   connectionRequestTimeout: 1s
 
 testEndpoint: http://localhost:8080/services/
-    
