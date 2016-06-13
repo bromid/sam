@@ -44,80 +44,79 @@ import se.atg.cmdb.ui.rest.InfoResource;
 import se.atg.cmdb.ui.rest.SearchResource;
 import se.atg.cmdb.ui.rest.ServerResource;
 import se.atg.cmdb.ui.rest.mapper.MongoServerExceptionMapper;
-	
+
 public class Main extends Application<CMDBConfiguration> {
 
-    public static void main(String[] args) throws Exception {
-    	new Main().run(args);
-    }
+  public static void main(String[] args) throws Exception {
+    new Main().run(args);
+  }
 
-	@Override
-	public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
-		bootstrap.addBundle(new ViewBundle<CMDBConfiguration>(Arrays.asList(new MarkdownViewRenderer())));
-		bootstrap.addBundle(new AssetsBundle("/static", "/", "index.html"));
-	}
+  @Override
+  public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
+    bootstrap.addBundle(new ViewBundle<CMDBConfiguration>(Arrays.asList(new MarkdownViewRenderer())));
+    bootstrap.addBundle(new AssetsBundle("/static", "/", "index.html"));
+  }
 
-	@Override
-	public void run(CMDBConfiguration configuration, Environment environment) throws Exception {
+  @Override
+  public void run(CMDBConfiguration configuration, Environment environment) throws Exception {
 
-		// Healthchecks
-		final MongoDatabase database = configuration.getDBConnectionFactory().getDatabase(environment.lifecycle());
-		environment.healthChecks().register("mongoDB", new MongoDBHealthCheck(database));
+    // Healthchecks
+    final MongoDatabase database = configuration.getDBConnectionFactory().getDatabase(environment.lifecycle());
+    environment.healthChecks().register("mongoDB", new MongoDBHealthCheck(database));
 
-		// Jackson configuration
-		final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper(), View.API.class);
+    // Jackson configuration
+    final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper(), View.API.class);
 
-		// REST Resources
-		environment.jersey().register(new InfoResource());
-		environment.jersey().register(new ServerResource(database, objectMapper));
-		environment.jersey().register(new ApplicationResource(database, objectMapper));
-		environment.jersey().register(new GroupResource(database, objectMapper));
-		environment.jersey().register(new AssetResource(database, objectMapper));
-		environment.jersey().register(new SearchResource(database, objectMapper));
+    // REST Resources
+    environment.jersey().register(new InfoResource());
+    environment.jersey().register(new ServerResource(database, objectMapper));
+    environment.jersey().register(new ApplicationResource(database, objectMapper));
+    environment.jersey().register(new GroupResource(database, objectMapper));
+    environment.jersey().register(new AssetResource(database, objectMapper));
+    environment.jersey().register(new SearchResource(database, objectMapper));
 
-		// Authentication
-		environment.jersey().register(RolesAllowedDynamicFeature.class);
-	    environment.jersey().register(new AuthDynamicFeature(
-	    	new BasicCredentialAuthFilter.Builder<User>()
-	    		.setAuthenticator(new BasicAuthenticator())
-	    		.setAuthorizer(new BasicAuthorizer())
-	        	.setPrefix("Basic")
-	    		.buildAuthFilter())
-	    );
+    // Authentication
+    environment.jersey().register(RolesAllowedDynamicFeature.class);
+    environment.jersey().register(new AuthDynamicFeature(new BasicCredentialAuthFilter.Builder<User>()
+        .setAuthenticator(new BasicAuthenticator())
+        .setAuthorizer(new BasicAuthorizer())
+        .setPrefix("Basic")
+        .buildAuthFilter())
+    );
 
-	    // Core resources
-		environment.jersey().register(ApiListingResource.class);
-		environment.jersey().register(DeclarativeLinkingFeature.class);
-		environment.jersey().register(MongoServerExceptionMapper.class);
+    // Core resources
+    environment.jersey().register(ApiListingResource.class);
+    environment.jersey().register(DeclarativeLinkingFeature.class);
+    environment.jersey().register(MongoServerExceptionMapper.class);
 
-		// Init Swagger
-		ModelConverters.getInstance().addConverter(new ModelConverter() {
+    // Init Swagger
+    ModelConverters.getInstance().addConverter(new ModelConverter() {
 
-			@Override
-			public Property resolveProperty(Type type, ModelConverterContext context, Annotation[] annotations, Iterator<ModelConverter> chain) {			
-				return chain.next().resolveProperty(type, context, annotations, chain);
-			}
+      @Override
+      public Property resolveProperty(Type type, ModelConverterContext context, Annotation[] annotations, Iterator<ModelConverter> chain) {
+        return chain.next().resolveProperty(type, context, annotations, chain);
+      }
 
-			@Override
-			public Model resolve(Type type, ModelConverterContext context, Iterator<ModelConverter> chain) {
+      @Override
+      public Model resolve(Type type, ModelConverterContext context, Iterator<ModelConverter> chain) {
 
-				final JavaType javaType = objectMapper.constructType(type);
-				if (javaType.isTypeOrSubTypeOf(Link.class)) {
-					return new ModelImpl()
-						.name("link")
-						.type("object")
-						.property("rel", new StringProperty())
-						.property("href", new StringProperty(StringProperty.Format.URL));
-				}
-				return chain.next().resolve(type, context, chain);
-			}
-		});
+        final JavaType javaType = objectMapper.constructType(type);
+        if (javaType.isTypeOrSubTypeOf(Link.class)) {
+          return new ModelImpl()
+              .name("link")
+              .type("object")
+              .property("rel", new StringProperty())
+              .property("href", new StringProperty(StringProperty.Format.URL));
+        }
+        return chain.next().resolve(type, context, chain);
+      }
+    });
 
-		final BeanConfig config = new BeanConfig();
-	    config.setTitle("ATG Configuration Management Database");
-	    config.setVersion(getClass().getPackage().getImplementationVersion());
-	    config.setResourcePackage("se.atg.cmdb.ui.rest");
-	    config.setBasePath("services");
-	    config.setScan(true);
-	}
+    final BeanConfig config = new BeanConfig();
+    config.setTitle("ATG Configuration Management Database");
+    config.setVersion(getClass().getPackage().getImplementationVersion());
+    config.setResourcePackage("se.atg.cmdb.ui.rest");
+    config.setBasePath("services");
+    config.setScan(true);
+  }
 }
