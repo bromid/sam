@@ -67,7 +67,7 @@ public class ApplicationResource {
 
 	@GET
 	@RolesAllowed(Roles.READ)
-	@Path("application")
+	@Path("services/application")
 	@ApiOperation("Fetch all applications")
 	public PaginatedCollection<Application> getApplications() {
 		return findApplications(ALL);
@@ -75,7 +75,7 @@ public class ApplicationResource {
 
 	@GET
 	@RolesAllowed(Roles.READ)
-	@Path("application/{id}")
+	@Path("services/application/{id}")
 	@ApiOperation(value="Fetch application", response=Application.class)
 	public Response getApplication(
 		@ApiParam @PathParam("id") String id
@@ -88,7 +88,7 @@ public class ApplicationResource {
 	}
 
 	@PUT
-	@Path("application")
+	@Path("services/application")
 	@RolesAllowed(Roles.EDIT)
 	@ApiOperation(value="Create a new application", code=201, response=ApplicationLink.class)
 	public Response createApplication(
@@ -109,7 +109,7 @@ public class ApplicationResource {
 
 	@PATCH
 	@RolesAllowed(Roles.EDIT)
-	@Path("application/{id}")
+	@Path("services/application/{id}")
 	@ApiOperation(value = "Update application", response=ApplicationLink.class)
 	@ApiImplicitParams(
 		@ApiImplicitParam(name="body", paramType="body", required=true, dataType="se.atg.cmdb.model.Application")

@@ -15,19 +15,18 @@ import io.dropwizard.jersey.errors.ErrorMessage;
 @Provider
 public class MongoServerExceptionMapper implements ExceptionMapper<MongoServerException> {
 
-	static final Logger logger = LoggerFactory.getLogger(MongoServerExceptionMapper.class);
+  private static final Logger logger = LoggerFactory.getLogger(MongoServerExceptionMapper.class);
 
-	@Override
-	public Response toResponse(MongoServerException exc) {
+  @Override
+  public Response toResponse(MongoServerException exc) {
 
-		logger.error("Got mongo server exception", exc);
-		final Status errorCode = Status.INTERNAL_SERVER_ERROR;
-		return Response
-			.status(errorCode)
-			.entity(new ErrorMessage(
-				errorCode.getStatusCode(),
-				"Database exception: " + exc.getCode(),
-				exc.getLocalizedMessage())
-			).build();
-	}
+    logger.error("Got mongo server exception", exc);
+    final Status errorCode = Status.INTERNAL_SERVER_ERROR;
+    return Response.status(errorCode)
+      .entity(new ErrorMessage(
+        errorCode.getStatusCode(),
+        "Database exception: " + exc.getCode(),
+        exc.getLocalizedMessage()
+    )).build();
+  }
 }
