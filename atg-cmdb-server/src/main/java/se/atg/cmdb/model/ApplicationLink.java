@@ -20,64 +20,64 @@ import se.atg.cmdb.ui.rest.Defaults;
 
 public class ApplicationLink {
 
-	public final String id;
-	public final String name;
+  public final String id;
+  public final String name;
 
-	@InjectLink(
-		resource=ApplicationResource.class,
-		method="getApplication",
-		style=Style.ABSOLUTE,
-		rel="self",
-		bindings={@Binding(name="id", value="${instance.id}")}
-	)
-	public Link link;
+  @InjectLink(
+    resource = ApplicationResource.class,
+    method = "getApplication",
+    style = Style.ABSOLUTE,
+    rel = "self",
+    bindings = {@Binding(name = "id", value = "${instance.id}")}
+  )
+  public Link link;
 
-	public ApplicationLink(String id) {
-		this(id,null);
-	}
+  public ApplicationLink(String id) {
+    this(id, null);
+  }
 
-	@JsonCreator
-	public ApplicationLink(
-		@JsonProperty("id") String id,
-		@JsonProperty("name") String name
-	) {
-		this.id = id;
-		this.name = name;
-	}
+  @JsonCreator
+  public ApplicationLink(
+    @JsonProperty("id") String id,
+    @JsonProperty("name") String name
+  ) {
+    this.id = id;
+    this.name = name;
+  }
 
-	public ApplicationLink(Document bson) {
-		this.id = bson.getString("id");
-		this.name = bson.getString("name");
-	}
+  public ApplicationLink(Document bson) {
+    this.id = bson.getString("id");
+    this.name = bson.getString("name");
+  }
 
-	public ApplicationLink(URI baseUri, String id, String name) {
-		this(id, name);
-		this.link = Link.fromMethod(ApplicationResource.class, "getApplication")
-			.baseUri(baseUri)
-			.rel("self")
-			.build(id);
-	}
+  public ApplicationLink(URI baseUri, String id, String name) {
+    this(id, name);
+    this.link = Link.fromMethod(ApplicationResource.class, "getApplication")
+        .baseUri(baseUri)
+        .rel("self")
+        .build(id);
+  }
 
-	public static ApplicationLink fromBson(Document bson) {
-		return new ApplicationLink(bson);
-	}
+  public static ApplicationLink fromBson(Document bson) {
+    return new ApplicationLink(bson);
+  }
 
-	public String getId() {
-		return id;
-	}
+  public String getId() {
+    return id;
+  }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-	}
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
+  }
 
-	@Override
-	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
+  }
 }
