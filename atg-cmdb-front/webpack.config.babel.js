@@ -2,12 +2,15 @@ import path from 'path';
 
 const srcPath = path.join(__dirname, 'src');
 
+var publicPath = "/static/";
+
 export default {
     devtool: 'eval',
     entry: './src/index',
     output: {
         path: path.join(__dirname, 'dist/static'),
         filename: 'bundle.js',
+        publicPath: publicPath
     },
     module: {
         loaders: [
@@ -22,7 +25,7 @@ export default {
             }, {
                 test: /\.(png|jpg)$/,
                 include: srcPath,
-                loader: 'url?name=/static/img/[name]-[hash].[ext]&limit=25000',
+                loader: 'url?name=img/[name]-[hash].[ext]&limit=25000',
             },
         ],
     },

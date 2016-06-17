@@ -2,9 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/groupActions';
 import { List, ListItem } from 'material-ui/List';
-import LinearProgress from 'material-ui/LinearProgress';
 import Subheader from 'material-ui/Subheader';
 import Badge from 'material-ui/Badge';
+import LoadingIndicator from './LoadingIndicator';
 
 function CountBadge({ children, title, primary, secondary }) {
     const style = { padding: '12px' };
@@ -68,7 +68,7 @@ const GroupsContainer = React.createClass({
 
     render() {
         const { isLoading, groups } = this.props;
-        if (isLoading) return <LinearProgress />;
+        if (isLoading) return <LoadingIndicator />;
 
         return (
             <Groups groups={groups} isLoading={isLoading} />
