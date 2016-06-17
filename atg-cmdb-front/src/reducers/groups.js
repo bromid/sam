@@ -12,6 +12,7 @@ export function groupsIsLoading(state = false, action) {
 }
 
 export function groups(state = {}, action) {
+    console.log(action);
     switch (action.type) {
         case Constants.FETCH_GROUP_RESPONSE:
             if (action.error) return {};

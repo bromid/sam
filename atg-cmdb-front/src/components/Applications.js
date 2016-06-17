@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import * as Actions from '../actions/applicationActions';
 import { List, ListItem } from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
-import LinearProgress from 'material-ui/LinearProgress';
 import Attributes from './Attributes';
+import LoadingIndicator from "./LoadingIndicator";
 
 function Application({ application: { name, group, attributes } }) {
     const content = (
@@ -41,7 +41,7 @@ const ApplicationsContainer = React.createClass({
 
     render() {
         const { isLoading, applications } = this.props;
-        if (isLoading) return <LinearProgress />;
+        if (isLoading) return <LoadingIndicator />;
 
         return (
             <Applications applications={applications} isLoading={isLoading} />
