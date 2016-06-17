@@ -37,7 +37,7 @@ public class SearchResource {
 	}
 
 	@GET
-	@Path("search")
+	@Path("services/search")
 	public SearchResult getAssets(
 		@ApiParam(value="Sökparameter", required=true) @QueryParam("q") String query
 	) {

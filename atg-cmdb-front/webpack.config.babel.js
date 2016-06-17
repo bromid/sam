@@ -22,7 +22,7 @@ export default {
             }, {
                 test: /\.(png|jpg)$/,
                 include: srcPath,
-                loader: 'url?name=img/[name]-[hash].[ext]&limit=25000',
+                loader: 'url?name=/static/img/[name]-[hash].[ext]&limit=25000',
             },
         ],
     },

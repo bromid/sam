@@ -47,7 +47,7 @@ public class AssetResource {
 	}
 
 	@GET
-	@Path("asset")
+	@Path("services/asset")
 	@RolesAllowed(Roles.READ)
 	@ApiOperation("Fetch all assets")
 	public PaginatedCollection<Asset> getAssets() {
@@ -55,7 +55,7 @@ public class AssetResource {
 	}
 
 	@GET
-	@Path("asset/{id}")
+	@Path("services/asset/{id}")
 	@RolesAllowed(Roles.READ)
 	@ApiOperation(value = "Fetch an asset", response=Asset.class)
 	public Response getAsset(

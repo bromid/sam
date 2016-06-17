@@ -69,7 +69,7 @@ public class ServerResource {
 	}
 
 	@GET
-	@Path("server")
+	@Path("services/server")
 	@RolesAllowed(Roles.READ)
 	@ApiOperation("Fetch all servers")
 	public PaginatedCollection<Server> getServers() {
@@ -77,7 +77,7 @@ public class ServerResource {
 	}
 
 	@GET
-	@Path("server/{environment}")
+	@Path("services/server/{environment}")
 	@RolesAllowed(Roles.READ)
 	@ApiOperation("Fetch all servers in an environment")
 	public PaginatedCollection<Server> getServersInEnvironment(
@@ -89,7 +89,7 @@ public class ServerResource {
 	}
 
 	@GET
-	@Path("server/{environment}/{hostname}")
+	@Path("services/server/{environment}/{hostname}")
 	@RolesAllowed(Roles.READ)
 	@ApiOperation(value = "Fetch a server", response=Server.class)
 	public Response getServer(
@@ -107,7 +107,7 @@ public class ServerResource {
 	}
 
 	@PUT
-	@Path("server")
+	@Path("services/server")
 	@RolesAllowed(Roles.EDIT)
 	@ApiOperation(value = "Create a new server", code=201, response=ServerLink.class)
 	public Response createServer(
@@ -128,7 +128,7 @@ public class ServerResource {
 
 	@PATCH
 	@RolesAllowed(Roles.EDIT)
-	@Path("server/{environment}/{hostname}")
+	@Path("services/server/{environment}/{hostname}")
 	@ApiOperation(value = "Update server", response=ServerLink.class)
 	@ApiImplicitParams(
 		@ApiImplicitParam(name="body", paramType="body", required=true, dataType="se.atg.cmdb.model.Server")

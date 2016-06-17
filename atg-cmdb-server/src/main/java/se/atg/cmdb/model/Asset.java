@@ -21,114 +21,125 @@ import se.atg.cmdb.ui.rest.Defaults;
 @JsonPropertyOrder({ "id", "name", "description", "os", "network", "meta", "attributes" })
 public class Asset extends Base {
 
-	@Size(min = 1, max = 50)
-	public String id;
-	@Size(min = 1, max = 50)
-	public String name;
-	@Valid
-	public OS os;
-	@Valid
-	public Network network;
+  @Size(min = 1, max = 50)
+  public String id;
+  @Size(min = 1, max = 50)
+  public String name;
+  @Valid
+  public OS os;
+  @Valid
+  public Network network;
 
-	public Asset() {}
-	public Asset(Document bson) {
-		super(bson);
+  public Asset() {
+  }
 
-		this.id = bson.getString("id");
-		this.name = bson.getString("name");
-		this.os = Mapper.mapObject(bson, "os", OS::fromBson);
-		this.network = Mapper.mapObject(bson, "network", Network::fromBson);
-	}
+  public Asset(Document bson) {
+    super(bson);
 
-	public String getId() {
-		return id;
-	}
+    this.id = bson.getString("id");
+    this.name = bson.getString("name");
+    this.os = Mapper.mapObject(bson, "os", OS::fromBson);
+    this.network = Mapper.mapObject(bson, "network", Network::fromBson);
+  }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-	}
+  public String getId() {
+    return id;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
-	}
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+  }
 
-	@Override
-	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
+  }
 
-	public static class OS {
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
+  }
 
-		@NotNull(groups=Create.class) @Size(min = 1, groups=Update.class)
-		public String name;
-		@NotNull(groups=Create.class) @Size(min = 1, groups=Update.class)
-		public String type;
-		public String version;
-		public Map<String, Object> attributes;
+  public static class OS {
 
-		public OS() {}
-		public OS(Document bson) {
-			this.name = bson.getString("name");
-			this.type = bson.getString("type");
-			this.version = bson.getString("version");
-			this.attributes = Mapper.mapAttributes(bson);
-		}
+    @NotNull(groups = Create.class)
+    @Size(min = 1, groups = Update.class)
+    public String name;
+    @NotNull(groups = Create.class)
+    @Size(min = 1, groups = Update.class)
+    public String type;
+    public String version;
+    public Map<String, Object> attributes;
 
-		public static OS fromBson(Document bson) {
-			return new OS(bson);
-		}
+    public OS() {
+    }
 
-		@Override
-		public String toString() {
-			return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-		}
+    public OS(Document bson) {
+      this.name = bson.getString("name");
+      this.type = bson.getString("type");
+      this.version = bson.getString("version");
+      this.attributes = Mapper.mapAttributes(bson);
+    }
 
-		@Override
-		public boolean equals(Object obj) {
-			return EqualsBuilder.reflectionEquals(this, obj);
-		}
+    public static OS fromBson(Document bson) {
+      return new OS(bson);
+    }
 
-		@Override
-		public int hashCode() {
-			return HashCodeBuilder.reflectionHashCode(this);
-		}
-	}
+    @Override
+    public String toString() {
+      return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+    }
 
-	public static class Network {
+    @Override
+    public boolean equals(Object obj) {
+      return EqualsBuilder.reflectionEquals(this, obj);
+    }
 
-		public String ipv4Address;
-		public String ipv6Address;
-		public Map<String, Object> attributes;
+    @Override
+    public int hashCode() {
+      return HashCodeBuilder.reflectionHashCode(this);
+    }
+  }
 
-		public Network() {}
-		public Network(Document bson) {
-			this.ipv4Address = bson.getString("ipv4Address");
-			this.ipv6Address = bson.getString("ipv6Address");
-			this.attributes = Mapper.mapAttributes(bson);
-		}
+  public static class Network {
 
-		public static Network fromBson(Document bson) {
-			return new Network(bson);
-		}
+    public String ipv4Address;
+    public String ipv6Address;
+    public Map<String, Object> attributes;
 
-		@Override
-		public String toString() {
-			return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-		}
+    public Network() {
+    }
 
-		@Override
-		public boolean equals(Object obj) {
-			return EqualsBuilder.reflectionEquals(this, obj);
-		}
+    public Network(Document bson) {
+      this.ipv4Address = bson.getString("ipv4Address");
+      this.ipv6Address = bson.getString("ipv6Address");
+      this.attributes = Mapper.mapAttributes(bson);
+    }
 
-		@Override
-		public int hashCode() {
-			return HashCodeBuilder.reflectionHashCode(this);
-		}
-	}
+    public static Network fromBson(Document bson) {
+      return new Network(bson);
+    }
 
-	public interface Create extends Update {}
-	public interface Update extends Base.Validation {}
+    @Override
+    public String toString() {
+      return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+      return HashCodeBuilder.reflectionHashCode(this);
+    }
+  }
+
+  public interface Create extends Update {
+  }
+
+  public interface Update extends Base.Validation {
+  }
 }

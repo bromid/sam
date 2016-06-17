@@ -36,10 +36,12 @@ import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthorizer;
 import se.atg.cmdb.ui.dropwizard.db.MongoDBHealthCheck;
+import se.atg.cmdb.ui.dropwizard.render.HtmlViewRenderer;
 import se.atg.cmdb.ui.dropwizard.render.MarkdownViewRenderer;
 import se.atg.cmdb.ui.rest.ApplicationResource;
 import se.atg.cmdb.ui.rest.AssetResource;
 import se.atg.cmdb.ui.rest.GroupResource;
+import se.atg.cmdb.ui.rest.IndexResource;
 import se.atg.cmdb.ui.rest.InfoResource;
 import se.atg.cmdb.ui.rest.SearchResource;
 import se.atg.cmdb.ui.rest.ServerResource;
@@ -53,8 +55,9 @@ public class Main extends Application<CMDBConfiguration> {
 
   @Override
   public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
-    bootstrap.addBundle(new ViewBundle<CMDBConfiguration>(Arrays.asList(new MarkdownViewRenderer())));
-    bootstrap.addBundle(new AssetsBundle("/static", "/", "index.html"));
+    bootstrap.addBundle(new ViewBundle<CMDBConfiguration>(Arrays.asList(new MarkdownViewRenderer(), new HtmlViewRenderer())));
+    bootstrap.addBundle(new AssetsBundle("/static", "/static", "index.html", "static"));
+    bootstrap.addBundle(new AssetsBundle("/docs", "/docs", "index.html", "docs"));
   }
 
   @Override
@@ -69,6 +72,7 @@ public class Main extends Application<CMDBConfiguration> {
 
     // REST Resources
     environment.jersey().register(new InfoResource());
+    environment.jersey().register(new IndexResource());
     environment.jersey().register(new ServerResource(database, objectMapper));
     environment.jersey().register(new ApplicationResource(database, objectMapper));
     environment.jersey().register(new GroupResource(database, objectMapper));
@@ -116,7 +120,6 @@ public class Main extends Application<CMDBConfiguration> {
     config.setTitle("ATG Configuration Management Database");
     config.setVersion(getClass().getPackage().getImplementationVersion());
     config.setResourcePackage("se.atg.cmdb.ui.rest");
-    config.setBasePath("services");
     config.setScan(true);
   }
 }

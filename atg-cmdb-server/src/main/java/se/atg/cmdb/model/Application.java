@@ -15,44 +15,51 @@ import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.ui.rest.Defaults;
 
 @ApiModel(description = "An application is running on a server and is identified by an id. All applications belongs to one or more groups and needs to be versioned")
-@JsonPropertyOrder({"id", "name", "version", "group", "meta"})
+@JsonPropertyOrder({ "id", "name", "version", "group", "meta" })
 public class Application extends Base {
 
-	@NotNull @Size(min = 1, max = 50)
-	public String id;
-	@NotNull @Size(min = 1, max = 50)
-	public String name;
-	public GroupLink group;
+  @NotNull
+  @Size(min = 1, max = 50)
+  public String id;
+  @NotNull
+  @Size(min = 1, max = 50)
+  public String name;
+  public GroupLink group;
 
-	public Application() {}
-	public Application(Document bson) {
-		super(bson);
+  public Application() {
+  }
 
-		this.id = bson.getString("id");
-		this.name = bson.getString("name");
-		this.group = Mapper.mapObject(bson, "group", GroupLink::fromId);
-		this.attributes = Mapper.mapAttributes(bson);
-	}
+  public Application(Document bson) {
+    super(bson);
 
-	public String getId() {
-		return id;
-	}
+    this.id = bson.getString("id");
+    this.name = bson.getString("name");
+    this.group = Mapper.mapObject(bson, "group", GroupLink::fromId);
+    this.attributes = Mapper.mapAttributes(bson);
+  }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-	}
+  public String getId() {
+    return id;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
-	}
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+  }
 
-	@Override
-	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
+  }
 
-	public interface Create extends Update {}
-	public interface Update extends Base.Validation {}
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
+  }
+
+  public interface Create extends Update {
+  }
+
+  public interface Update extends Base.Validation {
+  }
 }

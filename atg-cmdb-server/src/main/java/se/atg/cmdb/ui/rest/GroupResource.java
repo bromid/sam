@@ -54,7 +54,7 @@ public class GroupResource {
 	}
 
 	@GET
-	@Path("group")
+	@Path("services/group")
 	@ApiOperation("Fetch all groups")
 	public PaginatedCollection<Group> getGroups(
 		@ApiParam("A comma separated list of tags") @QueryParam("tags") String tags,
@@ -72,7 +72,7 @@ public class GroupResource {
 	}
 
 	@GET
-	@Path("group/{id}")
+	@Path("services/group/{id}")
 	@ApiOperation("Fetch group")
 	public Group getGroup(
 		@ApiParam("id") @PathParam("id") String id
@@ -86,7 +86,7 @@ public class GroupResource {
 	}
 
 	@GET
-	@Path("group/tag")
+	@Path("services/group/tag")
 	@ApiOperation("Fetch all group tags")
 	public PaginatedCollection<Tag> getGroupTags() {
 		return getTags();
