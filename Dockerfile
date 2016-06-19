@@ -53,4 +53,4 @@ ADD atg-cmdb-server/default.yml /opt/default.yml
 
 # Expose ports.
 EXPOSE 8080
-CMD /bin/mongod -f /etc/mongod.conf && java -jar /opt/cmdb.jar server /opt/default.yml && tail -f /var/log/mongodb/mongod.log
+CMD /bin/mongod -f /etc/mongod.conf && java -jar /opt/cmdb.jar server /opt/default.yml 
