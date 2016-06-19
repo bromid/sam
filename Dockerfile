@@ -45,8 +45,14 @@ RUN yum clean all
 RUN chown -R mongod:mongod /var/lib/mongo
 
 # Copy config mongodb
-ADD dockerstuff/mongod.conf /etc/mongod.conf
+ADD dockerconf/mongod.conf /etc/mongod.conf
+
+# Cmdb jar file
+ADD atg-cmdb-server/target/atg-cmdb-server-1.0-SNAPSHOT.jar /opt/cmdb.jar
+ADD atg-cmdb-server/default.yml /opt/default.yml
 
 # Expose ports.
 EXPOSE 27017
 CMD /bin/mongod -f /etc/mongod.conf && tail -f /var/log/mongodb/mongod.log
+EXPOSE 8080
+CMD java -jar /opt/cmdb.jar server /opt/default.yml 
