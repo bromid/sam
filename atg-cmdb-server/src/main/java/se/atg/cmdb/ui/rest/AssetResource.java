@@ -1,13 +1,19 @@
 package se.atg.cmdb.ui.rest;
 
+import java.io.IOException;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriInfo;
 
 import org.bson.BsonDocument;
 import org.bson.Document;
@@ -15,6 +21,8 @@ import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
@@ -25,9 +33,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
+import se.atg.cmdb.helpers.JSONHelper;
 import se.atg.cmdb.helpers.RESTHelper;
 import se.atg.cmdb.model.Asset;
+import se.atg.cmdb.model.AssetLink;
 import se.atg.cmdb.model.PaginatedCollection;
+import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
 @Path("/")
@@ -67,6 +78,27 @@ public class AssetResource {
 			.tag(RESTHelper.getEntityTag(asset).orElse(null))
 			.build();
 	}
+	
+	@PUT
+	@Path("services/asset")
+	@RolesAllowed(Roles.EDIT)
+	@ApiOperation(value="Create a new asset", code=201, response=AssetLink.class)
+	public Response createAsset(
+			@ApiParam("Asset") Asset asset,
+			@Context UriInfo uriInfo,
+			@Context SecurityContext securityContext
+	) throws JsonParseException, JsonMappingException, IOException{
+		logger.info("Create asset: {}", asset);
+
+		RESTHelper.validate(asset, Asset.Create.class);
+
+		final User user = RESTHelper.getUser(securityContext);
+		final Document bson = JSONHelper.addMetaForCreate(asset, user.name, objectMapper);
+		database.getCollection(Collections.ASSETS).insertOne(bson);
+
+		return linkResponse(Status.CREATED, bson, uriInfo);
+		
+	}
 
 	private PaginatedCollection<Asset> findAssets(Bson filter) {
 		
@@ -88,5 +120,15 @@ public class AssetResource {
 			throw new WebApplicationException(Status.NOT_FOUND);
 		}
 		return bson;
+	}
+	
+	private Response linkResponse(Status status, Document bson, UriInfo uriInfo) {
+		final AssetLink response = new AssetLink(uriInfo.getBaseUri(), bson.getString("id"), bson.getString("name"));
+		return Response
+			.status(status)
+			.location(response.link.getUri())
+			.entity(response)
+			.tag(RESTHelper.getEntityTag(bson).orElse(null))
+			.build();
 	}
 }
