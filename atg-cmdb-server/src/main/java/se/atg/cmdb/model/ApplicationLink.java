@@ -11,6 +11,7 @@ import org.bson.Document;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLink.Style;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,6 +21,7 @@ import se.atg.cmdb.ui.rest.Defaults;
 
 public class ApplicationLink {
 
+  @NotEmpty
   public final String id;
   public final String name;
 
@@ -53,9 +55,9 @@ public class ApplicationLink {
   public ApplicationLink(URI baseUri, String id, String name) {
     this(id, name);
     this.link = Link.fromMethod(ApplicationResource.class, "getApplication")
-        .baseUri(baseUri)
-        .rel("self")
-        .build(id);
+      .baseUri(baseUri)
+      .rel("self")
+      .build(id);
   }
 
   public static ApplicationLink fromBson(Document bson) {
