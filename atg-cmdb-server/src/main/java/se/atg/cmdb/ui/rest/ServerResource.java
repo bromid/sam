@@ -33,6 +33,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.UnwindOptions;
 
@@ -44,8 +45,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.helpers.MongoHelper;
 import se.atg.cmdb.helpers.RESTHelper;
+import se.atg.cmdb.model.Deployment;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
 import se.atg.cmdb.model.ServerLink;
@@ -57,163 +60,238 @@ import se.atg.cmdb.ui.dropwizard.auth.Roles;
 @Produces(Defaults.MEDIA_TYPE_JSON)
 public class ServerResource {
 
-	private static final Logger logger = LoggerFactory.getLogger(ServerResource.class);
-	private static final Bson ALL = new BsonDocument();
+  private static final Logger logger = LoggerFactory.getLogger(ServerResource.class);
+  private static final Bson ALL = new BsonDocument();
 
-	private final MongoDatabase database;
-	private final ObjectMapper objectMapper;
+  private final MongoDatabase database;
+  private final ObjectMapper objectMapper;
 
-	public ServerResource(MongoDatabase database, ObjectMapper objectMapper) {
-		this.database = database;
-		this.objectMapper = objectMapper;
-	}
+  public ServerResource(MongoDatabase database, ObjectMapper objectMapper) {
+    this.database = database;
+    this.objectMapper = objectMapper;
+  }
 
-	@GET
-	@Path("services/server")
-	@RolesAllowed(Roles.READ)
-	@ApiOperation("Fetch all servers")
-	public PaginatedCollection<Server> getServers() {
-		return findServers(ALL);
-	}
+  @GET
+  @Path("services/server")
+  @RolesAllowed(Roles.READ)
+  @ApiOperation("Fetch all servers")
+  public PaginatedCollection<Server> getServers() {
+    return findServers(ALL);
+  }
 
-	@GET
-	@Path("services/server/{environment}")
-	@RolesAllowed(Roles.READ)
-	@ApiOperation("Fetch all servers in an environment")
-	public PaginatedCollection<Server> getServersInEnvironment(
-		@ApiParam("Test environment") @PathParam("environment") String environment
-	) {
-		return findServers(
-			Filters.eq("environment", environment)
-		);
-	}
+  @GET
+  @Path("services/server/{environment}")
+  @RolesAllowed(Roles.READ)
+  @ApiOperation("Fetch all servers in an environment")
+  public PaginatedCollection<Server> getServersInEnvironment(
+    @ApiParam("Test environment") @PathParam("environment") String environment
+  ) {
+    return findServers(
+      Filters.eq("environment", environment)
+    );
+  }
 
-	@GET
-	@Path("services/server/{environment}/{hostname}")
-	@RolesAllowed(Roles.READ)
-	@ApiOperation(value = "Fetch a server", response=Server.class)
-	public Response getServer(
-		@ApiParam("Server hostname") @PathParam("hostname") String hostname,
-		@ApiParam("Test environment") @PathParam("environment") String environment
-	) {
-		final Document server = findServer(Filters.and(
-			Filters.eq("environment", environment),
-			Filters.eq("hostname", hostname)
-		));
-		return Response
-			.ok(new Server(server))
-			.tag(RESTHelper.getEntityTag(server).orElse(null))
-			.build();
-	}
+  @GET
+  @Path("services/server/{environment}/{hostname}")
+  @RolesAllowed(Roles.READ)
+  @ApiOperation(value = "Fetch a server", response = Server.class)
+  public Response getServer(
+    @ApiParam("Server hostname") @PathParam("hostname") String hostname,
+    @ApiParam("Test environment") @PathParam("environment") String environment
+  ) {
+    final Document server = findServer(Filters.and(
+      Filters.eq("environment", environment),
+      Filters.eq("hostname", hostname)
+    ));
+    return Response
+      .ok(new Server(server))
+      .tag(RESTHelper.getEntityTag(server).orElse(null))
+      .build();
+  }
 
-	@PUT
-	@Path("services/server")
-	@RolesAllowed(Roles.EDIT)
-	@ApiOperation(value = "Create a new server", code=201, response=ServerLink.class)
-	public Response createServer(
-		@ApiParam("Server") Server server,
-		@Context UriInfo uriInfo,
-		@Context SecurityContext securityContext
-	) throws JsonParseException, JsonMappingException, IOException {
-		logger.info("Create server: {}", server);
+  @GET
+  @Path("services/server/{environment}/{hostname}/deployment")
+  @RolesAllowed(Roles.READ)
+  @ApiOperation(value = "Fetch all deployed applications on the server", response = Server.class)
+  public PaginatedCollection<Deployment> getServerDeployments(
+    @ApiParam("Server hostname") @PathParam("hostname") String hostname,
+    @ApiParam("Test environment") @PathParam("environment") String environment
+  ) {
+    final Document document = findServer(Filters.and(
+      Filters.eq("environment", environment),
+      Filters.eq("hostname", hostname)
+    ));
+    final Server server = new Server(document);
+    return RESTHelper.paginatedList(server.deployments);
+  }
 
-		RESTHelper.validate(server, Server.Create.class);
+  @GET
+  @Path("services/server/{environment}/{hostname}/deployment/{applicationId}")
+  @RolesAllowed(Roles.READ)
+  @ApiOperation(value = "Get a deployed application on the server", response=Deployment.class)
+  public Deployment getServerDeployment(
+    @ApiParam("Server hostname") @PathParam("hostname") String hostname,
+    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam("Application id") @PathParam("applicationId") String applicationId
+  ) {
+    final Document document = database.getCollection(Collections.SERVERS)
+      .find(Filters.and(
+        Filters.eq("environment", environment),
+        Filters.eq("hostname", hostname)
+      )).projection(Projections.elemMatch("deployments",
+        Filters.eq("applicationId", applicationId)
+      )).first();
+    if (document == null) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
 
-		final User user = RESTHelper.getUser(securityContext);
-		final Document bson = JSONHelper.addMetaForCreate(server, user.name, objectMapper);
-		database.getCollection(Collections.SERVERS).insertOne(bson);
+    final Deployment deployment = Mapper.mapObject(document, "deployments", Deployment::fromDeploymentBson);
+    if (deployment == null) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
+    return deployment;
+  }
 
-		return linkResponse(Status.CREATED, bson, uriInfo);
-	}
+  @PUT
+  @Path("services/server/{environment}/{hostname}/deployment")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation(value = "Add a deployed applications to the server", response = ServerLink.class)
+  public Response addDeployment(
+    @ApiParam("Server hostname") @PathParam("hostname") String hostname,
+    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam("Deployment") Deployment deployment,
+    @Context UriInfo uriInfo,
+    @Context Request request,
+    @Context SecurityContext securityContext
+  ) {
+    logger.info("Add deployment: {}", deployment);
+    RESTHelper.validate(deployment);
 
-	@PATCH
-	@RolesAllowed(Roles.EDIT)
-	@Path("services/server/{environment}/{hostname}")
-	@ApiOperation(value = "Update server", response=ServerLink.class)
-	@ApiImplicitParams(
-		@ApiImplicitParam(name="body", paramType="body", required=true, dataType="se.atg.cmdb.model.Server")
-	)
-	public Response updateServer(
-		@ApiParam("Server hostname") @PathParam("hostname") String hostname,
-		@ApiParam("Test environment") @PathParam("environment") String environment,
-		@ApiParam(hidden=true) JsonNode serverJson,
-		@Context UriInfo uriInfo,
-		@Context Request request,
-		@Context SecurityContext securityContext
-	) throws IOException {
+    final Document existing = getServerForUpdate(hostname, environment);
+    final Optional<String> hash = RESTHelper.verifyHash(existing, request);
 
-		final Document existing = database
-			.getCollection(Collections.SERVERS)
-			.find(Filters.and(
-					Filters.eq("environment", environment),
-					Filters.eq("hostname", hostname)
-			)).first();	
-		if (existing == null) {
-			throw new WebApplicationException(Status.NOT_FOUND);
-		}
+    final Document update = JSONHelper.entityToBson(deployment, objectMapper);
+    Mapper.upsertList(existing, update, "deployments", Deployment::sameApplicationId);
 
-		final Server server = objectMapper.treeToValue(serverJson, Server.class);
-		RESTHelper.validate(server, Server.Update.class);
+    final User user = RESTHelper.getUser(securityContext);
+    JSONHelper.updateMetaForUpdate(existing, hash, user.name);
 
-		final Optional<String> hash = RESTHelper.verifyHash(existing, request);
-		JSONHelper.merge(existing, serverJson, objectMapper);
+    MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
+    return serverLinkResponse(Status.OK, existing, uriInfo);
+  }
 
-		final User user = RESTHelper.getUser(securityContext);
-		JSONHelper.updateMetaForUpdate(existing, hash, user.name);
+  @PUT
+  @Path("services/server")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation(value = "Create a new server", code = 201, response = ServerLink.class)
+  public Response createServer(
+    @ApiParam("Server") Server server,
+    @Context UriInfo uriInfo,
+    @Context SecurityContext securityContext
+  ) throws JsonParseException, JsonMappingException, IOException {
+    logger.info("Create server: {}", server);
 
-		MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
-		return linkResponse(Status.OK, existing, uriInfo);
-	}
+    RESTHelper.validate(server, Server.Create.class);
 
-	private PaginatedCollection<Server> findServers(Bson filter) {
-		return RESTHelper.paginatedList(
-			database.getCollection(Collections.SERVERS)
-				.aggregate(getServerQuery(filter))
-				.map(Server::new)
-		);
-	}
+    final User user = RESTHelper.getUser(securityContext);
+    final Document bson = JSONHelper.addMetaForCreate(server, user.name, objectMapper);
 
-	private Document findServer(Bson filter) {
-		final Document bson = database.getCollection(Collections.SERVERS)
-			.aggregate(getServerQuery(filter))
-			.first();
-		if (bson == null) {
-			throw new WebApplicationException(Status.NOT_FOUND);
-		}
-		return bson;
-	}
+    database.getCollection(Collections.SERVERS).insertOne(bson);
+    return serverLinkResponse(Status.CREATED, bson, uriInfo);
+  }
 
-	private static List<Bson> getServerQuery(Bson filter) {
+  @PATCH
+  @RolesAllowed(Roles.EDIT)
+  @Path("services/server/{environment}/{hostname}")
+  @ApiOperation(value = "Update server", response = ServerLink.class)
+  @ApiImplicitParams(@ApiImplicitParam(name = "body", paramType = "body", required = true, dataType = "se.atg.cmdb.model.Server"))
+  public Response updateServer(
+    @ApiParam("Server hostname") @PathParam("hostname") String hostname,
+    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam(hidden = true) JsonNode serverJson,
+    @Context UriInfo uriInfo,
+    @Context Request request,
+    @Context SecurityContext securityContext
+  ) throws IOException {
 
-		final List<Bson> pipeline = new ArrayList<>(6);
-		if (filter != ALL) {
-			pipeline.add(Aggregates.match(filter));
-		}
-		pipeline.add(Aggregates.unwind("$deployments", new UnwindOptions().preserveNullAndEmptyArrays(true)));
-		pipeline.add(Aggregates.lookup(Collections.APPLICATIONS, "deployments.applicationId", "id", "applications"));
-		pipeline.add(Aggregates.unwind("$applications", new UnwindOptions().preserveNullAndEmptyArrays(true)));
-		pipeline.add(Aggregates.group(
-			new Document().append("hostname", "$hostname").append("environment", "$environment"),
-			new BsonField("fqdn", new Document("$first", "$fqdn")),
-			new BsonField("description", new Document("$first", "$description")),
-			new BsonField("os", new Document("$first", "$os")),
-			new BsonField("network", new Document("$first", "$network")),
-			new BsonField("meta", new Document("$first", "$meta")),
-			new BsonField("attributes", new Document("$first", "$attributes")),
-			new BsonField("applications", new Document("$push", "$applications")),
-			new BsonField("deployments", new Document("$push", "$deployments"))
-		));
-		pipeline.add(Aggregates.sort(Sorts.ascending("_id")));
-		return pipeline;
-	}
+    final Server server = objectMapper.treeToValue(serverJson, Server.class);
+    logger.info("Update server: {}", server);
+    RESTHelper.validate(server, Server.Update.class);
 
-	private Response linkResponse(Status status, Document bson, UriInfo uriInfo) {
-		final ServerLink response = ServerLink.buildFromURI(uriInfo.getBaseUri(), bson.getString("hostname"), bson.getString("environment"));
-		return Response
-			.status(status)
-			.location(response.link.getUri())
-			.entity(response)
-			.tag(RESTHelper.getEntityTag(bson).orElse(null))
-			.build();
-	}
+    final Document existing = getServerForUpdate(hostname, environment);
+    final Optional<String> hash = RESTHelper.verifyHash(existing, request);
+    JSONHelper.merge(existing, serverJson, objectMapper);
+
+    final User user = RESTHelper.getUser(securityContext);
+    JSONHelper.updateMetaForUpdate(existing, hash, user.name);
+
+    MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
+    return serverLinkResponse(Status.OK, existing, uriInfo);
+  }
+
+  private Document getServerForUpdate(String hostname, String environment) {
+
+    final Document bson = database.getCollection(Collections.SERVERS)
+      .find(Filters.and(
+        Filters.eq("environment", environment),
+        Filters.eq("hostname", hostname))
+      ).first();
+    if (bson == null) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
+    return bson;
+  }
+
+  private Document findServer(Bson filter) {
+
+    final Document bson = database.getCollection(Collections.SERVERS)
+      .aggregate(getServerQuery(filter))
+      .first();
+    if (bson == null) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
+    return bson;
+  }
+
+  private PaginatedCollection<Server> findServers(Bson filter) {
+    return RESTHelper.paginatedList(database
+      .getCollection(Collections.SERVERS)
+      .aggregate(getServerQuery(filter))
+      .map(Server::new)
+    );
+  }
+
+  private static List<Bson> getServerQuery(Bson filter) {
+
+    final List<Bson> pipeline = new ArrayList<>(6);
+    if (filter != ALL) {
+      pipeline.add(Aggregates.match(filter));
+    }
+    pipeline.add(Aggregates.unwind("$deployments", new UnwindOptions().preserveNullAndEmptyArrays(true)));
+    pipeline.add(Aggregates.lookup(Collections.APPLICATIONS, "deployments.applicationId", "id", "applications"));
+    pipeline.add(Aggregates.unwind("$applications", new UnwindOptions().preserveNullAndEmptyArrays(true)));
+    pipeline.add(Aggregates.group(
+      new Document().append("hostname", "$hostname").append("environment", "$environment"),
+      new BsonField("fqdn", new Document("$first", "$fqdn")),
+      new BsonField("description", new Document("$first", "$description")),
+      new BsonField("os", new Document("$first", "$os")),
+      new BsonField("network", new Document("$first", "$network")),
+      new BsonField("meta", new Document("$first", "$meta")),
+      new BsonField("attributes", new Document("$first", "$attributes")),
+      new BsonField("applications", new Document("$push", "$applications")),
+      new BsonField("deployments", new Document("$push", "$deployments"))));
+    pipeline.add(Aggregates.sort(Sorts.ascending("_id")));
+    return pipeline;
+  }
+
+  private Response serverLinkResponse(Status status, Document bson, UriInfo uriInfo) {
+
+    final ServerLink response = ServerLink.buildFromURI(uriInfo.getBaseUri(), bson.getString("hostname"), bson.getString("environment"));
+    return Response
+      .status(status)
+      .location(response.link.getUri())
+      .entity(response)
+      .tag(RESTHelper.getEntityTag(bson).orElse(null))
+      .build();
+  }
 }

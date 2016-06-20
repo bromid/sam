@@ -27,13 +27,14 @@ public class Main extends Application<CMDBConfiguration> {
   @Override
   public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
     bootstrap.addCommand(new TestCommand(this,
-        Optional.empty(),
-        SmokeTest.class,
-        ServerIntegrationTest.class,
-        GroupIntegrationTest.class,
-        ApplicationIntegrationTest.class,
-        AssetIntegrationTest.class,
-        SearchIntegrationTest.class
+      Optional.empty(),
+      //testDescription(ServerIntegrationTest.class, "addServerDeployment"),
+      SmokeTest.class,
+      ServerIntegrationTest.class,
+      GroupIntegrationTest.class,
+      ApplicationIntegrationTest.class,
+      AssetIntegrationTest.class,
+      SearchIntegrationTest.class
     ));
   }
 

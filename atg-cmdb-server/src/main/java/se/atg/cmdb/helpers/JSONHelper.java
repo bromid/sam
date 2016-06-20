@@ -31,24 +31,30 @@ public abstract class JSONHelper {
 
   static final Logger logger = LoggerFactory.getLogger(JSONHelper.class);
 
-  public static boolean updateMetaForUpdate(Document bson, Optional<String> hash, String updatedBy) {
+  public static UpdateMetaResult updateMetaForUpdate(Document bson, Optional<String> hash, String updatedBy) {
 
-    final Document meta = (Document) bson.remove("meta");
+    final Document updatedMeta = (Document) bson.remove("meta");
 
     final Date now = Date.from(Instant.now());
-    meta.put("refreshed", now);
-    meta.put("refreshedBy", updatedBy);
+    updatedMeta.put("refreshed", now);
+    updatedMeta.put("refreshedBy", updatedBy);
 
     final String newHash = DigestUtils.sha1Hex(bson.toJson());
     if (hash.isPresent() && hash.get().equals(newHash)) {
-      bson.put("meta", meta);
-      return false;
+      bson.put("meta", updatedMeta);
+      return new UpdateMetaResult() {{
+        updated = false;
+        meta = updatedMeta;
+      }};
     } else {
-      meta.put("hash", newHash);
-      meta.put("updated", now);
-      meta.put("updatedBy", updatedBy);
-      bson.put("meta", meta);
-      return true;
+      updatedMeta.put("hash", newHash);
+      updatedMeta.put("updated", now);
+      updatedMeta.put("updatedBy", updatedBy);
+      bson.put("meta", updatedMeta);
+      return new UpdateMetaResult() {{
+        updated = true;
+        meta = updatedMeta;
+      }};
     }
   }
 
@@ -159,5 +165,10 @@ public abstract class JSONHelper {
       }
     });
     return objectMapper;
+  }
+
+  public static class UpdateMetaResult {
+    public boolean updated;
+    public Document meta;
   }
 }

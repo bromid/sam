@@ -23,80 +23,80 @@ import se.atg.cmdb.ui.rest.Defaults;
 @JsonPropertyOrder({ "id", "name", "description", "groups", "applications", "tags", "meta" })
 public class Group extends Base {
 
-	@NotNull
-	@Size(min = 1, max = 50)
-	public String id;
-	@NotNull
-	@Size(min = 1, max = 50)
-	public String name;
-	public List<Group> groups;
-	public List<ApplicationLink> applications;
-	public List<AssetLink> assets;
-	public List<Tag> tags;
+  @NotNull
+  @Size(min = 1, max = 50)
+  public String id;
+  @NotNull
+  @Size(min = 1, max = 50)
+  public String name;
+  public List<Group> groups;
+  public List<ApplicationLink> applications;
+  public List<AssetLink> assets;
+  public List<Tag> tags;
 
-	public Group() {
-	}
+  public Group() {
+  }
 
-	@JsonCreator
-	public Group(String id) {
-		this.id = id;
-	}
+  @JsonCreator
+  public Group(String id) {
+    this.id = id;
+  }
 
-	public Group(Document bson) {
-		super(bson);
+  public Group(Document bson) {
+    super(bson);
 
-		this.id = bson.getString("id");
-		this.name = bson.getString("name");
-		this.groups = Mapper.mapList(bson, "groups", Group::fromBson);
+    this.id = bson.getString("id");
+    this.name = bson.getString("name");
+    this.groups = Mapper.mapList(bson, "groups", Group::fromBson);
 
-		this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
-		this.assets = Mapper.mapList(bson, "assets", AssetLink::fromBson);
-		this.tags = Mapper.mapList(bson, "tags", Tag::new);
-	}
+    this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
+    this.assets = Mapper.mapList(bson, "assets", AssetLink::fromBson);
+    this.tags = Mapper.mapList(bson, "tags", Tag::new);
+  }
 
-	public List<String> resetGroups() {
+  public List<String> resetGroups() {
 
-		if (this.groups == null) {
-			return Collections.emptyList();
-		}
-		final List<String> groups = this.groups.stream()
-			.map(Group::getId)
-			.collect(Collectors.toList());
-		this.groups.clear();
-		return groups;
-	}
+    if (this.groups == null) {
+      return Collections.emptyList();
+    }
+    final List<String> groups = this.groups.stream()
+      .map(Group::getId)
+      .collect(Collectors.toList());
+    this.groups.clear();
+    return groups;
+  }
 
-	public List<Group> getGroups() {
-		if (groups == null) {
-			return Collections.emptyList();
-		}
-		return groups;
-	}
+  public List<Group> getGroups() {
+    if (groups == null) {
+      return Collections.emptyList();
+    }
+    return groups;
+  }
 
-	public void addGroup(Group group) {
-		groups.add(group);
-	}
+  public void addGroup(Group group) {
+    groups.add(group);
+  }
 
-	public String getId() {
-		return id;
-	}
+  public String getId() {
+    return id;
+  }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-	}
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
+  }
 
-	@Override
-	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
+  }
 
-	public static Group fromBson(Document bson) {
-		return new Group(bson);
-	}
+  public static Group fromBson(Document bson) {
+    return new Group(bson);
+  }
 }

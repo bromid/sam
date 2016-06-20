@@ -195,23 +195,31 @@ public class CreateTestdata {
     for (int server = 1; server < 9; ++server) {
       for (int env = 1; env < 3; ++env) {
         servers.insertOne(Document.parse(
-        "{\"hostname\": \"vltma" + server + "\"," +
-          "\"fqdn\": \"vltma" + server + ".test" + env + ".hh.atg.se\"," +
-          "\"environment\": \"test" + env + "\"," +
-          "\"description\": \"Runs all important applications\"" +
-          "\"os\": {" +
-            "\"name\": \"RedHat Enterprise Linux\"," +
-            "\"type\": " + ((server % 2 == 0) ? "\"Linux\"" : "\"Windows\",") +
-            "\"version\": \"6.2\"" +
-          "}," +
-          "\"network\": {" +
-            "\"ipv4Address\": \"10.0.0.1\"," +
-            "\"attributes\": {" +
-            "\"test\": 1" +
-          "}" +
-        "}}")
-        .append("applications", Lists.newArrayList(new Document().append("id", "atg-service-betting"), new Document().append("id", "tillsammans-service")))
-        .append("attributes", new Document().append("Param1", "Value1").append("Param2", new Document().append("Param3", "Value3"))));
+          "{\"hostname\": \"vltma" + server + "\"," +
+            "\"fqdn\": \"vltma" + server + ".test" + env + ".hh.atg.se\"," +
+            "\"environment\": \"test" + env + "\"," +
+            "\"description\": \"Runs all important applications\"" +
+            "\"os\": {" +
+              "\"name\": \"RedHat Enterprise Linux\"," +
+              "\"type\": " + ((server % 2 == 0) ? "\"Linux\"" : "\"Windows\",") +
+              "\"version\": \"6.2\"" +
+            "}," +
+            "\"network\": {" +
+              "\"ipv4Address\": \"10.0.0.1\"," +
+              "\"attributes\": {" +
+              "\"test\": 1" +
+            "}" +
+          "}}")
+          .append("deployments", Lists.newArrayList(
+            new Document().append("applicationId", "atg-service-betting").append("version", "1.0.0"),
+            new Document().append("applicationId", "tillsammans-service").append("version", "0.0.1-patch2")
+          )).append("attributes", new Document()
+            .append("Param1", "Value1")
+            .append("Param2", new Document()
+              .append("Param3", "Value3")
+          )).append("meta", new Document()
+            .append("createdBy", "testdata"))
+        );
       }
     }
     servers.updateOne(Filters.eq("fqdn", "vltma1.test1.hh.atg.se"), Updates.set("description", "Denna server tillhör Tillsammans."));
