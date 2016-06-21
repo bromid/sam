@@ -17,7 +17,7 @@ import com.mongodb.client.model.Sorts;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.RESTHelper;
+import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.SearchResult;
 import se.atg.cmdb.model.search.ServerSearchResult;
 
@@ -26,29 +26,29 @@ import se.atg.cmdb.model.search.ServerSearchResult;
 @Produces(Defaults.MEDIA_TYPE_JSON)
 public class SearchResource {
 
-	static final Logger logger = LoggerFactory.getLogger(ServerResource.class);
+  static final Logger logger = LoggerFactory.getLogger(ServerResource.class);
 
-	private final MongoDatabase database;
-	private final ObjectMapper objectMapper;
+  private final MongoDatabase database;
+  private final ObjectMapper objectMapper;
 
-	public SearchResource(MongoDatabase database, ObjectMapper objectMapper) {
-		this.database = database;
-		this.objectMapper = objectMapper;
-	}
+  public SearchResource(MongoDatabase database, ObjectMapper objectMapper) {
+    this.database = database;
+    this.objectMapper = objectMapper;
+  }
 
-	@GET
-	@Path("services/search")
-	public SearchResult getAssets(
-		@ApiParam(value="Sökparameter", required=true) @QueryParam("q") String query
-	) {
-		final SearchResult result = new SearchResult();
-		result.servers = RESTHelper.paginatedList(
-			database.getCollection(Collections.SERVERS)
-				.find(Filters.text(query))
-				.projection(Projections.metaTextScore("score"))
-				.sort(Sorts.metaTextScore("score"))
-				.map(ServerSearchResult::new)
-		);
-		return result;
-	}
+  @GET
+  @Path("services/search")
+  public SearchResult getAssets(
+    @ApiParam(value = "Sökparameter", required = true) @QueryParam("q") String query
+  ) {
+    final SearchResult result = new SearchResult();
+    result.servers = RestHelper.paginatedList(
+      database.getCollection(Collections.SERVERS)
+        .find(Filters.text(query))
+        .projection(Projections.metaTextScore("score"))
+        .sort(Sorts.metaTextScore("score"))
+        .map(ServerSearchResult::new)
+    );
+    return result;
+  }
 }

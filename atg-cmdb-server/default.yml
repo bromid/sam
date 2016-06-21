@@ -1,5 +1,5 @@
-mongoDB:
-  dbName: test
+mongoDatabase:
+  name: test
   username: uid
   password: pwd
   connections:

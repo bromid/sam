@@ -39,9 +39,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.helpers.MongoHelper;
-import se.atg.cmdb.helpers.RESTHelper;
+import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
 import se.atg.cmdb.model.PaginatedCollection;
@@ -76,21 +76,21 @@ public class ApplicationResource {
   @GET
   @RolesAllowed(Roles.READ)
   @Path("services/application/{id}")
-  @ApiOperation(value="Fetch application", response=Application.class)
+  @ApiOperation(value = "Fetch application", response = Application.class)
   public Response getApplication(
     @ApiParam @PathParam("id") String id
   ) {
     final Document application = findApplication(Filters.eq("id", id));
     return Response
       .ok(new Application(application))
-      .tag(RESTHelper.getEntityTag(application).orElse(null))
+      .tag(RestHelper.getEntityTag(application).orElse(null))
       .build();
   }
 
   @PUT
   @Path("services/application")
   @RolesAllowed(Roles.EDIT)
-  @ApiOperation(value="Create a new application", code=201, response=ApplicationLink.class)
+  @ApiOperation(value = "Create a new application", code = 201, response = ApplicationLink.class)
   public Response createApplication(
     @ApiParam("Application") Application application,
     @Context UriInfo uriInfo,
@@ -98,10 +98,10 @@ public class ApplicationResource {
   ) throws JsonParseException, JsonMappingException, IOException {
     logger.info("Create application: {}", application);
 
-    RESTHelper.validate(application, Application.Create.class);
+    RestHelper.validate(application, Application.Create.class);
 
-    final User user = RESTHelper.getUser(securityContext);
-    final Document bson = JSONHelper.addMetaForCreate(application, user.name, objectMapper);
+    final User user = RestHelper.getUser(securityContext);
+    final Document bson = JsonHelper.addMetaForCreate(application, user.name, objectMapper);
     database.getCollection(Collections.APPLICATIONS).insertOne(bson);
 
     return linkResponse(Status.CREATED, bson, uriInfo);
@@ -110,27 +110,27 @@ public class ApplicationResource {
   @PATCH
   @RolesAllowed(Roles.EDIT)
   @Path("services/application/{id}")
-  @ApiOperation(value = "Update application", response=ApplicationLink.class)
+  @ApiOperation(value = "Update application", response = ApplicationLink.class)
   @ApiImplicitParams(
-    @ApiImplicitParam(name="body", paramType="body", required=true, dataType="se.atg.cmdb.model.Application")
+    @ApiImplicitParam(name = "body", paramType = "body", required = true, dataType = "se.atg.cmdb.model.Application")
   )
   public Response updateApplication(
     @ApiParam("Application id") @PathParam("id") String id,
-    @ApiParam(hidden=true) JsonNode applicationJson,
+    @ApiParam(hidden = true) JsonNode applicationJson,
     @Context UriInfo uriInfo,
     @Context Request request,
     @Context SecurityContext securityContext
   ) throws IOException {
 
     final Application application = objectMapper.treeToValue(applicationJson, Application.class);
-    RESTHelper.validate(application, Server.Update.class);
+    RestHelper.validate(application, Server.Update.class);
 
     final Document existing = findApplication(Filters.eq("id", id));
-    final Optional<String> hash = RESTHelper.verifyHash(existing, request);
-    JSONHelper.merge(existing, applicationJson, objectMapper);
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
+    JsonHelper.merge(existing, applicationJson, objectMapper);
 
-    final User user = RESTHelper.getUser(securityContext);
-    JSONHelper.updateMetaForUpdate(existing, hash, user.name);
+    final User user = RestHelper.getUser(securityContext);
+    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
 
     MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.APPLICATIONS));
     return linkResponse(Status.OK, existing, uriInfo);
@@ -145,7 +145,7 @@ public class ApplicationResource {
     } else {
       query = collection.find(filter);
     }
-    return RESTHelper.paginatedList(query.map(Application::new));
+    return RestHelper.paginatedList(query.map(Application::new));
   }
 
   private Document findApplication(Bson filter) {
@@ -164,7 +164,7 @@ public class ApplicationResource {
       .status(status)
       .location(response.link.getUri())
       .entity(response)
-      .tag(RESTHelper.getEntityTag(bson).orElse(null))
+      .tag(RestHelper.getEntityTag(bson).orElse(null))
       .build();
   }
 }

@@ -10,26 +10,26 @@ import se.atg.cmdb.ui.rest.Defaults;
 
 public class Tag {
 
-	public String name;
-	public boolean editable = true;
+  public String name;
+  public boolean editable = true;
 
-	@JsonCreator
-	public Tag(String name) {
-		this.name = name;
-	}
+  @JsonCreator
+  public Tag(String name) {
+    this.name = name;
+  }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
-	}
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
+  }
 
-	@Override
-	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
+  }
 }

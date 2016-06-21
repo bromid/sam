@@ -8,20 +8,20 @@ import com.google.inject.Injector;
 
 public class GuiceInjectionJUnitRunner extends RunnerBuilder {
 
-	private final Injector injector;
+  private final Injector injector;
 
-	public GuiceInjectionJUnitRunner(Injector injector) {
-		this.injector = injector;
-	}
+  public GuiceInjectionJUnitRunner(Injector injector) {
+    this.injector = injector;
+  }
 
-	@Override
-	public Runner runnerForClass(Class<?> testClass) throws Throwable {
-		return new BlockJUnit4ClassRunner(testClass) {
-		    public Object createTest() throws Exception {
-		        final Object obj = super.createTest();
-		        injector.injectMembers(obj);
-		        return obj;
-		    }
-		};
-	}
+  @Override
+  public Runner runnerForClass(Class<?> testClass) throws Throwable {
+    return new BlockJUnit4ClassRunner(testClass) {
+        public Object createTest() throws Exception {
+            final Object obj = super.createTest();
+            injector.injectMembers(obj);
+            return obj;
+        }
+    };
+  }
 }

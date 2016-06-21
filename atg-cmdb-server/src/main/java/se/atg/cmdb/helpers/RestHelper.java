@@ -30,7 +30,7 @@ import jersey.repackaged.com.google.common.collect.Lists;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.User;
 
-public abstract class RESTHelper {
+public abstract class RestHelper {
 
   private static final ValidatorFactory VALIDATOR_FACTORY = Validators.newValidatorFactory();
 

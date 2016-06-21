@@ -18,7 +18,7 @@ public class Deployment extends Base {
 
   @NotNull
   @Valid
-  @JsonView(View.API.class)
+  @JsonView(View.Api.class)
   public ApplicationLink applicationLink;
   public String version;
   public String releaseNotes;
@@ -61,7 +61,7 @@ public class Deployment extends Base {
   }
 
   @JsonProperty
-  @JsonView(View.DB.class)
+  @JsonView(View.Db.class)
   public String getApplicationId() {
     return applicationLink.id;
   }
@@ -81,7 +81,7 @@ public class Deployment extends Base {
     return HashCodeBuilder.reflectionHashCode(this);
   }
 
-  public static boolean sameApplicationId(Document a, Document b) {
-    return a.getString("applicationId").equals(b.getString("applicationId"));
+  public static boolean sameApplicationId(Document first, Document second) {
+    return first.getString("applicationId").equals(second.getString("applicationId"));
   }
 }

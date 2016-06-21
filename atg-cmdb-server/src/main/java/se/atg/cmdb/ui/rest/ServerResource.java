@@ -44,10 +44,10 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.helpers.MongoHelper;
-import se.atg.cmdb.helpers.RESTHelper;
+import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.Deployment;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
@@ -105,7 +105,7 @@ public class ServerResource {
     ));
     return Response
       .ok(new Server(server))
-      .tag(RESTHelper.getEntityTag(server).orElse(null))
+      .tag(RestHelper.getEntityTag(server).orElse(null))
       .build();
   }
 
@@ -122,13 +122,13 @@ public class ServerResource {
       Filters.eq("hostname", hostname)
     ));
     final Server server = new Server(document);
-    return RESTHelper.paginatedList(server.deployments);
+    return RestHelper.paginatedList(server.deployments);
   }
 
   @GET
   @Path("services/server/{environment}/{hostname}/deployment/{applicationId}")
   @RolesAllowed(Roles.READ)
-  @ApiOperation(value = "Get a deployed application on the server", response=Deployment.class)
+  @ApiOperation(value = "Get a deployed application on the server", response = Deployment.class)
   public Deployment getServerDeployment(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
     @ApiParam("Test environment") @PathParam("environment") String environment,
@@ -165,16 +165,16 @@ public class ServerResource {
     @Context SecurityContext securityContext
   ) {
     logger.info("Add deployment: {}", deployment);
-    RESTHelper.validate(deployment);
+    RestHelper.validate(deployment);
 
     final Document existing = getServerForUpdate(hostname, environment);
-    final Optional<String> hash = RESTHelper.verifyHash(existing, request);
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
 
-    final Document update = JSONHelper.entityToBson(deployment, objectMapper);
+    final Document update = JsonHelper.entityToBson(deployment, objectMapper);
     Mapper.upsertList(existing, update, "deployments", Deployment::sameApplicationId);
 
-    final User user = RESTHelper.getUser(securityContext);
-    JSONHelper.updateMetaForUpdate(existing, hash, user.name);
+    final User user = RestHelper.getUser(securityContext);
+    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
 
     MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
     return serverLinkResponse(Status.OK, existing, uriInfo);
@@ -191,10 +191,10 @@ public class ServerResource {
   ) throws JsonParseException, JsonMappingException, IOException {
     logger.info("Create server: {}", server);
 
-    RESTHelper.validate(server, Server.Create.class);
+    RestHelper.validate(server, Server.Create.class);
 
-    final User user = RESTHelper.getUser(securityContext);
-    final Document bson = JSONHelper.addMetaForCreate(server, user.name, objectMapper);
+    final User user = RestHelper.getUser(securityContext);
+    final Document bson = JsonHelper.addMetaForCreate(server, user.name, objectMapper);
 
     database.getCollection(Collections.SERVERS).insertOne(bson);
     return serverLinkResponse(Status.CREATED, bson, uriInfo);
@@ -216,14 +216,14 @@ public class ServerResource {
 
     final Server server = objectMapper.treeToValue(serverJson, Server.class);
     logger.info("Update server: {}", server);
-    RESTHelper.validate(server, Server.Update.class);
+    RestHelper.validate(server, Server.Update.class);
 
     final Document existing = getServerForUpdate(hostname, environment);
-    final Optional<String> hash = RESTHelper.verifyHash(existing, request);
-    JSONHelper.merge(existing, serverJson, objectMapper);
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
+    JsonHelper.merge(existing, serverJson, objectMapper);
 
-    final User user = RESTHelper.getUser(securityContext);
-    JSONHelper.updateMetaForUpdate(existing, hash, user.name);
+    final User user = RestHelper.getUser(securityContext);
+    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
 
     MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
     return serverLinkResponse(Status.OK, existing, uriInfo);
@@ -254,7 +254,7 @@ public class ServerResource {
   }
 
   private PaginatedCollection<Server> findServers(Bson filter) {
-    return RESTHelper.paginatedList(database
+    return RestHelper.paginatedList(database
       .getCollection(Collections.SERVERS)
       .aggregate(getServerQuery(filter))
       .map(Server::new)
@@ -286,12 +286,12 @@ public class ServerResource {
 
   private Response serverLinkResponse(Status status, Document bson, UriInfo uriInfo) {
 
-    final ServerLink response = ServerLink.buildFromURI(uriInfo.getBaseUri(), bson.getString("hostname"), bson.getString("environment"));
+    final ServerLink response = ServerLink.buildFromUri(uriInfo.getBaseUri(), bson.getString("hostname"), bson.getString("environment"));
     return Response
       .status(status)
       .location(response.link.getUri())
       .entity(response)
-      .tag(RESTHelper.getEntityTag(bson).orElse(null))
+      .tag(RestHelper.getEntityTag(bson).orElse(null))
       .build();
   }
 }

@@ -25,7 +25,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.Deployment;
@@ -36,7 +36,7 @@ import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class ServerIntegrationTest {
 
-  @Inject 
+  @Inject
   private MongoDatabase database;
   @Inject
   private WebTarget testEndpoint;
@@ -66,7 +66,7 @@ public class ServerIntegrationTest {
       fqdn = "vltma2.test1.hh.atg.se";
       description = "Min testserver";
     }};
-    servers.insertOne(JSONHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
 
     final Server response = getServer(server1.environment, server1.hostname);
     TestHelper.isEqualExceptMeta(server1, response);
@@ -80,14 +80,14 @@ public class ServerIntegrationTest {
       environment = "test1";
       fqdn = "vltma1.test1.hh.atg.se";
     }};
-    servers.insertOne(JSONHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
 
     final Server server2 = new Server() {{
       hostname = "vltma2";
       environment = "test1";
       fqdn = "vltma2.test1.hh.atg.se";
     }};
-    servers.insertOne(JSONHelper.addMetaForCreate(server2, "integration-test", objectMapper));
+    servers.insertOne(JsonHelper.addMetaForCreate(server2, "integration-test", objectMapper));
 
     final PaginatedCollection<Server> response = testEndpoint.path("server")
       .request(MediaType.APPLICATION_JSON_TYPE)
@@ -102,7 +102,7 @@ public class ServerIntegrationTest {
     TestHelper.assertEquals(Arrays.asList(server1, server2), response.items, Server::getFqdn, TestHelper::isEqualExceptMeta);
   }
 
-  @Test(expected=NotFoundException.class)
+  @Test(expected = NotFoundException.class)
   public void shouldReturnNotFoundWhenServerDoesNotExist() {
      testEndpoint
       .path("server").path("test1").path("vltma1")
@@ -111,13 +111,13 @@ public class ServerIntegrationTest {
   }
 
   @Test
-  public void addNewServer(){
+  public void addNewServer() {
 
     final Server server1 = new Server() {{
       environment = "ci";
       hostname = "somehost";
       fqdn = "somehost.ci.hh.atg.se";
-      os = new OS() {{
+      os = new Os() {{
         name = "RedHat";
         type = "Linux";
         version = "6.7";
@@ -129,7 +129,7 @@ public class ServerIntegrationTest {
   }
 
   @Test
-  public void newServerCantHaveId(){
+  public void newServerCantHaveId() {
 
     final Server server = new Server() {{
       id = "not-allowed";
@@ -144,7 +144,7 @@ public class ServerIntegrationTest {
   }
 
   @Test
-  public void newServerMustHaveHostname(){
+  public void newServerMustHaveHostname() {
 
     final Server server = new Server() {{
       environment = "ci";
@@ -157,7 +157,7 @@ public class ServerIntegrationTest {
   }
 
   @Test
-  public void newServerMustHaveEnvironment(){
+  public void newServerMustHaveEnvironment() {
 
     final Server server = new Server() {{
       hostname = "somehost";
@@ -170,7 +170,7 @@ public class ServerIntegrationTest {
   }
 
   @Test
-  public void patchedServerCantHaveId(){
+  public void patchedServerCantHaveId() {
 
     final Server server = new Server() {{
       environment = "ci";
@@ -193,7 +193,7 @@ public class ServerIntegrationTest {
   }
 
   @Test
-  public void addNewServerWithApplications(){
+  public void addNewServerWithApplications() {
 
     /*
      * Create server
@@ -202,7 +202,7 @@ public class ServerIntegrationTest {
       hostname = "vltma1";
       environment = "qa";
       fqdn = "vltma1.qa.hh.atg.se";
-      os = new OS() {{
+      os = new Os() {{
         name = "RedHat";
         type = "Linux";
         version = "6.7";
@@ -233,13 +233,13 @@ public class ServerIntegrationTest {
       id = "my-application1";
       name = "My Application 1";
     }};
-    applications.insertOne(JSONHelper.addMetaForCreate(application1, "integration.test", objectMapper));
+    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration.test", objectMapper));
 
     final Application application2 = new Application() {{
       id = "my-application2";
       name = "My Application 2";
     }};
-    applications.insertOne(JSONHelper.addMetaForCreate(application2, "integration.test", objectMapper));
+    applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration.test", objectMapper));
 
     /*
      * Get and verify server
@@ -263,7 +263,7 @@ public class ServerIntegrationTest {
       environment = "ci";
       hostname = "somehost";
       fqdn = "somehost.ci.hh.atg.se";
-      os = new OS() {{
+      os = new Os() {{
         name = "RedHat";
         type = "Linux";
         version = "6.7";
@@ -272,11 +272,11 @@ public class ServerIntegrationTest {
     final ServerResponse createServerResponse = createServer(server);
 
     /*
-     * Patch server 
+     * Patch server
      */
     final Server serverPatch = new Server() {{
       environment = "test1";
-      os = new OS() {{
+      os = new Os() {{
         version = "6.9";
       }};
     }};
@@ -322,7 +322,7 @@ public class ServerIntegrationTest {
       description = "Min testserver";
       deployments = Arrays.asList(deployment1, deployment2, deployment3);
     }};
-    servers.insertOne(JSONHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
 
     /*
      * Create applications
@@ -331,13 +331,13 @@ public class ServerIntegrationTest {
       id = "application1";
       name = "Application 1";
     }};
-    applications.insertOne(JSONHelper.addMetaForCreate(application1, "integration-test", objectMapper));
+    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test", objectMapper));
 
     final Application application3 = new Application() {{
       id = "application3";
       name = "Application 3";
     }};
-    applications.insertOne(JSONHelper.addMetaForCreate(application3, "integration-test", objectMapper));
+    applications.insertOne(JsonHelper.addMetaForCreate(application3, "integration-test", objectMapper));
 
     final PaginatedCollection<Deployment> response = getServerDeployments(server1.environment, server1.hostname);
     Assert.assertEquals(3, response.items.size());
@@ -373,7 +373,7 @@ public class ServerIntegrationTest {
       description = "Min testserver";
       deployments = Arrays.asList(deployment1, deployment2, deployment3);
     }};
-    servers.insertOne(JSONHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
 
     /*
      * Create applications
@@ -382,13 +382,13 @@ public class ServerIntegrationTest {
       id = "application1";
       name = "Application 1";
     }};
-    applications.insertOne(JSONHelper.addMetaForCreate(application1, "integration-test", objectMapper));
+    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test", objectMapper));
 
     final Application application3 = new Application() {{
       id = "application3";
       name = "Application 3";
     }};
-    applications.insertOne(JSONHelper.addMetaForCreate(application3, "integration-test", objectMapper));
+    applications.insertOne(JsonHelper.addMetaForCreate(application3, "integration-test", objectMapper));
 
     final Deployment response = getServerDeployment(server1.environment, server1.hostname, application3.id);
     verifyServerDeploymentRest(deployment3, response);
@@ -413,14 +413,14 @@ public class ServerIntegrationTest {
       name = "My application 1";
       description = "Important app";
     }};
-    applications.insertOne(JSONHelper.addMetaForCreate(application1, "integration-test", objectMapper));
+    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test", objectMapper));
 
     final Application application2 = new Application() {{
       id = "my-app2";
       name = "My application 2";
       description = "Another important app";
     }};
-    applications.insertOne(JSONHelper.addMetaForCreate(application2, "integration-test", objectMapper));
+    applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration-test", objectMapper));
 
     final PaginatedCollection<Deployment> serverDeployments = getServerDeployments(server.link);
     Assert.assertNull(serverDeployments.items);
@@ -431,7 +431,6 @@ public class ServerIntegrationTest {
     final Deployment deployment1 = new Deployment("my-app1") {{
       version = "1.2.3";
       releaseNotes = "http://www.atg.se/release-notes1";
-      
     }};
     final ServerLink addDeploymentResponse1 = addServerDeployment(server.link, deployment1);
     final Server serverAfterAdd1 = getServer(addDeploymentResponse1.link);
@@ -444,7 +443,6 @@ public class ServerIntegrationTest {
     final Deployment deployment2 = new Deployment("my-app2") {{
       version = "1.0.0";
       releaseNotes = "http://www.atg.se/release-notes2";
-      
     }};
     final ServerLink addDeploymentResponse2 = addServerDeployment(server.link, deployment2);
     final Server serverAfterAdd2 = getServer(addDeploymentResponse2.link);
@@ -568,9 +566,11 @@ public class ServerIntegrationTest {
   }
 
   static class ServerResponse {
+
     public Link link;
     public Document db;
-    public ServerResponse(ServerLink link, Document db) {
+
+    ServerResponse(ServerLink link, Document db) {
       Assert.assertEquals(link.environment, db.getString("environment"));
       Assert.assertEquals(link.hostname, db.getString("hostname"));
       this.db = db;

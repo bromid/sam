@@ -19,7 +19,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
@@ -48,7 +48,7 @@ public class GroupIntegrationTest {
       id = "my-group";
       name = "My group";
     }};
-    groups.insertOne(JSONHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
 
     final Group response = getGroup(group1.id);
     TestHelper.isEqualExceptMeta(group1, response);
@@ -61,13 +61,13 @@ public class GroupIntegrationTest {
       id = "group1";
       name = "My group 1";
     }};
-    groups.insertOne(JSONHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
 
     final Group group2 = new Group() {{
       id = "group2";
       name = "My group 2";
     }};
-    groups.insertOne(JSONHelper.addMetaForCreate(group2, "intergration-test", objectMapper));
+    groups.insertOne(JsonHelper.addMetaForCreate(group2, "intergration-test", objectMapper));
 
     final PaginatedCollection<Group> response = testEndpoint.path("group")
       .request(MediaType.APPLICATION_JSON_TYPE)
@@ -121,7 +121,7 @@ public class GroupIntegrationTest {
         name = "Sub-group 2 to Group 2";
       }}
     );
-    groups.insertMany(JSONHelper.entitiesToBson(groupsToAdd, objectMapper));
+    groups.insertMany(JsonHelper.entitiesToBson(groupsToAdd, objectMapper));
 
     final PaginatedCollection<Group> response = testEndpoint.path("group")
       .request(MediaType.APPLICATION_JSON_TYPE)

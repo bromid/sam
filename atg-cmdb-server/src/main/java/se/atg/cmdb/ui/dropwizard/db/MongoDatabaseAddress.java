@@ -6,14 +6,14 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class MongoDBAddress {
+public class MongoDatabaseAddress {
 
-	@NotNull
-	@JsonProperty
-	public String host;
+  @NotNull
+  @JsonProperty
+  public String host;
 
-	@Min(1)
-	@Max(65535)
-	@JsonProperty
-	public int port;
+  @Min(1)
+  @Max(65535)
+  @JsonProperty
+  public int port;
 }

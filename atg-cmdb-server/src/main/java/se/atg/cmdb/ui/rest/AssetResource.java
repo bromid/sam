@@ -33,8 +33,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JSONHelper;
-import se.atg.cmdb.helpers.RESTHelper;
+import se.atg.cmdb.helpers.JsonHelper;
+import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.Asset;
 import se.atg.cmdb.model.AssetLink;
 import se.atg.cmdb.model.PaginatedCollection;
@@ -68,32 +68,32 @@ public class AssetResource {
   @GET
   @Path("services/asset/{id}")
   @RolesAllowed(Roles.READ)
-  @ApiOperation(value = "Fetch an asset", response=Asset.class)
+  @ApiOperation(value = "Fetch an asset", response = Asset.class)
   public Response getAsset(
-      @ApiParam("id") @PathParam("id") String id
-      ) {
+    @ApiParam("id") @PathParam("id") String id
+  ) {
     final Document asset = findAsset(Filters.eq("id", id));
     return Response
         .ok(new Asset(asset))
-        .tag(RESTHelper.getEntityTag(asset).orElse(null))
+        .tag(RestHelper.getEntityTag(asset).orElse(null))
         .build();
   }
 
   @PUT
   @Path("services/asset")
   @RolesAllowed(Roles.EDIT)
-  @ApiOperation(value="Create a new asset", code=201, response=AssetLink.class)
+  @ApiOperation(value = "Create a new asset", code = 201, response = AssetLink.class)
   public Response createAsset(
-      @ApiParam("Asset") Asset asset,
-      @Context UriInfo uriInfo,
-      @Context SecurityContext securityContext
-  ) throws JsonParseException, JsonMappingException, IOException{
+    @ApiParam("Asset") Asset asset,
+    @Context UriInfo uriInfo,
+    @Context SecurityContext securityContext
+  ) throws JsonParseException, JsonMappingException, IOException {
     logger.info("Create asset: {}", asset);
 
-    RESTHelper.validate(asset, Asset.Create.class);
+    RestHelper.validate(asset, Asset.Create.class);
 
-    final User user = RESTHelper.getUser(securityContext);
-    final Document bson = JSONHelper.addMetaForCreate(asset, user.name, objectMapper);
+    final User user = RestHelper.getUser(securityContext);
+    final Document bson = JsonHelper.addMetaForCreate(asset, user.name, objectMapper);
     database.getCollection(Collections.ASSETS).insertOne(bson);
 
     return linkResponse(Status.CREATED, bson, uriInfo);
@@ -108,13 +108,13 @@ public class AssetResource {
     } else {
       query = collection.find(filter);
     }
-    return RESTHelper.paginatedList(query.map(Asset::new));
+    return RestHelper.paginatedList(query.map(Asset::new));
   }
 
   private Document findAsset(Bson filter) {
     final Document bson = database.getCollection(Collections.ASSETS)
-        .find(filter)
-        .first();
+      .find(filter)
+      .first();
     if (bson == null) {
       throw new WebApplicationException(Status.NOT_FOUND);
     }
@@ -124,10 +124,10 @@ public class AssetResource {
   private Response linkResponse(Status status, Document bson, UriInfo uriInfo) {
     final AssetLink response = new AssetLink(uriInfo.getBaseUri(), bson.getString("id"), bson.getString("name"));
     return Response
-        .status(status)
-        .location(response.link.getUri())
-        .entity(response)
-        .tag(RESTHelper.getEntityTag(bson).orElse(null))
-        .build();
+      .status(status)
+      .location(response.link.getUri())
+      .entity(response)
+      .tag(RestHelper.getEntityTag(bson).orElse(null))
+      .build();
   }
 }

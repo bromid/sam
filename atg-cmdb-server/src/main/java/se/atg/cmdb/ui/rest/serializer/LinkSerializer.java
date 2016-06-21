@@ -9,16 +9,16 @@ import javax.ws.rs.core.Link;
 
 public class LinkSerializer extends JsonSerializer<Link> {
 
-	@Override
-	public void serialize(Link link, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
-		jg.writeStartObject();
-		jg.writeStringField("rel", link.getRel());
-		jg.writeStringField("href", link.getUri().toString());
-		jg.writeEndObject();
-	}
+  @Override
+  public void serialize(Link link, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
+    jg.writeStartObject();
+    jg.writeStringField("rel", link.getRel());
+    jg.writeStringField("href", link.getUri().toString());
+    jg.writeEndObject();
+  }
 
-	@Override
-	public Class<Link> handledType() {
-		return Link.class;
-	}
+  @Override
+  public Class<Link> handledType() {
+    return Link.class;
+  }
 }

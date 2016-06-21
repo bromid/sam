@@ -9,15 +9,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import se.atg.cmdb.model.View;
 
-public class JSONHelperTest {
+public class JsonHelperTest {
 
   @Test
   public void entityToBsonWithJsonViews() {
 
     final WithExcludes expected = new WithExcludes();
 
-    final ObjectMapper mapper = JSONHelper.configureObjectMapper(new ObjectMapper(), View.API.class);
-    final Document bson = JSONHelper.entityToBson(expected, mapper);
+    final ObjectMapper mapper = JsonHelper.configureObjectMapper(new ObjectMapper(), View.Api.class);
+    final Document bson = JsonHelper.entityToBson(expected, mapper);
 
     Assert.assertNull(bson.getString("api"));
     Assert.assertEquals(expected.db, bson.getString("db"));
@@ -26,9 +26,9 @@ public class JSONHelperTest {
 
   class WithExcludes {
 
-    @JsonView(View.API.class)
+    @JsonView(View.Api.class)
     public final String api = "API";
-    @JsonView(View.DB.class)
+    @JsonView(View.Db.class)
     public final String db = "DB";
     public final String defaultView = "NO-VIEW";
   }

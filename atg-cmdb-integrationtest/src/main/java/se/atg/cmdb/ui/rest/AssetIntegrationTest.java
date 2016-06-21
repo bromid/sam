@@ -20,7 +20,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Asset;
 import se.atg.cmdb.model.AssetLink;
 import se.atg.cmdb.model.PaginatedCollection;
@@ -29,91 +29,91 @@ import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class AssetIntegrationTest {
 
-	@Inject 
-	private MongoDatabase database;
-	@Inject
-	private WebTarget testEndpoint;
-	@Inject
-	private Client client;
-	@Inject
-	private ObjectMapper objectMapper;
+  @Inject
+  private MongoDatabase database;
+  @Inject
+  private WebTarget testEndpoint;
+  @Inject
+  private Client client;
+  @Inject
+  private ObjectMapper objectMapper;
 
-	private MongoCollection<Document> assets;
+  private MongoCollection<Document> assets;
 
-	@Before
-	public void setUp() {
-		assets = database.getCollection(Collections.ASSETS);
-		assets.deleteMany(new Document());
-	}
+  @Before
+  public void setUp() {
+    assets = database.getCollection(Collections.ASSETS);
+    assets.deleteMany(new Document());
+  }
 
-	@Test
-	public void getAsset() {
+  @Test
+  public void getAsset() {
 
-		final Asset asset1 = new Asset() {{
-			id = "my-asset1";
-			name = "Min pryl1";
-			description = "Very useful asset";
-		}};
-		assets.insertOne(JSONHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
+    final Asset asset1 = new Asset() {{
+      id = "my-asset1";
+      name = "Min pryl1";
+      description = "Very useful asset";
+    }};
+    assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
 
-		final Asset response = getAsset(asset1.id);
-		TestHelper.isEqualExceptMeta(asset1, response);
-	}
+    final Asset response = getAsset(asset1.id);
+    TestHelper.isEqualExceptMeta(asset1, response);
+  }
 
-	@Test
-	public void getAssets() {
+  @Test
+  public void getAssets() {
 
-		final Asset asset1 = new Asset() {{
-			id = "my-asset1";
-			name = "Min pryl1";
-			description = "Very useful asset";
-		}};
-		assets.insertOne(JSONHelper.addMetaForCreate(asset1, "integration-test", objectMapper));		
+    final Asset asset1 = new Asset() {{
+      id = "my-asset1";
+      name = "Min pryl1";
+      description = "Very useful asset";
+    }};
+    assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
 
-		final Asset asset2 = new Asset() {{
-			id = "my-asset2";
-			name = "Min pryl2";
-			description = "Also a very useful asset";
-		}};
-		assets.insertOne(JSONHelper.addMetaForCreate(asset2, "integration-test", objectMapper));	
+    final Asset asset2 = new Asset() {{
+      id = "my-asset2";
+      name = "Min pryl2";
+      description = "Also a very useful asset";
+    }};
+    assets.insertOne(JsonHelper.addMetaForCreate(asset2, "integration-test", objectMapper));
 
-		final PaginatedCollection<Asset> response = testEndpoint.path("asset")
-			.request(MediaType.APPLICATION_JSON_TYPE)
-			.get(new GenericType<PaginatedCollection<Asset>>(){});
+    final PaginatedCollection<Asset> response = testEndpoint.path("asset")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(new GenericType<PaginatedCollection<Asset>>(){});
 
-		Assert.assertNull(response.next);
-		Assert.assertNull(response.previous);
-		Assert.assertNull(response.start);
-		Assert.assertNull(response.limit);
+    Assert.assertNull(response.next);
+    Assert.assertNull(response.previous);
+    Assert.assertNull(response.start);
+    Assert.assertNull(response.limit);
 
-		Assert.assertEquals(2, response.items.size());
-		TestHelper.assertEquals(Arrays.asList(asset1, asset2), response.items, Asset::getId, TestHelper::isEqualExceptMeta);
-	}
+    Assert.assertEquals(2, response.items.size());
+    TestHelper.assertEquals(Arrays.asList(asset1, asset2), response.items, Asset::getId, TestHelper::isEqualExceptMeta);
+  }
 
-	@Test(expected=NotFoundException.class)
-	public void shouldReturnNotFoundWhenServerDoesNotExist() {
-		 testEndpoint
-			.path("asset").path("asset-id")
-			.request(MediaType.APPLICATION_JSON_TYPE)
-			.get(Server.class);
-	}
+  @Test(expected = NotFoundException.class)
+  public void shouldReturnNotFoundWhenServerDoesNotExist() {
+     testEndpoint
+      .path("asset").path("asset-id")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(Server.class);
+  }
 
-	private Asset getAsset(String id) {
+  private Asset getAsset(String id) {
 
-		final Response response = testEndpoint
-			.path("asset").path(id)
-			.request(MediaType.APPLICATION_JSON_TYPE)
-			.get();
-		TestHelper.assertSuccessful(response);
-		return response.readEntity(Asset.class);
-	}
+    final Response response = testEndpoint
+      .path("asset").path(id)
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    TestHelper.assertSuccessful(response);
+    return response.readEntity(Asset.class);
+  }
 
-	private Asset getAsset(AssetLink assetLink) {
+  private Asset getAsset(AssetLink assetLink) {
 
-		final Response response = client.target(assetLink.link)
-			.request(MediaType.APPLICATION_JSON_TYPE)
-			.get();
-		TestHelper.assertSuccessful(response);
-		return response.readEntity(Asset.class);
-	}
+    final Response response = client.target(assetLink.link)
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    TestHelper.assertSuccessful(response);
+    return response.readEntity(Asset.class);
+  }
 }
