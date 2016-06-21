@@ -1,4 +1,5 @@
 import path from 'path';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 const srcPath = path.join(__dirname, 'src');
 
@@ -12,6 +13,14 @@ export default {
         filename: 'bundle.js',
         publicPath: publicPath
     },
+    plugins: [
+        new CopyWebpackPlugin([
+            {
+                from: path.join(srcPath, 'icons'),
+                to: 'icons'
+            }
+        ])
+    ],
     module: {
         loaders: [
             {
@@ -26,7 +35,7 @@ export default {
                 test: /\.(png|jpg)$/,
                 include: srcPath,
                 loader: 'url?name=img/[name]-[hash].[ext]&limit=25000',
-            },
-        ],
-    },
+            }
+        ]
+    }
 };
