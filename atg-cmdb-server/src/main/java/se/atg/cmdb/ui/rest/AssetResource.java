@@ -3,6 +3,7 @@ package se.atg.cmdb.ui.rest;
 import java.io.IOException;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -28,6 +29,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -97,6 +99,22 @@ public class AssetResource {
     database.getCollection(Collections.ASSETS).insertOne(bson);
 
     return linkResponse(Status.CREATED, bson, uriInfo);
+  }
+
+  @DELETE
+  @Path("services/asset/{id}")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation(value = "Remove an asset")
+  public Response deleteAsset(
+    @ApiParam("id") @PathParam("id") String id
+  ) {
+    final DeleteResult result = database
+      .getCollection(Collections.ASSETS)
+      .deleteOne(Filters.eq("id", id));
+    if (result.getDeletedCount() < 1) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
+    return Response.noContent().build();
   }
 
   private PaginatedCollection<Asset> findAssets(Bson filter) {

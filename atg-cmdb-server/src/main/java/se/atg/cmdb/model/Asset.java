@@ -21,8 +21,10 @@ import se.atg.cmdb.ui.rest.Defaults;
 @JsonPropertyOrder({ "id", "name", "description", "os", "network", "meta", "attributes" })
 public class Asset extends Base {
 
+  @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String id;
+  @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String name;
   @Valid
@@ -63,11 +65,11 @@ public class Asset extends Base {
 
   public static class Os {
 
-    @NotNull(groups = Create.class)
-    @Size(min = 1, groups = Update.class)
+    @NotNull(groups = SubtypeCreate.class)
+    @Size(min = 1, groups = SubtypeUpdate.class)
     public String name;
-    @NotNull(groups = Create.class)
-    @Size(min = 1, groups = Update.class)
+    @NotNull(groups = SubtypeCreate.class)
+    @Size(min = 1, groups = SubtypeUpdate.class)
     public String type;
     public String version;
     public Map<String, Object> attributes;
@@ -137,7 +139,11 @@ public class Asset extends Base {
     }
   }
 
-  public interface Create extends Update {}
+  public interface Create extends SubtypeCreate, Update {}
 
-  public interface Update extends Base.Validation {}
+  public interface Update extends SubtypeUpdate {}
+
+  public interface SubtypeCreate extends SubtypeUpdate {}
+
+  public interface SubtypeUpdate extends Base.Validation {}
 }
