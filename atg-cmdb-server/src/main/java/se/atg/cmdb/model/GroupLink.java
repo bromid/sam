@@ -10,12 +10,14 @@ import org.glassfish.jersey.linking.InjectLink;
 import org.glassfish.jersey.linking.InjectLink.Style;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import se.atg.cmdb.ui.rest.GroupResource;
 
 public class GroupLink {
 
   public final String id;
+  public final String name;
 
   @InjectLink(
     resource = GroupResource.class,
@@ -26,17 +28,27 @@ public class GroupLink {
   )
   public Link link;
 
-  public GroupLink(Document bson) {
-    this.id = bson.getString("id");
+  @JsonCreator
+  public GroupLink(String id) {
+    this(id, null);
   }
 
   @JsonCreator
-  public GroupLink(String id) {
+  public GroupLink(
+    @JsonProperty("id") String id,
+    @JsonProperty("name") String name
+  ) {
     this.id = id;
+    this.name = name;
   }
 
-  public GroupLink(URI baseUri, String id) {
-    this.id = id;
+  public GroupLink(Document bson) {
+    this.id = bson.getString("id");
+    this.name = bson.getString("name");
+  }
+
+  public GroupLink(URI baseUri, String id, String name) {
+    this(id, name);
     this.link = Link.fromMethod(GroupResource.class, "getGroup")
       .baseUri(baseUri)
       .rel("self")

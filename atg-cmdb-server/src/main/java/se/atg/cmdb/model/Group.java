@@ -13,7 +13,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import io.swagger.annotations.ApiModel;
 import se.atg.cmdb.helpers.Mapper;
@@ -23,15 +25,16 @@ import se.atg.cmdb.ui.rest.Defaults;
 @JsonPropertyOrder({ "id", "name", "description", "groups", "applications", "tags", "meta" })
 public class Group extends Base {
 
-  @NotNull
+  @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String id;
-  @NotNull
+  @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String name;
   public List<Group> groups;
   public List<ApplicationLink> applications;
   public List<AssetLink> assets;
+  @JsonView(View.Api.class)
   public List<Tag> tags;
 
   public Group() {
@@ -81,6 +84,17 @@ public class Group extends Base {
     return id;
   }
 
+  @JsonProperty("tags")
+  @JsonView(View.Db.class)
+  public List<String> getTags() {
+    if (tags == null) {
+      return Collections.emptyList();
+    }
+    return tags.stream()
+      .map(t->t.name)
+      .collect(Collectors.toList());
+  }
+
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
@@ -99,4 +113,8 @@ public class Group extends Base {
   public static Group fromBson(Document bson) {
     return new Group(bson);
   }
+
+  public interface Create extends Update {}
+
+  public interface Update extends Base.Validation {}
 }

@@ -38,9 +38,15 @@ public class AssetLink {
   }
 
   @JsonCreator
+  public AssetLink(String id) {
+    this(id, null);
+  }
+
+  @JsonCreator
   public AssetLink(
-      @JsonProperty("id") String id,
-      @JsonProperty("name") String name) {
+    @JsonProperty("id") String id,
+    @JsonProperty("name") String name
+  ) {
     this.id = id;
     this.name = name;
   }

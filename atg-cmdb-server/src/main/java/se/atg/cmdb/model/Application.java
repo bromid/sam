@@ -18,16 +18,15 @@ import se.atg.cmdb.ui.rest.Defaults;
 @JsonPropertyOrder({ "id", "name", "version", "group", "meta" })
 public class Application extends Base {
 
-  @NotNull
+  @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String id;
-  @NotNull
+  @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String name;
   public GroupLink group;
 
-  public Application() {
-  }
+  public Application() {}
 
   public Application(Document bson) {
     super(bson);
@@ -57,9 +56,7 @@ public class Application extends Base {
     return HashCodeBuilder.reflectionHashCode(this);
   }
 
-  public interface Create extends Update {
-  }
+  public interface Create extends Update {}
 
-  public interface Update extends Base.Validation {
-  }
+  public interface Update extends Base.Validation {}
 }

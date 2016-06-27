@@ -170,6 +170,22 @@ public class ServerIntegrationTest {
   }
 
   @Test
+  public void newServerOsMustHaveName() {
+
+    final Server server = new Server() {{
+      hostname = "somehost";
+      environment = "someenvironment";
+      os = new Os() {{
+        type = "Windows";
+      }};
+    }};
+    final Response response = testEndpoint.path("server")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .put(Entity.json(server));
+    TestHelper.assertValidationError("os.name may not be null", response);
+  }
+
+  @Test
   public void patchedServerCantHaveId() {
 
     final Server server = new Server() {{
@@ -292,6 +308,26 @@ public class ServerIntegrationTest {
     Assert.assertEquals(server.os.type, patchedServer.os.type);
     Assert.assertEquals(serverPatch.environment, patchedServer.environment);
     Assert.assertEquals(serverPatch.os.version, patchedServer.os.version);
+  }
+
+  @Test
+  public void deleteServer() {
+
+    final Server server1 = new Server() {{
+      hostname = "server1";
+      environment = "qa";
+    }};
+    final ServerResponse createResponse = createServer(server1);
+
+    final Response deleteResponse = client.target(createResponse.link)
+      .request(MediaType.APPLICATION_JSON)
+      .delete();
+    TestHelper.assertSuccessful(deleteResponse);
+
+    final Response response = client.target(createResponse.link)
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    Assert.assertEquals(404, response.getStatus());
   }
 
   @Test

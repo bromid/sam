@@ -107,6 +107,7 @@ public class AssetIntegrationTest {
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
       name = "My Asset #1";
+      description = "Very important asset";
       os = new Os() {{
         name = "RedHat";
         type = "Linux";
@@ -117,6 +118,8 @@ public class AssetIntegrationTest {
       }};
     }};
     final AssetResponse createResponse = createAsset(asset1);
+    Assert.assertNotNull(createResponse.db);
+
     final Asset response = getAsset(createResponse.link);
     TestHelper.isEqualExceptMeta(asset1, response);
   }
@@ -143,6 +146,22 @@ public class AssetIntegrationTest {
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(asset1));
     TestHelper.assertValidationError("name may not be null", response);
+  }
+
+  @Test
+  public void newAssetOsMustHaveName() {
+
+    final Asset asset1 = new Asset() {{
+      id = "my-asset1";
+      name = "My Asset 1";
+      os = new Os() {{
+        type = "Linux";
+      }};
+    }};
+    final Response response = testEndpoint.path("asset")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .put(Entity.json(asset1));
+    TestHelper.assertValidationError("os.name may not be null", response);
   }
 
   @Test

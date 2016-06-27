@@ -3,8 +3,11 @@ package se.atg.cmdb.ui.rest;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -17,11 +20,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 
 import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Group;
+import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
+import se.atg.cmdb.model.Tag;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class GroupIntegrationTest {
@@ -30,6 +36,8 @@ public class GroupIntegrationTest {
   private MongoDatabase database;
   @Inject
   private WebTarget testEndpoint;
+  @Inject
+  private Client client;
   @Inject
   private ObjectMapper objectMapper;
 
@@ -136,9 +144,102 @@ public class GroupIntegrationTest {
     TestHelper.assertEquals(Arrays.asList(root1, root2, root3), response.items, Group::getId, GroupIntegrationTest::verifyGroups);
   }
 
+  @Test
+  public void addNewGroup() {
+
+    final Group group1 = new Group() {{
+      id = "group1";
+      name = "Group 1";
+      description = "Group description";
+    }};
+    createGroup(group1);
+
+    final Group group2 = new Group() {{
+      id = "group2";
+      name = "Group 2";
+      description = "Group description";
+      groups = Arrays.asList(new Group("group1"), new Group("group3"));
+      tags = Arrays.asList(new Tag("tag1"));
+    }};
+    final GroupResponse createResponse = createGroup(group2);
+    Assert.assertNotNull(createResponse.db);
+
+    final Group response = getGroup(createResponse.link);
+    TestHelper.assertEquals(Arrays.asList(group1), response.groups, Group::getId, TestHelper::isEqualExceptMeta);
+
+    response.groups = null;
+    group2.groups = null;
+    TestHelper.isEqualExceptMeta(group2, response);
+  }
+
+  @Test
+  public void newGroupMustHaveId() {
+
+    final Group group1 = new Group() {{
+      name = "Group 1";
+    }};
+    final Response response = testEndpoint.path("group")
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .put(Entity.json(group1));
+      TestHelper.assertValidationError("id may not be null", response);
+  }
+
+  @Test
+  public void newGroupMustHaveName() {
+
+    final Group group1 = new Group() {{
+      id = "group1";
+    }};
+    final Response response = testEndpoint.path("group")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .put(Entity.json(group1));
+    TestHelper.assertValidationError("name may not be null", response);
+  }
+
+  @Test
+  public void deleteGroup() {
+
+    final Group group1 = new Group() {{
+      id = "group1";
+      name = "Group 1";
+    }};
+    final GroupResponse createResponse = createGroup(group1);
+
+    final Response deleteResponse = client.target(createResponse.link)
+      .request(MediaType.APPLICATION_JSON)
+      .delete();
+    TestHelper.assertSuccessful(deleteResponse);
+
+    final Response response = client.target(createResponse.link)
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    Assert.assertEquals(404, response.getStatus());
+  }
+
+  private GroupResponse createGroup(Group group) {
+
+    final Response response = testEndpoint.path("group")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .put(Entity.json(group));
+    TestHelper.assertSuccessful(response);
+
+    final Document db = groups.find(Filters.eq("id", group.id)).first();
+    final GroupLink link = response.readEntity(GroupLink.class);
+    return new GroupResponse(link, db);
+  }
+
   private Group getGroup(String id) {
 
     final Response response = testEndpoint.path("group").path(id)
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    TestHelper.assertSuccessful(response);
+    return response.readEntity(Group.class);
+  }
+
+  private Group getGroup(Link link) {
+
+    final Response response = client.target(link)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .get();
     TestHelper.assertSuccessful(response);
@@ -151,5 +252,18 @@ public class GroupIntegrationTest {
       TestHelper.assertEquals(expected.groups, actual.groups, Group::getId, GroupIntegrationTest::verifyGroups);
     }
     Assert.assertEquals(expected.id, actual.id);
+  }
+
+  static class GroupResponse {
+
+    public Link link;
+    public Document db;
+
+    GroupResponse(GroupLink link, Document db) {
+      Assert.assertEquals(link.id, db.getString("id"));
+      Assert.assertEquals(link.name, db.getString("name"));
+      this.db = db;
+      this.link = link.link;
+    }
   }
 }
