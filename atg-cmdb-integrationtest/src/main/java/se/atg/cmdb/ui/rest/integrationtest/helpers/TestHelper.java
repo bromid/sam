@@ -33,7 +33,7 @@ public abstract class TestHelper {
   public static <K,V,T> void assertEquals(Map<K,V> expectedMap, Collection<T> actualCollection, Function<? super T,K> keyMapper, BiConsumer<V,T> assertion) {
 
     Assert.assertEquals(expectedMap.size(), actualCollection.size());
-    actualCollection.forEach(actual->{
+    actualCollection.forEach(actual -> {
       final K key = keyMapper.apply(actual);
       final V expected = expectedMap.get(key);
       Assert.assertNotNull("Missing " + key, expected);

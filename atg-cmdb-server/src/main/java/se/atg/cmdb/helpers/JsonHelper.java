@@ -27,9 +27,9 @@ import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.rest.serializer.LinkDeserializer;
 import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
 
-public abstract class JSONHelper {
+public abstract class JsonHelper {
 
-  static final Logger logger = LoggerFactory.getLogger(JSONHelper.class);
+  static final Logger logger = LoggerFactory.getLogger(JsonHelper.class);
 
   public static UpdateMetaResult updateMetaForUpdate(Document bson, Optional<String> hash, String updatedBy) {
 
@@ -59,7 +59,7 @@ public abstract class JSONHelper {
   }
 
   public static Document addMetaForCreate(Object node, String createdBy, ObjectMapper objectMapper) {
-    final String json = JSONHelper.objectToJson(node, objectMapper, View.DB.class);
+    final String json = JsonHelper.objectToJson(node, objectMapper, View.Db.class);
     return addMetaForCreate(json, createdBy);
   }
 
@@ -128,7 +128,7 @@ public abstract class JSONHelper {
 
   public static Document jsonToBson(JsonNode node, ObjectMapper objectMapper) {
     try {
-      final String json = objectMapper.writerWithView(View.DB.class).writeValueAsString(node);
+      final String json = objectMapper.writerWithView(View.Db.class).writeValueAsString(node);
       return Document.parse(json);
     } catch (JsonProcessingException exc) {
       logger.error("Failed to generate json for: " + node, exc);
@@ -138,7 +138,7 @@ public abstract class JSONHelper {
 
   public static Document entityToBson(Object entity, ObjectMapper objectMapper) {
     try {
-      final String json = objectMapper.writerWithView(View.DB.class).writeValueAsString(entity);
+      final String json = objectMapper.writerWithView(View.Db.class).writeValueAsString(entity);
       return Document.parse(json);
     } catch (JsonProcessingException exc) {
       logger.error("Failed to generate json for: " + entity, exc);

@@ -2,8 +2,8 @@ package se.atg.cmdb.dao;
 
 public interface Collections {
 
-  static final String SERVERS = "servers";
-  static final String ASSETS = "assets";
-  static final String APPLICATIONS = "applications";
-  static final String GROUPS = "groups";
+  String SERVERS = "servers";
+  String ASSETS = "assets";
+  String APPLICATIONS = "applications";
+  String GROUPS = "groups";
 }

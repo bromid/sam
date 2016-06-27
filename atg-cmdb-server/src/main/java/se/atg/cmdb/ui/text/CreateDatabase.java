@@ -13,14 +13,15 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.IndexOptions;
+import com.mongodb.client.model.Indexes;
 
 import se.atg.cmdb.dao.Collections;
 
-import static com.mongodb.client.model.Indexes.*;
+public final class CreateDatabase {
 
-public class CreateDatabase {
+  static final Logger logger = LoggerFactory.getLogger(CreateDatabase.class);
 
-  final static Logger logger = LoggerFactory.getLogger(CreateDatabase.class);
+  private CreateDatabase() {}
 
   public static void main(String[] args) {
 
@@ -46,7 +47,7 @@ public class CreateDatabase {
         new IndexOptions().unique(true)
       ),
       new IndexModel(
-        compoundIndex(text("hostname"), text("environment"), text("fqdn"), text("description")),
+        compoundIndex(Indexes.text("hostname"), Indexes.text("environment"), Indexes.text("fqdn"), Indexes.text("description")),
         new IndexOptions().weights(new Document().append("hostname", 10).append("fqdn", 10).append("environment", 5)).defaultLanguage("sv")
       )
     ));
@@ -58,6 +59,6 @@ public class CreateDatabase {
     groups.createIndex(ascending("id"), new IndexOptions().unique(true));
 
     final MongoCollection<Document> assets = database.getCollection(Collections.ASSETS);
-    assets.createIndex(ascending("id"), new IndexOptions().unique(true));  
+    assets.createIndex(ascending("id"), new IndexOptions().unique(true));
   }
 }

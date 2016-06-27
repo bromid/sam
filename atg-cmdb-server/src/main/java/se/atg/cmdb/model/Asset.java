@@ -26,7 +26,7 @@ public class Asset extends Base {
   @Size(min = 1, max = 50)
   public String name;
   @Valid
-  public OS os;
+  public Os os;
   @Valid
   public Network network;
 
@@ -38,7 +38,7 @@ public class Asset extends Base {
 
     this.id = bson.getString("id");
     this.name = bson.getString("name");
-    this.os = Mapper.mapObject(bson, "os", OS::fromBson);
+    this.os = Mapper.mapObject(bson, "os", Os::fromBson);
     this.network = Mapper.mapObject(bson, "network", Network::fromBson);
   }
 
@@ -61,7 +61,7 @@ public class Asset extends Base {
     return HashCodeBuilder.reflectionHashCode(this);
   }
 
-  public static class OS {
+  public static class Os {
 
     @NotNull(groups = Create.class)
     @Size(min = 1, groups = Update.class)
@@ -72,18 +72,18 @@ public class Asset extends Base {
     public String version;
     public Map<String, Object> attributes;
 
-    public OS() {
+    public Os() {
     }
 
-    public OS(Document bson) {
+    public Os(Document bson) {
       this.name = bson.getString("name");
       this.type = bson.getString("type");
       this.version = bson.getString("version");
       this.attributes = Mapper.mapAttributes(bson);
     }
 
-    public static OS fromBson(Document bson) {
-      return new OS(bson);
+    public static Os fromBson(Document bson) {
+      return new Os(bson);
     }
 
     @Override
@@ -137,9 +137,7 @@ public class Asset extends Base {
     }
   }
 
-  public interface Create extends Update {
-  }
+  public interface Create extends Update {}
 
-  public interface Update extends Base.Validation {
-  }
+  public interface Update extends Base.Validation {}
 }

@@ -27,13 +27,13 @@ import io.dropwizard.cli.EnvironmentCommand;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
-import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.View;
-import se.atg.cmdb.ui.dropwizard.CMDBConfiguration;
-import se.atg.cmdb.ui.dropwizard.db.MongoDBHealthCheck;
+import se.atg.cmdb.ui.dropwizard.CmdbConfiguration;
+import se.atg.cmdb.ui.dropwizard.db.MongoDatabaseHealthCheck;
 import se.atg.cmdb.ui.text.CreateDatabase;
 
-public class TestCommand extends EnvironmentCommand<CMDBConfiguration> {
+public class TestCommand extends EnvironmentCommand<CmdbConfiguration> {
 
   static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
   static final Logger LOGGER = LoggerFactory.getLogger("integration-test");
@@ -41,22 +41,22 @@ public class TestCommand extends EnvironmentCommand<CMDBConfiguration> {
   private Class<?>[] testClasses;
   private Optional<Description> testFilter;
 
-  public TestCommand(Application<CMDBConfiguration> application, Optional<Description> testFilter, Class<?>... testClasses) {
+  public TestCommand(Application<CmdbConfiguration> application, Optional<Description> testFilter, Class<?>... testClasses) {
     super(application, "test", "Runs junit tests");
     this.testFilter = testFilter;
     this.testClasses = testClasses;
   }
 
   @Override
-  protected Class<CMDBConfiguration> getConfigurationClass() {
-    return CMDBConfiguration.class;
+  protected Class<CmdbConfiguration> getConfigurationClass() {
+    return CmdbConfiguration.class;
   }
 
   @Override
-  protected void run(Environment environment, Namespace namespace, CMDBConfiguration configuration) throws Exception {
+  protected void run(Environment environment, Namespace namespace, CmdbConfiguration configuration) throws Exception {
 
     // Jackson configuration
-    final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper(), View.API.class);
+    final ObjectMapper objectMapper = JsonHelper.configureObjectMapper(environment.getObjectMapper(), View.Api.class);
 
     // Jersey client configuration
     final Client client = new JerseyClientBuilder(environment)
@@ -66,7 +66,7 @@ public class TestCommand extends EnvironmentCommand<CMDBConfiguration> {
       .build("atg_cmdb_integrationtest");
 
     // Guice injection
-    final MongoDatabase database = configuration.getDBConnectionFactory().getDatabase(environment.lifecycle());
+    final MongoDatabase database = configuration.getDbConnectionFactory().getDatabase(environment.lifecycle());
     final Injector injector = Guice.createInjector(new AbstractModule() {
       protected void configure() {
         bind(ObjectMapper.class).toInstance(objectMapper);
@@ -89,7 +89,7 @@ public class TestCommand extends EnvironmentCommand<CMDBConfiguration> {
 
   private static void verifyDatabaseHealth(MongoDatabase database) {
 
-    final MongoDBHealthCheck dbHealthCheck = new MongoDBHealthCheck(database);
+    final MongoDatabaseHealthCheck dbHealthCheck = new MongoDatabaseHealthCheck(database);
     final com.codahale.metrics.health.HealthCheck.Result dbHealth = dbHealthCheck.execute();
     if (!dbHealth.isHealthy()) {
       throw new RuntimeException("Failed to connect to database", dbHealth.getError());

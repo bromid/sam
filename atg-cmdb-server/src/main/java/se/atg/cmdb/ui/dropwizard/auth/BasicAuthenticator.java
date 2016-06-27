@@ -9,11 +9,11 @@ import se.atg.cmdb.model.User;
 
 public class BasicAuthenticator implements Authenticator<BasicCredentials, User> {
 
-	@Override
-	public Optional<User> authenticate(BasicCredentials credentials) throws AuthenticationException {
-		if ("secret".equals(credentials.getPassword())) {
-			return Optional.of(new User(credentials.getUsername()));
-		}
-		return Optional.absent();
-	}
+  @Override
+  public Optional<User> authenticate(BasicCredentials credentials) throws AuthenticationException {
+    if ("secret".equals(credentials.getPassword())) {
+      return Optional.of(new User(credentials.getUsername()));
+    }
+    return Optional.absent();
+  }
 }

@@ -34,6 +34,21 @@ public abstract class Mapper {
       .collect(Collectors.toList());
   }
 
+  public static <T,R> List<R> mapList(Document bson, String field, Map<T, Document> map, Function<Document,T> keyMapper, BiFunction<Document,Document,R> mapper) {
+
+    final List<Document> list = (List<Document>) bson.get(field);
+    if (list == null) {
+      return Collections.emptyList();
+    }
+    return list.stream()
+      .map(t -> {
+        final T key = keyMapper.apply(t);
+        final Document mapItem = map.get(key);
+        return mapper.apply(t, mapItem);
+      })
+      .collect(Collectors.toList());
+  }
+
   public static <T> Map<T, Document> mapListToMap(Document bson, String field, Function<Document,T> keyMapper) {
 
     final List<Document> list = (List<Document>) bson.get(field);
@@ -42,21 +57,6 @@ public abstract class Mapper {
     }
     return list.stream()
       .collect(Collectors.toMap(keyMapper, Function.identity()));
-  }
-
-  public static <T,R> List<R> mapList(Document bson, String field, Map<T, Document> map, Function<Document,T> keyMapper, BiFunction<Document,Document,R> mapper) {
-
-    final List<Document> list = (List<Document>) bson.get(field);
-    if (list == null) {
-      return Collections.emptyList();
-    }
-    return list.stream()
-      .map(t->{
-        final T key = keyMapper.apply(t);
-        final Document mapItem = map.get(key);
-        return mapper.apply(t, mapItem);
-      })
-      .collect(Collectors.toList());
   }
 
   public static <T,R> List<R> mapFromTwoList(Document bson, String field1, String field2, BiFunction<? super T, ? super T, ? extends R> mapper) {

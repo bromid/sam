@@ -13,37 +13,37 @@ import se.atg.cmdb.ui.rest.ServerResource;
 
 public class ServerLink {
 
-	public final String hostname;
-	public final String environment;
-	public Link link;
+  public final String hostname;
+  public final String environment;
+  public Link link;
 
-	@JsonCreator
-	public ServerLink(
-		@JsonProperty("hostname") String hostname,
-		@JsonProperty("environment") String environment,
-		@JsonProperty("link") Link link
-	) {
-		this(hostname, environment);
-		this.link = link;
-	}
+  @JsonCreator
+  public ServerLink(
+    @JsonProperty("hostname") String hostname,
+    @JsonProperty("environment") String environment,
+    @JsonProperty("link") Link link
+  ) {
+    this(hostname, environment);
+    this.link = link;
+  }
 
-	public ServerLink(String hostname, String environment) {
-		this.hostname = hostname;
-		this.environment = environment;
-	}
+  public ServerLink(String hostname, String environment) {
+    this.hostname = hostname;
+    this.environment = environment;
+  }
 
-	public ServerLink(Document bson) {
-		this.hostname = bson.getString("hostname");
-		this.environment = bson.getString("environment");
-	}
+  public ServerLink(Document bson) {
+    this.hostname = bson.getString("hostname");
+    this.environment = bson.getString("environment");
+  }
 
-	public static ServerLink buildFromURI(URI baseUri, String hostname, String environment) {
+  public static ServerLink buildFromUri(URI baseUri, String hostname, String environment) {
 
-		final ServerLink link = new ServerLink(hostname, environment);
-		link.link = Link.fromMethod(ServerResource.class, "getServer")
-			.baseUri(baseUri)
-			.rel("self")
-			.build(environment, hostname);
-		return link;
-	}
+    final ServerLink link = new ServerLink(hostname, environment);
+    link.link = Link.fromMethod(ServerResource.class, "getServer")
+      .baseUri(baseUri)
+      .rel("self")
+      .build(environment, hostname);
+    return link;
+  }
 }

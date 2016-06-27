@@ -15,20 +15,29 @@ public abstract class TreeHelper {
       .keySet()
       .stream()
       .collect(Collectors.toMap(Function.identity(), NodeState::create));
-    return recursiveCreateTree(nodes.get(rootNodeId), nodes, loopCheck.get(rootNodeId), loopCheck, getSubNodes, addSubNode);
+    final State<T> state = new State<T>() {{
+      thisNodes = nodes;
+      thisLoopCheck = loopCheck;
+      thisGetSubNodes = getSubNodes;
+      thisAddSubNode = addSubNode;
+    }};
+    return recursiveCreateTree(state.getNode(rootNodeId), state.getLoopCheck(rootNodeId), state);
   }
 
-  private static <T> T recursiveCreateTree(T rootNode, Map<String, T> nodes, NodeState nodeState, Map<String, NodeState> loopCheck, Function<T, List<String>> getSubNodes, BiConsumer<T, T> addSubNode) {
+  private static <T> T recursiveCreateTree(T rootNode, NodeState nodeState, State<T> state) {
 
-    if (nodeState == null) return null;
-    if (nodeState.onStack) return null;
-    if (nodeState.visit()) return rootNode;
+    if (nodeState == null || nodeState.onStack) {
+      return null;
+    }
+    if (nodeState.visit()) {
+      return rootNode;
+    }
 
-    final List<String> subNodeIds = getSubNodes.apply(rootNode);
+    final List<String> subNodeIds = state.getSubNodes(rootNode);
     subNodeIds.stream()
-      .map(t -> recursiveCreateTree(nodes.get(t), nodes, loopCheck.get(t), loopCheck, getSubNodes, addSubNode))
+      .map(t -> recursiveCreateTree(state.getNode(t), state.getLoopCheck(t), state))
       .filter(Objects::nonNull)
-      .forEach(t -> addSubNode.accept(rootNode, t));
+      .forEach(t -> state.addSubNode(rootNode, t));
 
     nodeState.leave();
     return rootNode;
@@ -54,6 +63,30 @@ public abstract class TreeHelper {
 
     static <T> NodeState create(T node) {
       return new NodeState();
+    }
+  }
+
+  static class State<T> {
+
+    Map<String, T> thisNodes;
+    Map<String, NodeState> thisLoopCheck;
+    Function<T, List<String>> thisGetSubNodes;
+    BiConsumer<T, T> thisAddSubNode;
+
+    List<String> getSubNodes(T rootNode) {
+      return thisGetSubNodes.apply(rootNode);
+    }
+
+    public void addSubNode(T rootNode, T node) {
+      thisAddSubNode.accept(rootNode, node);
+    }
+
+    public NodeState getLoopCheck(String nodeId) {
+      return thisLoopCheck.get(nodeId);
+    }
+
+    public T getNode(String nodeId) {
+      return thisNodes.get(nodeId);
     }
   }
 }

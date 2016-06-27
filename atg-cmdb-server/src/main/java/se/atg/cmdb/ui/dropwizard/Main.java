@@ -30,12 +30,12 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
-import se.atg.cmdb.helpers.JSONHelper;
+import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.User;
 import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthorizer;
-import se.atg.cmdb.ui.dropwizard.db.MongoDBHealthCheck;
+import se.atg.cmdb.ui.dropwizard.db.MongoDatabaseHealthCheck;
 import se.atg.cmdb.ui.dropwizard.render.HtmlViewRenderer;
 import se.atg.cmdb.ui.dropwizard.render.MarkdownViewRenderer;
 import se.atg.cmdb.ui.rest.ApplicationResource;
@@ -47,28 +47,28 @@ import se.atg.cmdb.ui.rest.SearchResource;
 import se.atg.cmdb.ui.rest.ServerResource;
 import se.atg.cmdb.ui.rest.mapper.MongoServerExceptionMapper;
 
-public class Main extends Application<CMDBConfiguration> {
+public class Main extends Application<CmdbConfiguration> {
 
   public static void main(String[] args) throws Exception {
     new Main().run(args);
   }
 
   @Override
-  public void initialize(Bootstrap<CMDBConfiguration> bootstrap) {
-    bootstrap.addBundle(new ViewBundle<CMDBConfiguration>(Arrays.asList(new MarkdownViewRenderer(), new HtmlViewRenderer())));
+  public void initialize(Bootstrap<CmdbConfiguration> bootstrap) {
+    bootstrap.addBundle(new ViewBundle<CmdbConfiguration>(Arrays.asList(new MarkdownViewRenderer(), new HtmlViewRenderer())));
     bootstrap.addBundle(new AssetsBundle("/static", "/static", "index.html", "static"));
     bootstrap.addBundle(new AssetsBundle("/docs", "/docs", "index.html", "docs"));
   }
 
   @Override
-  public void run(CMDBConfiguration configuration, Environment environment) throws Exception {
+  public void run(CmdbConfiguration configuration, Environment environment) throws Exception {
 
     // Healthchecks
-    final MongoDatabase database = configuration.getDBConnectionFactory().getDatabase(environment.lifecycle());
-    environment.healthChecks().register("mongoDB", new MongoDBHealthCheck(database));
+    final MongoDatabase database = configuration.getDbConnectionFactory().getDatabase(environment.lifecycle());
+    environment.healthChecks().register("mongoDB", new MongoDatabaseHealthCheck(database));
 
     // Jackson configuration
-    final ObjectMapper objectMapper = JSONHelper.configureObjectMapper(environment.getObjectMapper(), View.API.class);
+    final ObjectMapper objectMapper = JsonHelper.configureObjectMapper(environment.getObjectMapper(), View.Api.class);
 
     // REST Resources
     environment.jersey().register(new InfoResource());

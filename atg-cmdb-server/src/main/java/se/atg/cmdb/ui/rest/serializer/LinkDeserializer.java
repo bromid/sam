@@ -14,27 +14,27 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class LinkDeserializer extends JsonDeserializer<Link> {
 
-	@Override
-	public Class<Link> handledType() {
-		return Link.class;
-	}
+  @Override
+  public Class<Link> handledType() {
+    return Link.class;
+  }
 
-	@Override
-	public Link deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  @Override
+  public Link deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
 
-		final ObjectCodec oc = jsonParser.getCodec();
-        final JsonNode node = oc.readTree(jsonParser);
+    final ObjectCodec oc = jsonParser.getCodec();
+    final JsonNode node = oc.readTree(jsonParser);
 
-        final JsonNode href = node.get("href");
-        if (href == null) {
-        	return null;
-        }
+    final JsonNode href = node.get("href");
+    if (href == null) {
+      return null;
+    }
 
-        final Builder linkBuilder = Link.fromUri(href.asText());
-        final JsonNode rel = node.get("rel");
-        if (rel != null) {
-        	linkBuilder.rel(rel.asText());
-        }
-        return linkBuilder.build();
-	}
+    final Builder linkBuilder = Link.fromUri(href.asText());
+    final JsonNode rel = node.get("rel");
+    if (rel != null) {
+      linkBuilder.rel(rel.asText());
+    }
+    return linkBuilder.build();
+  }
 }

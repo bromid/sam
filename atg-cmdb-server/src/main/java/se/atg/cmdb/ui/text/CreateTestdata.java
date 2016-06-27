@@ -13,9 +13,11 @@ import com.mongodb.client.model.Updates;
 
 import se.atg.cmdb.dao.Collections;
 
-public class CreateTestdata {
+public final class CreateTestdata {
 
-  final static Logger logger = LoggerFactory.getLogger(CreateTestdata.class);
+  static final Logger logger = LoggerFactory.getLogger(CreateTestdata.class);
+
+  private CreateTestdata() {}
 
   public static void main(String[] args) {
 

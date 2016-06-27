@@ -47,7 +47,7 @@ public class PaginatedCollection<T> {
       limit = optionalLimit.get();
 
       if (items.size() > limit) {
-        final int nextStart = (optionalStart.isPresent()) ? start+limit : limit;
+        final int nextStart = (optionalStart.isPresent()) ? start + limit : limit;
         this.items = items.subList(0, limit);
         this.next = Link.fromUriBuilder(uriBuilder.replaceQueryParam("limit", limit).replaceQueryParam("start", nextStart)).rel("next").build();
       }

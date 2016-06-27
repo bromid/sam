@@ -15,31 +15,31 @@ import se.atg.cmdb.ui.dropwizard.view.ReleaseNotesView;
 @Produces(Defaults.MEDIA_TYPE_JSON)
 public class InfoResource {
 
-	private static final ReleaseNotesView releaseNotesView = new ReleaseNotesView();
+  private static final ReleaseNotesView releaseNotesView = new ReleaseNotesView();
 
-	@GET
-	@Path("info/release-notes")
-	@Produces(Defaults.META_TYPE_HTML)
-	public ReleaseNotesView getReleaseNote() {
-		return releaseNotesView;
-	}
+  @GET
+  @Path("info/release-notes")
+  @Produces(Defaults.META_TYPE_HTML)
+  public ReleaseNotesView getReleaseNote() {
+    return releaseNotesView;
+  }
 
-	@GET
-	@Path("info")
-	public Info getInfo(
-		@Context UriInfo uriInfo
-	) {
-		return new Info() {{
-			version = getClass().getPackage().getImplementationVersion();
-			releaseNotes = Link.fromMethod(InfoResource.class, "getReleaseNote")
-				.baseUri(uriInfo.getBaseUri())
-				.build()
-				.getUri();
-		}};
-	}
+  @GET
+  @Path("info")
+  public Info getInfo(
+    @Context UriInfo uriInfo
+  ) {
+    return new Info() {{
+      version = getClass().getPackage().getImplementationVersion();
+      releaseNotes = Link.fromMethod(InfoResource.class, "getReleaseNote")
+        .baseUri(uriInfo.getBaseUri())
+        .build()
+        .getUri();
+    }};
+  }
 
-	public static class Info {
-		public URI releaseNotes;
-		public String version;
-	}
+  public static class Info {
+    public URI releaseNotes;
+    public String version;
+  }
 }
