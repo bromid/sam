@@ -68,6 +68,11 @@ public class Server extends Asset {
     return id;
   }
 
+  @Null(groups = { Create.class, Update.class })
+  public String getName() {
+    return name;
+  }
+
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
@@ -82,4 +87,8 @@ public class Server extends Asset {
   public int hashCode() {
     return HashCodeBuilder.reflectionHashCode(this);
   }
+
+  public interface Create extends Update, SubtypeCreate {}
+
+  public interface Update extends SubtypeUpdate {}
 }

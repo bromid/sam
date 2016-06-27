@@ -28,7 +28,7 @@ public class Main extends Application<CmdbConfiguration> {
   public void initialize(Bootstrap<CmdbConfiguration> bootstrap) {
     bootstrap.addCommand(new TestCommand(this,
       Optional.empty(),
-      //testDescription(ServerIntegrationTest.class, "addServerDeployment"),
+      //testDescription(ServerIntegrationTest.class, "addNewServer"),
       SmokeTest.class,
       ServerIntegrationTest.class,
       GroupIntegrationTest.class,
