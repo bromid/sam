@@ -13,9 +13,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonView;
 
 import io.swagger.annotations.ApiModel;
 import se.atg.cmdb.helpers.Mapper;
@@ -34,7 +32,6 @@ public class Group extends Base {
   public List<Group> groups;
   public List<ApplicationLink> applications;
   public List<AssetLink> assets;
-  @JsonView(View.Api.class)
   public List<Tag> tags;
 
   public Group() {
@@ -54,7 +51,7 @@ public class Group extends Base {
 
     this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
     this.assets = Mapper.mapList(bson, "assets", AssetLink::fromBson);
-    this.tags = Mapper.mapList(bson, "tags", Tag::new);
+    this.tags = Mapper.mapList(bson, "tags", Tag::fromName);
   }
 
   public List<String> resetGroups() {
@@ -84,15 +81,11 @@ public class Group extends Base {
     return id;
   }
 
-  @JsonProperty("tags")
-  @JsonView(View.Db.class)
-  public List<String> getTags() {
+  public List<Tag> getTags() {
     if (tags == null) {
       return Collections.emptyList();
     }
-    return tags.stream()
-      .map(t->t.name)
-      .collect(Collectors.toList());
+    return tags;
   }
 
   @Override
