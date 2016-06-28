@@ -1,28 +1,39 @@
 package se.atg.cmdb.ui.rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
@@ -32,11 +43,16 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
+import se.atg.cmdb.helpers.JsonHelper;
+import se.atg.cmdb.helpers.MongoHelper;
 import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.helpers.TreeHelper;
 import se.atg.cmdb.model.Group;
+import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Tag;
+import se.atg.cmdb.model.User;
+import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
 @Path("/")
 @Api("groups")
@@ -92,6 +108,48 @@ public class GroupResource {
     return getTags();
   }
 
+  @PUT
+  @Path("services/group")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation(value = "Create a new group", code = 201, response = GroupLink.class)
+  public Response createGroup(
+    @ApiParam("Group") Group group,
+    @Context UriInfo uriInfo,
+    @Context SecurityContext securityContext
+  ) throws JsonParseException, JsonMappingException, IOException {
+    logger.info("Create group: {}", group);
+
+    RestHelper.validate(group, Group.Create.class);
+
+    final User user = RestHelper.getUser(securityContext);
+    final Document bson = JsonHelper.addMetaForCreate(group, user.name, objectMapper);
+    database.getCollection(Collections.GROUPS).insertOne(bson);
+
+    return linkResponse(Status.CREATED, bson, uriInfo);
+  }
+
+  @DELETE
+  @Path("services/group/{id}")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation(value = "Remove a group")
+  public Response deleteGroup(
+    @ApiParam("group id") @PathParam("id") String id,
+    @Context Request request
+  ) {
+    logger.info("Delete group: {}", id);
+
+    final Bson filter = Filters.eq("id", id);
+    final MongoCollection<Document> collection = database.getCollection(Collections.GROUPS);
+    final Document existing = collection.find(filter).first();
+    if (existing == null) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
+
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
+    MongoHelper.deleteDocument(filter, hash, collection);
+    return Response.noContent().build();
+  }
+
   /*
    * Fetch all groups joined (mongodb lookup) with their applications and assets.
    */
@@ -107,13 +165,13 @@ public class GroupResource {
   }
 
   private PaginatedCollection<Tag> getTags() {
-        return RestHelper.paginatedList(database
-          .getCollection(Collections.GROUPS)
-          .aggregate(Lists.newArrayList(
-            Aggregates.unwind("$tags"),
-              Aggregates.group("$tags")
-          )).map(t->new Tag(t.getString("_id")))
-         );
+    return RestHelper.paginatedList(database
+      .getCollection(Collections.GROUPS)
+      .aggregate(Lists.newArrayList(
+        Aggregates.unwind("$tags"),
+          Aggregates.group("$tags")
+        )).map(t->new Tag(t.getString("_id")))
+      );
     }
 
   /*
@@ -161,5 +219,15 @@ public class GroupResource {
       return group;
     }
     return TreeHelper.createTree(groupId, groups, Group::resetGroups, Group::addGroup);
+  }
+
+  private static Response linkResponse(Status status, Document bson, UriInfo uriInfo) {
+    final GroupLink response = new GroupLink(uriInfo.getBaseUri(), bson.getString("id"), bson.getString("name"));
+    return Response
+      .status(status)
+      .location(response.link.getUri())
+      .entity(response)
+      .tag(RestHelper.getEntityTag(bson).orElse(null))
+      .build();
   }
 }

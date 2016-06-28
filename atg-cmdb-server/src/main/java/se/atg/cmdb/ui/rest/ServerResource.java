@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -229,13 +230,35 @@ public class ServerResource {
     return serverLinkResponse(Status.OK, existing, uriInfo);
   }
 
+  @DELETE
+  @Path("services/server/{environment}/{hostname}")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation(value = "Remove a server")
+  public Response deleteServer(
+    @ApiParam("Server hostname") @PathParam("hostname") String hostname,
+    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @Context Request request
+  ) {
+    logger.info("Delete server: {}, {}", environment, hostname);
+
+    final Document existing = getServerForUpdate(hostname, environment);
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
+    MongoHelper.deleteDocument(Filters.and(
+        Filters.eq("environment", environment),
+        Filters.eq("hostname", hostname)
+      ), hash,
+      database.getCollection(Collections.SERVERS)
+    );
+    return Response.noContent().build();
+  }
+
   private Document getServerForUpdate(String hostname, String environment) {
 
     final Document bson = database.getCollection(Collections.SERVERS)
       .find(Filters.and(
         Filters.eq("environment", environment),
-        Filters.eq("hostname", hostname))
-      ).first();
+        Filters.eq("hostname", hostname)
+      )).first();
     if (bson == null) {
       throw new WebApplicationException(Status.NOT_FOUND);
     }

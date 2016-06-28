@@ -9,6 +9,7 @@ import org.bson.conversions.Bson;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
 public abstract class MongoHelper {
@@ -24,6 +25,20 @@ public abstract class MongoHelper {
     }
     final UpdateResult result = collection.replaceOne(filter, document);
     if (result.getMatchedCount() != 1) {
+      throw new WebApplicationException("Concurrent modification", 422);
+    }
+  }
+
+  public static void deleteDocument(Bson filter, Optional<String> hash, MongoCollection<Document> collection) {
+
+    if (hash.isPresent()) {
+      filter = Filters.and(
+        filter,
+        Filters.eq("meta.hash", hash.get())
+      );
+    }
+    final DeleteResult result = collection.deleteOne(filter);
+    if (result.getDeletedCount() != 1) {
       throw new WebApplicationException("Concurrent modification", 422);
     }
   }

@@ -13,9 +13,15 @@ public class Tag {
   public String name;
   public boolean editable = true;
 
+  public Tag() {}
+
   @JsonCreator
   public Tag(String name) {
     this.name = name;
+  }
+
+  public static Tag fromName(String name) {
+    return new Tag(name);
   }
 
   @Override

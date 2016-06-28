@@ -6,6 +6,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -98,8 +99,9 @@ public class ApplicationIntegrationTest {
       name = "My Application 1";
       description = "Min testserver";
     }};
-    final ApplicationLink link = createApplication(application1);
-    final Application response = getApplication(link);
+    final ApplicationResponse createResponse = createApplication(application1);
+
+    final Application response = getApplication(createResponse.link);
     TestHelper.isEqualExceptMeta(application1, response);
   }
 
@@ -114,7 +116,8 @@ public class ApplicationIntegrationTest {
       name = "My Application 1";
       description = "Min testserver";
     }};
-    final ApplicationLink link = createApplication(application1);
+    final ApplicationResponse createResponse = createApplication(application1);
+    Assert.assertNotNull(createResponse.db);
 
     /*
      * Patch server
@@ -123,7 +126,7 @@ public class ApplicationIntegrationTest {
       name = "My Patched application name";
       description = "New description";
     }};
-    final Response response = client.target(link.link)
+    final Response response = client.target(createResponse.link)
       .request(MediaType.APPLICATION_JSON)
       .build("PATCH", Entity.json(applicationPatch))
       .invoke();
@@ -133,20 +136,42 @@ public class ApplicationIntegrationTest {
     /*
      * Get and verify
      */
-    final Application patchedApplication = getApplication(patchedApplicationLink);
+    final Application patchedApplication = getApplication(patchedApplicationLink.link);
     Assert.assertEquals(application1.id, patchedApplication.id);
     Assert.assertEquals(applicationPatch.name, patchedApplication.name);
     Assert.assertEquals(applicationPatch.description, patchedApplication.description);
   }
 
-  private ApplicationLink createApplication(final Application application) {
+  @Test
+  public void deleteApplication() {
+
+    final Application application1 = new Application() {{
+      id = "my-application1";
+      name = "My Application #1";
+    }};
+    final ApplicationResponse createResponse = createApplication(application1);
+
+    final Response deleteResponse = client.target(createResponse.link)
+      .request(MediaType.APPLICATION_JSON)
+      .delete();
+    TestHelper.assertSuccessful(deleteResponse);
+
+    final Response response = client.target(createResponse.link)
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    Assert.assertEquals(404, response.getStatus());
+  }
+
+  private ApplicationResponse createApplication(final Application application) {
 
     final Response response = testEndpoint.path("application")
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(application));
     TestHelper.assertSuccessful(response);
-    Assert.assertNotNull(applications.find(Filters.eq("id", application.id)).first());
-    return response.readEntity(ApplicationLink.class);
+
+    final Document db = applications.find(Filters.eq("id", application.id)).first();
+    final ApplicationLink link = response.readEntity(ApplicationLink.class);
+    return new ApplicationResponse(link, db);
   }
 
   private Application getApplication(String id) {
@@ -159,12 +184,25 @@ public class ApplicationIntegrationTest {
     return response.readEntity(Application.class);
   }
 
-  private Application getApplication(ApplicationLink applicationLink) {
+  private Application getApplication(Link link) {
 
-    final Response response = client.target(applicationLink.link)
+    final Response response = client.target(link)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .get();
     TestHelper.assertSuccessful(response);
     return response.readEntity(Application.class);
+  }
+
+  static class ApplicationResponse {
+
+    public Link link;
+    public Document db;
+
+    ApplicationResponse(ApplicationLink link, Document db) {
+      Assert.assertEquals(link.id, db.getString("id"));
+      Assert.assertEquals(link.name, db.getString("name"));
+      this.db = db;
+      this.link = link.link;
+    }
   }
 }

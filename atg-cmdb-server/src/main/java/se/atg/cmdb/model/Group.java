@@ -23,10 +23,10 @@ import se.atg.cmdb.ui.rest.Defaults;
 @JsonPropertyOrder({ "id", "name", "description", "groups", "applications", "tags", "meta" })
 public class Group extends Base {
 
-  @NotNull
+  @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String id;
-  @NotNull
+  @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String name;
   public List<Group> groups;
@@ -51,7 +51,7 @@ public class Group extends Base {
 
     this.applications = Mapper.mapList(bson, "applications", ApplicationLink::fromBson);
     this.assets = Mapper.mapList(bson, "assets", AssetLink::fromBson);
-    this.tags = Mapper.mapList(bson, "tags", Tag::new);
+    this.tags = Mapper.mapList(bson, "tags", Tag::fromName);
   }
 
   public List<String> resetGroups() {
@@ -81,6 +81,13 @@ public class Group extends Base {
     return id;
   }
 
+  public List<Tag> getTags() {
+    if (tags == null) {
+      return Collections.emptyList();
+    }
+    return tags;
+  }
+
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
@@ -99,4 +106,8 @@ public class Group extends Base {
   public static Group fromBson(Document bson) {
     return new Group(bson);
   }
+
+  public interface Create extends Update {}
+
+  public interface Update extends Base.Validation {}
 }

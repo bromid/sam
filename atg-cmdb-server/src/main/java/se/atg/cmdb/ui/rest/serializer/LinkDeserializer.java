@@ -20,7 +20,7 @@ public class LinkDeserializer extends JsonDeserializer<Link> {
   }
 
   @Override
-  public Link deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+  public Link deserialize(JsonParser jsonParser, DeserializationContext ctx) throws IOException, JsonProcessingException {
 
     final ObjectCodec oc = jsonParser.getCodec();
     final JsonNode node = oc.readTree(jsonParser);

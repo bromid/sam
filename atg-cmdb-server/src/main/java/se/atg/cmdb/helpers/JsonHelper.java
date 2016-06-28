@@ -16,16 +16,24 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.rest.serializer.LinkDeserializer;
 import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
+import se.atg.cmdb.ui.rest.serializer.TagSerializer;
 
 public abstract class JsonHelper {
 
@@ -148,8 +156,16 @@ public abstract class JsonHelper {
 
   public static List<? extends Document> entitiesToBson(List<Group> groupsToAdd, ObjectMapper objectMapper) {
     return groupsToAdd.stream()
-        .map(t -> entityToBson(t, objectMapper))
-        .collect(Collectors.toList());
+      .map(t -> entityToBson(t, objectMapper))
+      .collect(Collectors.toList());
+  }
+
+  public static JsonSerializer<Object> getBeanSerializer(SerializerProvider sp, Class<?> cls) throws JsonMappingException {
+
+    final SerializationConfig config = sp.getConfig();
+    final JavaType type = config.constructType(cls);
+    final BeanDescription beanDesc = config.introspect(type);
+    return BeanSerializerFactory.instance.findBeanSerializer(sp, type, beanDesc);
   }
 
   public static ObjectMapper configureObjectMapper(ObjectMapper objectMapper, Class<?> view) {
@@ -161,6 +177,7 @@ public abstract class JsonHelper {
       private static final long serialVersionUID = 1L;
       {
         addSerializer(new LinkSerializer());
+        addSerializer(new TagSerializer());
         addDeserializer(Link.class, new LinkDeserializer());
       }
     });

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -134,6 +135,23 @@ public class ApplicationResource {
 
     MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.APPLICATIONS));
     return linkResponse(Status.OK, existing, uriInfo);
+  }
+
+  @DELETE
+  @Path("services/application/{id}")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation(value = "Remove an application")
+  public Response deleteApplication(
+    @ApiParam("application id") @PathParam("id") String id,
+    @Context Request request
+  ) {
+    logger.info("Delete application: {}", id);
+
+    final Bson filter = Filters.eq("id", id);
+    final Document existing = findApplication(filter);
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
+    MongoHelper.deleteDocument(filter, hash, database.getCollection(Collections.APPLICATIONS));
+    return Response.noContent().build();
   }
 
   private PaginatedCollection<Application> findApplications(Bson filter) {
