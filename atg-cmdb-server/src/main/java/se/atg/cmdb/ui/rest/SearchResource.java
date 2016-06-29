@@ -49,6 +49,7 @@ public class SearchResource {
         .sort(Sorts.metaTextScore("score"))
         .map(ServerSearchResult::new)
     );
+    result.groups = null;
     return result;
   }
 }
