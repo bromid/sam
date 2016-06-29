@@ -10,7 +10,7 @@ import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Tag;
 import se.atg.cmdb.model.View;
 
-public class TagSerializer extends StdSerializer<Tag>{
+public class TagSerializer extends StdSerializer<Tag> {
 
   private static final long serialVersionUID = 1L;
 
