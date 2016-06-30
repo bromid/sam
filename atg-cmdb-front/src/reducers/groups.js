@@ -1,6 +1,6 @@
 import * as Constants from '../constants';
 
-export function groupsIsLoading(state = false, action) {
+export function groupsIsLoading(state = null, action) {
     switch (action.type) {
         case Constants.FETCH_GROUP_REQUEST:
             return true;

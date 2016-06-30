@@ -57,11 +57,11 @@ function Groups({ groups }) {
             <Subheader>Groups</Subheader>
             {groups.map(group => <Group group={group} key={group.id} />)}
         </List>
-
     );
 }
 
 const GroupsContainer = React.createClass({
+
     componentDidMount() {
         this.props.fetchGroups();
     },
@@ -80,7 +80,7 @@ function mapStateToProps(state) {
     const { groups, groupsIsLoading } = state;
     return {
         groups: groups.items,
-        isLoading: groupsIsLoading || !groups.items,
+        isLoading: groupsIsLoading || groupsIsLoading === null,
     };
 }
 export default connect(mapStateToProps, Actions)(GroupsContainer);
