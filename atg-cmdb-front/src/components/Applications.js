@@ -42,7 +42,7 @@ const ApplicationsContainer = React.createClass({
     render() {
         const { isLoading, applications } = this.props;
         if (isLoading) return <LoadingIndicator />;
-
+        if (!applications) return <p>No results</p>;
         return (
             <Applications applications={applications} />
         );

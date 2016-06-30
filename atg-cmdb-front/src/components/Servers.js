@@ -24,6 +24,7 @@ const ServersContainer = React.createClass({
     render() {
         const {servers, isLoading} = this.props;
         if (isLoading) return <LoadingIndicator />;
+        if (!servers) return <p>No results</p>;
         return <List>
             <h2 style={{margin: 15}}>Servers</h2>
             {servers.map(server => (

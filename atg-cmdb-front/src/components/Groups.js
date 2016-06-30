@@ -69,6 +69,7 @@ const GroupsContainer = React.createClass({
     render() {
         const { isLoading, groups } = this.props;
         if (isLoading) return <LoadingIndicator />;
+        if (!groups) return <p>No results</p>;
 
         return (
             <Groups groups={groups} isLoading={isLoading} />
