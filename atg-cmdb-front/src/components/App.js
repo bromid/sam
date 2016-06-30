@@ -25,7 +25,7 @@ const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen, children }) => (
             />
             <div style={mdPlus ? {marginLeft: 200, position: 'relative', height: '100vh'} : null}>
                 <AppBar
-                    title="Assets Management Dashboard"
+                    title="Simple Asset Management"
                     showMenuIconButton={!mdPlus}
                     onLeftIconButtonTouchTap={openMenu}
                     style={{height: 100, padding: 20}}

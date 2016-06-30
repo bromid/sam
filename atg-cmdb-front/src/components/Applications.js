@@ -30,11 +30,11 @@ function Applications({ applications }) {
                 <Application key={application.id} application={application} />
             ))}
         </List>
-
     );
 }
 
 const ApplicationsContainer = React.createClass({
+
     componentDidMount() {
         this.props.fetchApplications();
     },
@@ -42,9 +42,9 @@ const ApplicationsContainer = React.createClass({
     render() {
         const { isLoading, applications } = this.props;
         if (isLoading) return <LoadingIndicator />;
-
+        if (!applications) return <p>No results</p>;
         return (
-            <Applications applications={applications} isLoading={isLoading} />
+            <Applications applications={applications} />
         );
     },
 });
@@ -53,7 +53,7 @@ function mapStateToProps(state) {
     const { applications, applicationsIsLoading } = state;
     return {
         applications: applications.items,
-        isLoading: applicationsIsLoading || !applications.items,
+        isLoading: applicationsIsLoading || applicationsIsLoading === null,
     };
 }
 export default connect(mapStateToProps, Actions)(ApplicationsContainer);

@@ -4,6 +4,7 @@ import { Router, Route, browserHistory } from 'react-router';
 import App from './App';
 import Groups from './Groups';
 import Applications from './Applications';
+import Servers from './Servers';
 
 const Root = ({ store }) => (
     <Provider store={store}>
@@ -11,6 +12,7 @@ const Root = ({ store }) => (
             <Route path="/" component={App} >
                 <Route path="groups" component={Groups} />
                 <Route path="applications" component={Applications} />
+                <Route path="servers" component={Servers} />  
             </Route>
         </Router>
     </Provider>
