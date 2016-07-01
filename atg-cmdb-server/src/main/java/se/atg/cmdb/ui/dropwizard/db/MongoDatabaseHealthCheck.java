@@ -1,12 +1,16 @@
 package se.atg.cmdb.ui.dropwizard.db;
 
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.health.HealthCheck;
 import com.mongodb.MongoClientException;
 import com.mongodb.client.MongoDatabase;
 
 public class MongoDatabaseHealthCheck extends HealthCheck {
+
+  static final Logger logger = LoggerFactory.getLogger(MongoDatabaseHealthCheck.class);
 
   private final MongoDatabase mongoDatabase;
 
@@ -24,6 +28,7 @@ public class MongoDatabaseHealthCheck extends HealthCheck {
       final Document result = mongoDatabase.runCommand(new Document("dbStats", 1));
       return Result.healthy(result.toJson());
     } catch (MongoClientException exc) {
+      logger.warn("Unhealthy database", exc);
       return Result.unhealthy(exc);
     }
   }
