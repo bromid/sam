@@ -5,6 +5,7 @@ import App from './App';
 import Groups from './Groups';
 import Applications from './Applications';
 import Servers from './Servers';
+import Server from './Server';
 
 const Root = ({ store }) => (
     <Provider store={store}>
@@ -12,7 +13,8 @@ const Root = ({ store }) => (
             <Route path="/" component={App} >
                 <Route path="groups" component={Groups} />
                 <Route path="applications" component={Applications} />
-                <Route path="servers" component={Servers} />  
+                <Route path="servers" component={Servers} />
+                <Route path="servers/:environment/:hostname" component={Server} />
             </Route>
         </Router>
     </Provider>

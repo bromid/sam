@@ -2,9 +2,9 @@ import * as Constants from '../constants';
 
 export function groupsIsLoading(state = null, action) {
     switch (action.type) {
-        case Constants.FETCH_GROUP_REQUEST:
+        case Constants.FETCH_GROUP_LIST_REQUEST:
             return true;
-        case Constants.FETCH_GROUP_RESPONSE:
+        case Constants.FETCH_GROUP_LIST_RESPONSE:
             return false;
         default:
             return state;
@@ -13,7 +13,7 @@ export function groupsIsLoading(state = null, action) {
 
 export function groups(state = {}, action) {
     switch (action.type) {
-        case Constants.FETCH_GROUP_RESPONSE:
+        case Constants.FETCH_GROUP_LIST_RESPONSE:
             if (action.error) return {};
             return action.payload;
         default:
