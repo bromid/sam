@@ -27,12 +27,12 @@ export default function createFetchActions(options) {
         },
     });
 
-    return function fetchPayload() {
+    return function fetchPayload(param) {
         return (dispatch, getState) => {
             if (shouldFetch && !shouldFetch(getState())) return null;
 
             dispatch(requestPayload());
-            return apiCall()
+            return apiCall(param)
                 .then(response => dispatch(receivePayload(response)))
                 .catch(error => dispatch(receivePayloadError(error)));
         };

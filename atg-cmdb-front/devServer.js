@@ -11,12 +11,16 @@ const port = 3001;
 
 const compiler = webpack(config);
 app.use(webpackDevMiddleware(compiler, {
-    noInfo: true,
+    stats: {
+        colors: true,
+        chunks: false,
+        assets: false
+    },
     publicPath: config.output.publicPath
 }));
 
 app.use("/services/*", function(req, res) {
-    req.url = req.baseUrl;
+    req.url = req._parsedUrl.path;
     servicesProxy.web(req, res, {
         target: {
             port: 8080,
