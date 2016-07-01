@@ -4,10 +4,11 @@ import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { blue800 } from 'material-ui/styles/colors';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import AppBar from 'material-ui/AppBar';
-import TextField from 'material-ui/TextField';
 import MainMenu from './MainMenu';
 import matchMedia from './matchMediaHOC';
 import * as menuActions from '../actions/menuActions';
+import SearchField from './SearchField';
+import * as searchActions from '../actions/searchActions';
 
 const theme = {
     palette: {
@@ -15,7 +16,7 @@ const theme = {
     }
 };
 
-const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen, children }) => (
+const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen, children, fetchSearch, searchResults, searchIsLoading }) => (
     <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
         <div>
             <MainMenu
@@ -29,6 +30,7 @@ const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen, children }) => (
                     showMenuIconButton={!mdPlus}
                     onLeftIconButtonTouchTap={openMenu}
                     style={{height: 100, padding: 20}}
+                    iconElementRight={<SearchField fetchSearch={fetchSearch} searchResults={searchResults} searchIsLoading={searchIsLoading} />}
                 />
                 {children}
             </div>
@@ -39,10 +41,15 @@ const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen, children }) => (
 function mapStateToProps(state, { mdPlus }) {
     return {
         mainMenuOpen: state.menuOpen || mdPlus,
+        searchResults: state.searchResults,
+        searchIsLoading: state.searchIsLoading
     };
 }
 
 export default matchMedia(connect(
     mapStateToProps,
-    menuActions
+    {
+        ...menuActions,
+        ...searchActions
+    }
 )(App));

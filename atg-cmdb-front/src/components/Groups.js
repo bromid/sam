@@ -54,7 +54,7 @@ function Group({ group, nestedLevel = 0 }) {
 function Groups({ groups }) {
     return (
         <List>
-            <Subheader>Groups</Subheader>
+            <h2 style={{margin: 15}}>Groups</h2>
             {groups.map(group => <Group group={group} key={group.id} />)}
         </List>
     );

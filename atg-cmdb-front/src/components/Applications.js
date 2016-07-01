@@ -25,7 +25,7 @@ function Application({ application: { name, group, attributes } }) {
 function Applications({ applications }) {
     return (
         <List>
-            <Subheader>Applications</Subheader>
+            <h2 style={{margin: 15}}>Applications</h2>
             {applications.map(application => (
                 <Application key={application.id} application={application} />
             ))}
