@@ -35,7 +35,7 @@ public class ServerSearchResult {
 
   public ServerSearchResult(Document bson) {
     this.hostname = bson.getString("hostname");
-    this.environment = bson.getString("hostname");
+    this.environment = bson.getString("environment");
     this.fqdn = bson.getString("fqdn");
     this.description = bson.getString("description");
     this.score = bson.getDouble("score");
@@ -43,9 +43,5 @@ public class ServerSearchResult {
 
   public String getFqdn() {
     return fqdn;
-  }
-
-  public String getHostname() {
-    return hostname;
   }
 }

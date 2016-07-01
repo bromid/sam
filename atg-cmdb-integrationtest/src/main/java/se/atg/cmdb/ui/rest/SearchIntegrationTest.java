@@ -3,7 +3,6 @@ package se.atg.cmdb.ui.rest;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
@@ -31,8 +30,6 @@ public class SearchIntegrationTest {
   private MongoDatabase database;
   @Inject
   private WebTarget testEndpoint;
-  @Inject
-  private Client client;
   @Inject
   private ObjectMapper objectMapper;
 
@@ -74,10 +71,15 @@ public class SearchIntegrationTest {
       .request(MediaType.APPLICATION_JSON_TYPE)
       .get(SearchResult.class);
 
-    final Collection<ServerSearchResult> servers = searchResult.servers.items;
-    Assert.assertEquals(2, servers.size());
+    final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
+    Assert.assertEquals(2, actualServers.size());
 
     final Map<String, Server> expectedMap = ImmutableMap.of(server1.fqdn, server1, server3.fqdn, server3);
-    TestHelper.assertEquals(expectedMap, servers, ServerSearchResult::getFqdn, (actual, expected) -> Assert.assertEquals(expected.getHostname(), actual.getHostname()));
+    TestHelper.assertEquals(expectedMap, actualServers, ServerSearchResult::getFqdn, (expected, actual) -> {
+      Assert.assertEquals(expected.hostname, actual.hostname);
+      Assert.assertEquals(expected.environment, actual.environment);
+      Assert.assertEquals(expected.fqdn, actual.fqdn);
+      Assert.assertEquals(expected.description, actual.description);
+    });
   }
 }
