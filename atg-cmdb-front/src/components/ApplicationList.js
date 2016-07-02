@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import * as Actions from '../actions/applicationActions';
 import { List, ListItem } from 'material-ui/List';
 import Attributes from './Attributes';
-import LoadingIndicator from "./LoadingIndicator";
+import LoadingIndicator from './LoadingIndicator';
 
 function Application({ application: { name, group, attributes } }) {
     const content = (
@@ -45,14 +45,14 @@ const ApplicationListContainer = React.createClass({
         return (
             <ApplicationList applications={applications} />
         );
-    }
+    },
 });
 
 function mapStateToProps(state) {
     const { applicationList, applicationListIsLoading } = state;
     return {
         applications: applicationList.items,
-        isLoading: applicationListIsLoading || applicationListIsLoading === null
+        isLoading: applicationListIsLoading || applicationListIsLoading === null,
     };
 }
 export default connect(mapStateToProps, Actions)(ApplicationListContainer);

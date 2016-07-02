@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/groupActions';
 import { List, ListItem } from 'material-ui/List';
-import Subheader from 'material-ui/Subheader';
 import Badge from 'material-ui/Badge';
 import LoadingIndicator from './LoadingIndicator';
 
@@ -81,7 +80,7 @@ function mapStateToProps(state) {
     const { groupList, groupListIsLoading } = state;
     return {
         groups: groupList.items,
-        isLoading: groupListIsLoading || groupListIsLoading === null
+        isLoading: groupListIsLoading || groupListIsLoading === null,
     };
 }
 export default connect(mapStateToProps, Actions)(GroupListContainer);

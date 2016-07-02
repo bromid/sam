@@ -16,15 +16,15 @@ export default function createFetchActions(options) {
 
     const receivePayload = payload => ({
         type: receiveKey,
-        payload: payloadTransform(payload)
+        payload: payloadTransform(payload),
     });
 
     const receivePayloadError = error => ({
         type: receiveKey,
         error: true,
         payload: {
-            status: errorTransform(error)
-        }
+            status: errorTransform(error),
+        },
     });
 
     return function fetchPayload(param) {

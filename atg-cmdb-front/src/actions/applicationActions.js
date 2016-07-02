@@ -5,11 +5,11 @@ import * as API from '../api';
 export const fetchApplicationList = createFetchActions({
     apiCall: API.fetchApplicationList,
     requestKey: Constants.FETCH_APPLICATION_LIST_REQUEST,
-    receiveKey: Constants.FETCH_APPLICATION_LIST_RESPONSE
+    receiveKey: Constants.FETCH_APPLICATION_LIST_RESPONSE,
 });
 
 export const fetchApplication = createFetchActions({
     apiCall: API.fetchApplication,
     requestKey: Constants.FETCH_APPLICATION_REQUEST,
-    receiveKey: Constants.FETCH_APPLICATION_RESPONSE
+    receiveKey: Constants.FETCH_APPLICATION_RESPONSE,
 });

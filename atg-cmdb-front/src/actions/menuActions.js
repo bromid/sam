@@ -9,6 +9,4 @@ export const toggleMenu = () => (dispatch, getState) => {
     dispatch(menuOpen ? closeMenu() : openMenu());
 };
 
-export const setMenuOpen = (open) => {
-    return open ? openMenu() : closeMenu();
-};
+export const setMenuOpen = (open) => (open ? openMenu() : closeMenu());

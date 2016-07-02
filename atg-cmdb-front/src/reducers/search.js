@@ -1,4 +1,4 @@
-import * as Constants from "../constants";
+import * as Constants from '../constants';
 
 export function searchIsLoading(state = false, action) {
     switch (action.type) {

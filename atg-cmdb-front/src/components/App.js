@@ -12,24 +12,25 @@ import * as searchActions from '../actions/searchActions';
 
 const theme = {
     palette: {
-        primary1Color: blue800
-    }
+        primary1Color: blue800,
+    },
 };
 
-const App = ({ mdPlus, mainMenuOpen, openMenu, setMenuOpen, children, fetchSearch, searchResults, searchIsLoading }) => (
+const App = ({ mdPlus, mainMenuOpen, openMenu, closeMenu, setMenuOpen, children, fetchSearch, searchResults, searchIsLoading }) => (
     <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
         <div>
             <MainMenu
                 isOpen={mainMenuOpen}
                 mdPlus={mdPlus}
                 setMenuOpen={setMenuOpen}
+                closeMenu={closeMenu}
             />
-            <div style={mdPlus ? {marginLeft: 200, position: 'relative', height: '100vh'} : null}>
+            <div style={mdPlus ? { marginLeft: 200, position: 'relative', height: '100vh' } : null}>
                 <AppBar
                     title="Simple Asset Management"
                     showMenuIconButton={!mdPlus}
                     onLeftIconButtonTouchTap={openMenu}
-                    style={{height: 100, padding: 20}}
+                    style={{ height: 100, padding: 20 }}
                     iconElementRight={<SearchField fetchSearch={fetchSearch} searchResults={searchResults} searchIsLoading={searchIsLoading} />}
                 />
                 {children}
@@ -42,7 +43,7 @@ function mapStateToProps(state, { mdPlus }) {
     return {
         mainMenuOpen: state.menuOpen || mdPlus,
         searchResults: state.searchResults,
-        searchIsLoading: state.searchIsLoading
+        searchIsLoading: state.searchIsLoading,
     };
 }
 
@@ -50,6 +51,6 @@ export default matchMedia(connect(
     mapStateToProps,
     {
         ...menuActions,
-        ...searchActions
+        ...searchActions,
     }
 )(App));

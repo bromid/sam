@@ -5,5 +5,5 @@ import * as API from '../api';
 export const fetchSearch = createFetchActions({
     apiCall: API.fetchSearch,
     requestKey: Constants.FETCH_SEARCH_REQUEST,
-    receiveKey: Constants.FETCH_SEARCH_RESPONSE
+    receiveKey: Constants.FETCH_SEARCH_RESPONSE,
 });
