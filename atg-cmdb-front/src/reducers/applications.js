@@ -1,6 +1,6 @@
 import * as Constants from '../constants';
 
-export function applicationsIsLoading(state = null, action) {
+export function applicationListIsLoading(state = null, action) {
     switch (action.type) {
         case Constants.FETCH_APPLICATION_LIST_REQUEST:
             return true;
@@ -11,7 +11,7 @@ export function applicationsIsLoading(state = null, action) {
     }
 }
 
-export function applications(state = {}, action) {
+export function applicationList(state = {}, action) {
     switch (action.type) {
         case Constants.FETCH_APPLICATION_LIST_RESPONSE:
             if (action.error) return {};

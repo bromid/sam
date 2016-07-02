@@ -53,15 +53,15 @@ const SearchField = React.createClass({
 
     handleSubmit(event) {
         event.preventDefault();
-        const {fetchSearch} = this.props;
+        const { fetchSearch } = this.props;
         const searchString = this.refs.input.value;
         fetchSearch(searchString);
         this.setState({modalOpen: true});
     },
 
     render() {
-        const {showIcon, modalOpen} = this.state;
-        const {searchResults, searchIsLoading} = this.props;
+        const { showIcon, modalOpen } = this.state;
+        const { searchResults, searchIsLoading } = this.props;
         return (
             <div style={searchStyles.wrapper}>
                 <form onSubmit={this.handleSubmit}>

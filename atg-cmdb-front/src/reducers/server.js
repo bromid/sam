@@ -1,6 +1,6 @@
 import * as Constants from '../constants';
 
-export function serversIsLoading(state = null, action) {
+export function serverIsLoading(state = null, action) {
     switch (action.type) {
         case Constants.FETCH_SERVER_REQUEST:
             return true;
@@ -11,7 +11,7 @@ export function serversIsLoading(state = null, action) {
     }
 }
 
-export function servers(state = {}, action) {
+export function server(state = {}, action) {
     switch (action.type) {
         case Constants.FETCH_SERVER_RESPONSE:
             if (action.error) return {};

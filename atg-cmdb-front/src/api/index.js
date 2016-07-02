@@ -10,11 +10,16 @@ const BASE_OPTIONS = {
     }
 }
 
-export const fetchGroups = () => fetch('/services/group', BASE_OPTIONS).then(parseJSON);
-export const fetchApplications = () => fetch('/services/application', BASE_OPTIONS).then(parseJSON);
-export const fetchSearch = (params) => fetch(`/services/search?q=${params}`, BASE_OPTIONS).then(parseJSON);
+export const fetchGroupList = () => fetch('/services/group', BASE_OPTIONS).then(parseJSON);
+export const fetchGroup = (params) => fetch(`/services/group/${params}`, BASE_OPTIONS).then(parseJSON);
 
-export const fetchServers = () => fetch('/services/server', BASE_OPTIONS).then(parseJSON);
+export const fetchApplicationList = () => fetch('/services/application', BASE_OPTIONS).then(parseJSON);
+export const fetchApplication = (params) => fetch(`/services/application/${params}`, BASE_OPTIONS).then(parseJSON);
+
+export const fetchServerList = () => fetch('/services/server', BASE_OPTIONS).then(parseJSON);
+export const fetchServer = (params) => fetch(`/services/server/${params.environment}/${params.hostname}`, BASE_OPTIONS).then(parseJSON);
+
+export const fetchSearch = (params) => fetch(`/services/search?q=${params}`, BASE_OPTIONS).then(parseJSON);
 
 function parseJSON(response) {
     return response.json();

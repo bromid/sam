@@ -16,17 +16,17 @@ function MainMenu({ mdPlus, isOpen, setMenuOpen }) {
                 <img src={atgLogo} style={{width: imageWidth, maxWidth: imageWidth, minWidth: imageWidth}} alt="ATG logo" />
             </CardMedia>
             <div style={{marginTop: 30}}>
-                <Link to="/groups">
-                    <MenuItem>Grupper</MenuItem>
+                <Link to="/group">
+                    <MenuItem>Groups</MenuItem>
                 </Link>
-                <Link to="/applications">
-                    <MenuItem>Applikationer</MenuItem>
+                <Link to="/application">
+                    <MenuItem>Applications</MenuItem>
                 </Link>
-                <Link to="/servers">
-                    <MenuItem>Servrar</MenuItem>
+                <Link to="/server">
+                    <MenuItem>Servers</MenuItem>
                 </Link>
-                <Link to="/assets">
-                    <MenuItem>Tillgångar</MenuItem>
+                <Link to="/asset">
+                    <MenuItem>Assets</MenuItem>
                 </Link>
             </div>
         </Drawer>

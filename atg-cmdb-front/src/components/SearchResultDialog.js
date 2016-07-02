@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import { Link } from 'react-router';
 import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
 import LoadingIndicator from "./LoadingIndicator";
@@ -13,18 +14,18 @@ const SearchResultDialog = React.createClass({
     },
 
     renderServersTable() {
-        const {searchResults} = this.props;
+        const { searchResults, handleCloseModal } = this.props;
 
         if (_.isEmpty(searchResults.servers.items)) return (
             <div>
-                <h2>Servers</h2>
+                <h2 style={{ margin:0 }}>Servers</h2>
                 <p>No results</p>
             </div>
         );
 
         const serverTableRows = searchResults.servers &&  searchResults.servers.items.map((server, index) =>
             <TableRow key={`tableRow-${index}`}>
-                <TableRowColumn><a href={`/server/${server.environment}/${server.hostname}`}>{server.hostname}@{server.environment}</a></TableRowColumn>
+                <TableRowColumn><Link onClick={ handleCloseModal } to={`/server/${server.environment}/${server.hostname}`}>{server.hostname}@{server.environment}</Link></TableRowColumn>
                 <TableRowColumn>{server.fqdn}</TableRowColumn>
                 <TableRowColumn>{server.description}</TableRowColumn>
             </TableRow>
@@ -32,7 +33,7 @@ const SearchResultDialog = React.createClass({
 
         return (
             <div>
-                <h3>Servers</h3>
+                <h3 style={{ margin:0 }}>Servers</h3>
                 <Table>
                     <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
                         <TableRow>

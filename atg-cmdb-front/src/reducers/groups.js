@@ -1,6 +1,6 @@
 import * as Constants from '../constants';
 
-export function groupsIsLoading(state = null, action) {
+export function groupListIsLoading(state = null, action) {
     switch (action.type) {
         case Constants.FETCH_GROUP_LIST_REQUEST:
             return true;
@@ -11,7 +11,7 @@ export function groupsIsLoading(state = null, action) {
     }
 }
 
-export function groups(state = {}, action) {
+export function groupList(state = {}, action) {
     switch (action.type) {
         case Constants.FETCH_GROUP_LIST_RESPONSE:
             if (action.error) return {};

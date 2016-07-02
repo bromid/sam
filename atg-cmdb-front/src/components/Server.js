@@ -1,30 +1,70 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/serverActions';
 import { List, ListItem } from 'material-ui/List';
-import Subheader from 'material-ui/Subheader';
-import Attributes from './Attributes';
 import LoadingIndicator from "./LoadingIndicator";
 
-const ServersContainer = React.createClass({
+function Deployment({deployment}) {
+    return (
+        <ListItem
+            primaryText={
+                <Link to={`/application/${deployment.applicationLink.id}`}>
+                    {`${deployment.applicationLink.name} (${deployment.version})`}
+                </Link>
+            }
+        />
+    );
+}
+
+const ServerContainer = React.createClass({
 
     componentDidMount() {
-        this.props.fetchServers();
+        const { environment, hostname } = this.props;
+        this.props.fetchServer({ environment, hostname }) ;
+    },
+
+    componentWillReceiveProps(newProps) {
+        const { environment, hostname } = this.props;
+        const newEnvironment = newProps.environment;
+        const newHostname = newProps.hostname;
+        if (newEnvironment !== environment || newHostname !== hostname) {
+            this.props.fetchServer({
+                environment: newEnvironment,
+                hostname: newHostname
+            });
+        }
     },
 
     render() {
-        const {servers, isLoading} = this.props;
+        const { server, isLoading } = this.props;
         if (isLoading) return <LoadingIndicator />;
-        if (!servers) return <p>No results</p>;
-        return <p>Server</p>;
+        if (!server.hostname) return <p>No results</p>;
+        return (
+            <div style={{ padding: '8px 0px' }}>
+                <h2>{server.hostname}@{server.environment}</h2>
+                <div style={{ margin: 16 }}>
+                    <p>{server.description}</p>
+                    <List>
+                        <h3>Deployments</h3>
+                        { server.deployments.map(deployment => (
+                            <Deployment key={deployment.applicationLink.id} deployment={deployment} />
+                        ))}
+                    </List>
+                </div>
+            </div>
+        );
     }
 });
 
 function mapStateToProps(state, props) {
-    const {servers, serversIsLoading} = state;
+    const { server, serverIsLoading } = state;
+    const { params } = props;
     return {
-        servers: servers.items,
-        isLoading: serversIsLoading || serversIsLoading === null
+        environment: params.environment,
+        hostname: params.hostname,
+        server: server,
+        isLoading: serverIsLoading || serverIsLoading === null
     };
 }
-export default connect(mapStateToProps, Actions)(ServersContainer);
+export default connect(mapStateToProps, Actions)(ServerContainer);

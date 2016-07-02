@@ -1,24 +1,23 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/serverActions';
 import { List, ListItem } from 'material-ui/List';
-import Subheader from 'material-ui/Subheader';
-import Attributes from './Attributes';
 import LoadingIndicator from "./LoadingIndicator";
 
 function Server({server}) {
     return (
         <ListItem
-            primaryText={`${server.hostname}@${server.environment}`}
+            primaryText={<Link to={`/server/${server.environment}/${server.hostname}`}>{`${server.hostname}@${server.environment}`}</Link>}
             secondaryText={server.description}
         />
     );
 }
 
-const ServersContainer = React.createClass({
+const ServerListContainer = React.createClass({
 
     componentDidMount() {
-        this.props.fetchServers();
+        this.props.fetchServerList();
     },
 
     render() {
@@ -26,8 +25,8 @@ const ServersContainer = React.createClass({
         if (isLoading) return <LoadingIndicator />;
         if (!servers) return <p>No results</p>;
         return <List>
-            <h2 style={{margin: 15}}>Servers</h2>
-            {servers.map(server => (
+            <h2>Servers</h2>
+            { servers.map(server => (
                 <Server key={server.hostname + server.environment} server={server} />
             ))};
         </List>;
@@ -35,10 +34,10 @@ const ServersContainer = React.createClass({
 });
 
 function mapStateToProps(state, props) {
-    const {servers, serversIsLoading} = state;
+    const {serverList, serverListIsLoading} = state;
     return {
-        servers: servers.items,
-        isLoading: serversIsLoading || serversIsLoading === null
+        servers: serverList.items,
+        isLoading: serverListIsLoading || serverListIsLoading === null
     };
 }
-export default connect(mapStateToProps, Actions)(ServersContainer);
+export default connect(mapStateToProps, Actions)(ServerListContainer);
