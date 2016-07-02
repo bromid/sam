@@ -1,20 +1,23 @@
 import { combineReducers } from 'redux';
-import { groups, groupsIsLoading } from './groups';
-import { applications, applicationsIsLoading } from './applications';
-import { servers, serversIsLoading } from './servers';
+import { groupList, groupListIsLoading } from './groups';
+import { applicationList, applicationListIsLoading } from './applications';
+import { serverList, serverListIsLoading } from './servers';
+import { server, serverIsLoading } from './server';
 import { menuOpen } from './menu';
-import {searchResults, searchIsLoading} from './search';
+import { searchResults, searchIsLoading } from './search';
 
 const cmdbState = combineReducers({
-    groups,
-    groupsIsLoading,
-    applications,
-    applicationsIsLoading,
-    servers,
-    serversIsLoading,
+    groupList,
+    groupListIsLoading,
+    applicationList,
+    applicationListIsLoading,
+    serverList,
+    serverListIsLoading,
+    server,
+    serverIsLoading,
     menuOpen,
     searchResults,
-    searchIsLoading
+    searchIsLoading,
 });
 
 export default cmdbState;

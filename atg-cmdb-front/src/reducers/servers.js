@@ -1,19 +1,19 @@
 import * as Constants from '../constants';
 
-export function serversIsLoading(state = null, action) {
+export function serverListIsLoading(state = null, action) {
     switch (action.type) {
-        case Constants.FETCH_SERVER_REQUEST:
+        case Constants.FETCH_SERVER_LIST_REQUEST:
             return true;
-        case Constants.FETCH_SERVER_RESPONSE:
+        case Constants.FETCH_SERVER_LIST_RESPONSE:
             return false;
         default:
             return state;
     }
 }
 
-export function servers(state = {}, action) {
+export function serverList(state = {}, action) {
     switch (action.type) {
-        case Constants.FETCH_SERVER_RESPONSE:
+        case Constants.FETCH_SERVER_LIST_RESPONSE:
             if (action.error) return {};
             return action.payload;
         default:

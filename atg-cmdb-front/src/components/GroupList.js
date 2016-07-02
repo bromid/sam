@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/groupActions';
 import { List, ListItem } from 'material-ui/List';
-import Subheader from 'material-ui/Subheader';
 import Badge from 'material-ui/Badge';
 import LoadingIndicator from './LoadingIndicator';
 
@@ -51,19 +50,19 @@ function Group({ group, nestedLevel = 0 }) {
     );
 }
 
-function Groups({ groups }) {
+function GroupList({ groups }) {
     return (
         <List>
-            <h2 style={{margin: 15}}>Groups</h2>
+            <h2>Groups</h2>
             {groups.map(group => <Group group={group} key={group.id} />)}
         </List>
     );
 }
 
-const GroupsContainer = React.createClass({
+const GroupListContainer = React.createClass({
 
     componentDidMount() {
-        this.props.fetchGroups();
+        this.props.fetchGroupList();
     },
 
     render() {
@@ -72,16 +71,16 @@ const GroupsContainer = React.createClass({
         if (!groups) return <p>No results</p>;
 
         return (
-            <Groups groups={groups} isLoading={isLoading} />
+            <GroupList groups={groups} isLoading={isLoading} />
         );
     },
 });
 
 function mapStateToProps(state) {
-    const { groups, groupsIsLoading } = state;
+    const { groupList, groupListIsLoading } = state;
     return {
-        groups: groups.items,
-        isLoading: groupsIsLoading || groupsIsLoading === null,
+        groups: groupList.items,
+        isLoading: groupListIsLoading || groupListIsLoading === null,
     };
 }
-export default connect(mapStateToProps, Actions)(GroupsContainer);
+export default connect(mapStateToProps, Actions)(GroupListContainer);

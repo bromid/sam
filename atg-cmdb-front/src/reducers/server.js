@@ -1,19 +1,19 @@
 import * as Constants from '../constants';
 
-export function groupListIsLoading(state = null, action) {
+export function serverIsLoading(state = null, action) {
     switch (action.type) {
-        case Constants.FETCH_GROUP_LIST_REQUEST:
+        case Constants.FETCH_SERVER_REQUEST:
             return true;
-        case Constants.FETCH_GROUP_LIST_RESPONSE:
+        case Constants.FETCH_SERVER_RESPONSE:
             return false;
         default:
             return state;
     }
 }
 
-export function groupList(state = {}, action) {
+export function server(state = {}, action) {
     switch (action.type) {
-        case Constants.FETCH_GROUP_LIST_RESPONSE:
+        case Constants.FETCH_SERVER_RESPONSE:
             if (action.error) return {};
             return action.payload;
         default:

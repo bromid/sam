@@ -1,22 +1,15 @@
+import createFetchActions from '../createFetchActions';
 import * as Constants from '../constants';
 import * as API from '../api';
 
-function requestServer() {
-    return {
-        type: Constants.FETCH_SERVER_REQUEST
-    };
-}
+export const fetchServerList = createFetchActions({
+    apiCall: API.fetchServerList,
+    requestKey: Constants.FETCH_SERVER_LIST_REQUEST,
+    receiveKey: Constants.FETCH_SERVER_LIST_RESPONSE,
+});
 
-function receiveServer(servers) {
-    return {
-        type: Constants.FETCH_SERVER_RESPONSE,
-        payload: servers
-    }
-}
-
-export function fetchServers() {
-    return (dispatch) => {
-        dispatch(requestServer());
-        API.fetchServers().then(servers => dispatch(receiveServer(servers)));
-    }
-}
+export const fetchServer = createFetchActions({
+    apiCall: API.fetchServer,
+    requestKey: Constants.FETCH_SERVER_REQUEST,
+    receiveKey: Constants.FETCH_SERVER_RESPONSE,
+});
