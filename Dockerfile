@@ -6,7 +6,7 @@
 # docker build -t atg/cmdb .
 #
 # Create:
-# docker create -it -p 27017:27017 --name cmdb atg/cmdb
+# docker create -p 8080:8080 -p 27017:27017 --name cmdb atg/cmdb
 #
 # Start:
 # docker start cmdb
