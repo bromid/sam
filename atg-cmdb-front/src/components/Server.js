@@ -37,8 +37,11 @@ const ServerContainer = React.createClass({
 
     componentWillReceiveProps(newProps) {
         const { environment, hostname, fetchServer } = this.props;
-        const newEnvironment = newProps.environment;
-        const newHostname = newProps.hostname;
+        const {
+            environment: newEnvironment,
+            hostname: newHostname,
+        } = newProps.environment;
+
         if (newEnvironment !== environment || newHostname !== hostname) {
             fetchServer({
                 environment: newEnvironment,

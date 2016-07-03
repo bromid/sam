@@ -65,7 +65,14 @@ const SearchField = React.createClass({
         return (
             <div style={searchStyles.wrapper}>
                 <form onSubmit={this.handleSubmit}>
-                    <input ref="input" onFocus={this.handleFocus} onBlur={this.handleBlur} style={searchStyles.input} type="text" placeholder="Search..." />
+                    <input
+                        ref="input"
+                        onFocus={this.handleFocus}
+                        onBlur={this.handleBlur}
+                        style={searchStyles.input}
+                        type="text"
+                        placeholder="Search..."
+                    />
                     {showIcon && <SearchIcon style={searchStyles.icon} color={blue800} />}
                 </form>
                 <SearchResultDialog
