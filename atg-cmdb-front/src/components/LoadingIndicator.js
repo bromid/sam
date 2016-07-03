@@ -8,10 +8,10 @@ const loadingStyle = {
     transform: 'translate(-50%, -50%)',
 };
 
-export default function () {
+export default function ({ size = 2 }) {
     return (
         <div style={loadingStyle}>
-            <CircularProgress size={2} />
+            <CircularProgress size={size} />
         </div>
     );
 }

@@ -6,6 +6,7 @@ import Groups from './GroupList';
 import Applications from './ApplicationList';
 import Servers from './ServerList';
 import Server from './Server';
+import ReleaseNotes from './ReleaseNotes';
 
 const Root = ({ store }) => (
     <Provider store={store}>
@@ -18,6 +19,7 @@ const Root = ({ store }) => (
                 <Route path="server" component={Servers} />
                 <Route path="server/:environment" component={Servers} />
                 <Route path="server/:environment/:hostname" component={Server} />
+                <Route path="release-notes" component={ReleaseNotes} />
             </Route>
         </Router>
     </Provider>

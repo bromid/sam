@@ -9,23 +9,28 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.UriInfo;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import se.atg.cmdb.ui.dropwizard.view.ReleaseNotesView;
 
 @Path("/")
+@Api("info")
 @Produces(Defaults.MEDIA_TYPE_JSON)
 public class InfoResource {
 
   private static final ReleaseNotesView releaseNotesView = new ReleaseNotesView();
 
   @GET
-  @Path("info/release-notes")
+  @Path("/services/info/release-notes")
+  @ApiOperation("Fetch release notes")
   @Produces(Defaults.META_TYPE_HTML)
   public ReleaseNotesView getReleaseNote() {
     return releaseNotesView;
   }
 
   @GET
-  @Path("info")
+  @Path("/services/info")
+  @ApiOperation("Fetch meta-data like version and release notes")
   public Info getInfo(
     @Context UriInfo uriInfo
   ) {
