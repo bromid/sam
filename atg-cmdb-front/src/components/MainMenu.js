@@ -26,7 +26,7 @@ function MainMenu({ mdPlus, isOpen, setMenuOpen, closeMenu }) {
     return (
         <Drawer docked={mdPlus} open={isOpen} onRequestChange={setMenuOpen} width={200}>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                <CardMedia mediaStyle={{mediaStyle}}>
+                <CardMedia mediaStyle={mediaStyle}>
                     <img src={atgLogo} style={logoStyle} alt="ATG logo" />
                 </CardMedia>
                 <div style={{ flex: 1, marginTop: 30 }}>

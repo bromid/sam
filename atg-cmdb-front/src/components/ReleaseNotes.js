@@ -13,7 +13,7 @@ const ReleaseNotesContainer = React.createClass({
     render() {
         const { error, releaseNotesHtml, isLoading } = this.props;
         if (isLoading) return <LoadingIndicator />;
-        if (error) return <p>Failed fetching release notes</p>
+        if (error) return <p>Failed fetching release notes</p>;
         return (
             <div id={'releaseNotes'} dangerouslySetInnerHTML={releaseNotesHtml} />
         );

@@ -17,13 +17,14 @@ const TEXT_HTML = {
     },
 };
 
-const verifySuccessful = function (response) {
+const verifySuccessful = (response) => {
     if (response.status >= 400) {
         throw new Error(
             `Got status ${response.statusText} (${response.status}) for ${response.url}.`
         );
     }
-}
+    return response;
+};
 
 const fetchJson = (url) => fetch(url, APPLICATION_JSON)
     .then((response) => verifySuccessful(response))
@@ -43,7 +44,8 @@ export const fetchApplication = (params) => fetchJson(`/services/application/${p
 
 export const fetchServerList = () => fetchJson('/services/server');
 
-export const fetchServer = (params) => fetchJson(`/services/server/${params.environment}/${params.hostname}`);
+export const fetchServer = (params) =>
+    fetchJson(`/services/server/${params.environment}/${params.hostname}`);
 
 export const fetchSearch = (params) => fetchJson(`/services/search?q=${params}`);
 
