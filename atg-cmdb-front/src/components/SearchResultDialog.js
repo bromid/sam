@@ -3,7 +3,10 @@ import { Link } from 'react-router';
 import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
 import LoadingIndicator from './LoadingIndicator';
-import { Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn } from 'material-ui/Table';
+import {
+    Table, TableBody, TableHeader, TableHeaderColumn,
+    TableRow, TableRowColumn,
+} from 'material-ui/Table';
 import _ from 'lodash';
 
 const SearchResultDialog = React.createClass({
@@ -14,9 +17,9 @@ const SearchResultDialog = React.createClass({
     },
 
     renderServersTable() {
-        const { searchResults, handleCloseModal } = this.props;
+        const { searchResults: { servers }, handleCloseModal } = this.props;
 
-        if (_.isEmpty(searchResults.servers.items)) {
+        if (_.isEmpty(servers.items)) {
             return (
                 <div>
                     <h2 style={{ margin: 0 }}>Servers</h2>
@@ -25,13 +28,20 @@ const SearchResultDialog = React.createClass({
             );
         }
 
-        const serverTableRows = searchResults.servers && searchResults.servers.items.map((server, index) =>
+        const serverTableRows = servers && servers.items.map((server, index) =>
             <TableRow key={`tableRow-${index}`}>
-                <TableRowColumn><Link onClick={handleCloseModal} to={`/server/${server.environment}/${server.hostname}`}>{server.hostname}@{server.environment}</Link></TableRowColumn>
+                <TableRowColumn>
+                    <Link
+                        onClick={handleCloseModal}
+                        to={`/server/${server.environment}/${server.hostname}`}
+                    >
+                        {server.hostname}@{server.environment}
+                    </Link>
+                </TableRowColumn>
                 <TableRowColumn>{server.fqdn}</TableRowColumn>
                 <TableRowColumn>{server.description}</TableRowColumn>
             </TableRow>
-        );
+            );
 
         return (
             <div>
@@ -45,7 +55,7 @@ const SearchResultDialog = React.createClass({
                         </TableRow>
                     </TableHeader>
                     <TableBody displayRowCheckbox={false}>
-                        {serverTableRows}
+                               {serverTableRows}
                     </TableBody>
                 </Table>
             </div>
@@ -73,8 +83,8 @@ const SearchResultDialog = React.createClass({
                 autoScrollBodyContent={true}
             >
                 <div style={{ minHeight: 500, marginTop: 20 }}>
-                    {isLoading && <LoadingIndicator />}
-                    {!isLoading && this.renderServersTable()}
+                     {isLoading && <LoadingIndicator />}
+                     {!isLoading && this.renderServersTable()}
                 </div>
             </Dialog>
         );

@@ -16,28 +16,49 @@ const theme = {
     },
 };
 
-const App = ({ mdPlus, mainMenuOpen, openMenu, closeMenu, setMenuOpen, children, fetchSearch, searchResults, searchIsLoading }) => (
-    <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
-        <div>
-            <MainMenu
-                isOpen={mainMenuOpen}
-                mdPlus={mdPlus}
-                setMenuOpen={setMenuOpen}
-                closeMenu={closeMenu}
-            />
-            <div style={mdPlus ? { marginLeft: 200, position: 'relative', height: '100vh' } : null}>
-                <AppBar
-                    title="Simple Asset Management"
-                    showMenuIconButton={!mdPlus}
-                    onLeftIconButtonTouchTap={openMenu}
-                    style={{ height: 100, padding: 20 }}
-                    iconElementRight={<SearchField fetchSearch={fetchSearch} searchResults={searchResults} searchIsLoading={searchIsLoading} />}
+function App(props) {
+    const {
+        mdPlus, mainMenuOpen, openMenu, closeMenu, setMenuOpen,
+        children, fetchSearch, searchResults, searchIsLoading,
+    } = props;
+
+    const searchField = (
+        <SearchField
+            fetchSearch={fetchSearch}
+            searchResults={searchResults}
+            searchIsLoading={searchIsLoading}
+        />
+    );
+
+    const mdPlusStyle = {
+        marginLeft: 200,
+        position: 'relative',
+        height: '100vh',
+    };
+
+    return (
+        <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
+            <div>
+                <MainMenu
+                    isOpen={mainMenuOpen}
+                    mdPlus={mdPlus}
+                    setMenuOpen={setMenuOpen}
+                    closeMenu={closeMenu}
                 />
-                {children}
+                <div style={mdPlus ? mdPlusStyle : null}>
+                    <AppBar
+                        title="Simple Asset Management"
+                        showMenuIconButton={!mdPlus}
+                        onLeftIconButtonTouchTap={openMenu}
+                        style={{ height: 100, padding: 20 }}
+                        iconElementRight={searchField}
+                    />
+                     {children}
+                </div>
             </div>
-        </div>
-    </MuiThemeProvider>
-);
+        </MuiThemeProvider>
+    );
+}
 
 function mapStateToProps(state, { mdPlus }) {
     return {

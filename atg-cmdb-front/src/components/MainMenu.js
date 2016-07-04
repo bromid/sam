@@ -10,10 +10,22 @@ const boxShadow = 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 
 const logoBackground = 'linear-gradient(180deg,#0266b0 0,#09428f)';
 
 function MainMenu({ mdPlus, isOpen, setMenuOpen, closeMenu }) {
+    const mediaStyle = {
+        padding: 27,
+        textAlign: 'center',
+        backgroundImage: logoBackground, boxShadow,
+    };
+
+    const logoStyle = {
+        width: imageWidth,
+        maxWidth: imageWidth,
+        minWidth: imageWidth,
+    };
+
     return (
         <Drawer docked={mdPlus} open={isOpen} onRequestChange={setMenuOpen} width={200}>
-            <CardMedia mediaStyle={{ padding: 27, textAlign: 'center', backgroundImage: logoBackground, boxShadow }}>
-                <img src={atgLogo} style={{ width: imageWidth, maxWidth: imageWidth, minWidth: imageWidth }} alt="ATG logo" />
+            <CardMedia mediaStyle={mediaStyle}>
+                <img src={atgLogo} style={logoStyle} alt="ATG logo" />
             </CardMedia>
             <div style={{ marginTop: 30 }}>
                 <Link onClick={closeMenu} to="/group">
