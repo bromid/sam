@@ -4,6 +4,7 @@ import MenuItem from 'material-ui/MenuItem';
 import { CardMedia } from 'material-ui/Card';
 import { Link } from 'react-router';
 import atgLogo from '../images/atg_logo.png';
+import Version from './Version';
 
 const imageWidth = 98;
 const boxShadow = 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px';
@@ -24,22 +25,25 @@ function MainMenu({ mdPlus, isOpen, setMenuOpen, closeMenu }) {
 
     return (
         <Drawer docked={mdPlus} open={isOpen} onRequestChange={setMenuOpen} width={200}>
-            <CardMedia mediaStyle={mediaStyle}>
-                <img src={atgLogo} style={logoStyle} alt="ATG logo" />
-            </CardMedia>
-            <div style={{ marginTop: 30 }}>
-                <Link onClick={closeMenu} to="/group">
-                    <MenuItem>Groups</MenuItem>
-                </Link>
-                <Link onClick={closeMenu} to="/application">
-                    <MenuItem>Applications</MenuItem>
-                </Link>
-                <Link onClick={closeMenu} to="/server">
-                    <MenuItem>Servers</MenuItem>
-                </Link>
-                <Link onClick={closeMenu} to="/asset">
-                    <MenuItem>Assets</MenuItem>
-                </Link>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <CardMedia mediaStyle={mediaStyle}>
+                    <img src={atgLogo} style={logoStyle} alt="ATG logo" />
+                </CardMedia>
+                <div style={{ flex: 1, marginTop: 30 }}>
+                    <Link onClick={closeMenu} to="/group">
+                        <MenuItem>Groups</MenuItem>
+                    </Link>
+                    <Link onClick={closeMenu} to="/application">
+                        <MenuItem>Applications</MenuItem>
+                    </Link>
+                    <Link onClick={closeMenu} to="/server">
+                        <MenuItem>Servers</MenuItem>
+                    </Link>
+                    <Link onClick={closeMenu} to="/asset">
+                        <MenuItem>Assets</MenuItem>
+                    </Link>
+                </div>
+                <Version />
             </div>
         </Drawer>
     );

@@ -5,6 +5,8 @@ import { serverList, serverListIsLoading } from './servers';
 import { server, serverIsLoading } from './server';
 import { menuOpen } from './menu';
 import { searchResults, searchIsLoading } from './search';
+import { info, infoIsLoading } from './info';
+import { releaseNotes, releaseNotesIsLoading } from './releaseNotes';
 
 const cmdbState = combineReducers({
     groupList,
@@ -18,6 +20,10 @@ const cmdbState = combineReducers({
     menuOpen,
     searchResults,
     searchIsLoading,
+    info,
+    infoIsLoading,
+    releaseNotes,
+    releaseNotesIsLoading,
 });
 
 export default cmdbState;

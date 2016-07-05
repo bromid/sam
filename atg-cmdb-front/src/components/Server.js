@@ -5,11 +5,19 @@ import * as Actions from '../actions/serverActions';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
 
-function DeploymentList({ server }) {
+function DeploymentList({ deployments }) {
+    if (!deployments) {
+        return (
+            <div>
+                <h3>Deployments</h3>
+                <p>No deployments</p>
+            </div>
+        );
+    }
     return (
         <List>
             <h3>Deployments</h3>
-            {server.deployments.map(deployment => (
+            {deployments.map(deployment => (
                 <Deployment key={deployment.applicationLink.id} deployment={deployment} />
             ))}
         </List>
@@ -40,7 +48,7 @@ const ServerContainer = React.createClass({
         const {
             environment: newEnvironment,
             hostname: newHostname,
-        } = newProps.environment;
+        } = newProps;
 
         if (newEnvironment !== environment || newHostname !== hostname) {
             fetchServer({
@@ -59,7 +67,7 @@ const ServerContainer = React.createClass({
                 <h2>{server.hostname}@{server.environment}</h2>
                 <div style={{ margin: 16 }}>
                     <p>{server.description}</p>
-                    <DeploymentList server={server} />
+                    <DeploymentList deployments={server.deployments} />
                 </div>
             </div>
         );
