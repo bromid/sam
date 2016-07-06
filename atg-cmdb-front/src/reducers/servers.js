@@ -1,22 +1,8 @@
 import * as Constants from '../constants';
+import createFetchReducers from '../createFetchReducers';
 
-export function serverListIsLoading(state = null, action) {
-    switch (action.type) {
-        case Constants.FETCH_SERVER_LIST_REQUEST:
-            return true;
-        case Constants.FETCH_SERVER_LIST_RESPONSE:
-            return false;
-        default:
-            return state;
-    }
-}
-
-export function serverList(state = {}, action) {
-    switch (action.type) {
-        case Constants.FETCH_SERVER_LIST_RESPONSE:
-            if (action.error) return {};
-            return action.payload;
-        default:
-            return state;
-    }
-}
+export default createFetchReducers({
+    resourceName: 'serverList',
+    requestKey: Constants.FETCH_SERVER_LIST_REQUEST,
+    receiveKey: Constants.FETCH_SERVER_LIST_RESPONSE,
+});

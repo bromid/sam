@@ -1,41 +1,30 @@
 import { combineReducers } from 'redux';
-import { groupList, groupListIsLoading } from './groups';
-import { group, groupIsLoading } from './group';
-import { applicationList, applicationListIsLoading } from './applications';
-import { application, applicationIsLoading } from './application';
-import { serverList, serverListIsLoading } from './servers';
-import { server, serverIsLoading } from './server';
-import { assetList, assetListIsLoading } from './assets';
-import { asset, assetIsLoading } from './asset';
+import groupList from './groups';
+import group from './group';
+import applicationList from './applications';
+import application from './application';
+import serverList from './servers';
+import server from './server';
+import assetList from './assets';
+import asset from './asset';
 import { menuOpen } from './menu';
-import { searchResults, searchIsLoading } from './search';
-import { info, infoIsLoading } from './info';
-import { releaseNotes, releaseNotesIsLoading } from './releaseNotes';
+import searchResults from './search';
+import info from './info';
+import releaseNotes from './releaseNotes';
 
 const cmdbState = combineReducers({
-    groupList,
-    groupListIsLoading,
-    group,
-    groupIsLoading,
-    applicationList,
-    applicationListIsLoading,
-    application,
-    applicationIsLoading,
-    serverList,
-    serverListIsLoading,
-    server,
-    serverIsLoading,
-    assetList,
-    assetListIsLoading,
-    asset,
-    assetIsLoading,
+    ...groupList,
+    ...group,
+    ...applicationList,
+    ...application,
+    ...serverList,
+    ...server,
+    ...assetList,
+    ...asset,
     menuOpen,
-    searchResults,
-    searchIsLoading,
-    info,
-    infoIsLoading,
-    releaseNotes,
-    releaseNotesIsLoading,
+    ...searchResults,
+    ...info,
+    ...releaseNotes,
 });
 
 export default cmdbState;
