@@ -1,22 +1,8 @@
 import * as Constants from '../constants';
+import createFetchReducers from '../createFetchReducers';
 
-export function infoIsLoading(state = null, action) {
-    switch (action.type) {
-        case Constants.FETCH_INFO_REQUEST:
-            return true;
-        case Constants.FETCH_INFO_RESPONSE:
-            return false;
-        default:
-            return state;
-    }
-}
-
-export function info(state = {}, action) {
-    switch (action.type) {
-        case Constants.FETCH_INFO_RESPONSE:
-            if (action.error) return {};
-            return action.payload;
-        default:
-            return state;
-    }
-}
+export default createFetchReducers({
+    resourceName: 'info',
+    requestKey: Constants.FETCH_INFO_REQUEST,
+    receiveKey: Constants.FETCH_INFO_RESPONSE,
+});

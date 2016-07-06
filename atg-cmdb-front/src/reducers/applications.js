@@ -1,22 +1,8 @@
 import * as Constants from '../constants';
+import createFetchReducers from '../createFetchReducers';
 
-export function applicationListIsLoading(state = null, action) {
-    switch (action.type) {
-        case Constants.FETCH_APPLICATION_LIST_REQUEST:
-            return true;
-        case Constants.FETCH_APPLICATION_LIST_RESPONSE:
-            return false;
-        default:
-            return state;
-    }
-}
-
-export function applicationList(state = {}, action) {
-    switch (action.type) {
-        case Constants.FETCH_APPLICATION_LIST_RESPONSE:
-            if (action.error) return {};
-            return action.payload;
-        default:
-            return state;
-    }
-}
+export default createFetchReducers({
+    resourceName: 'applicationList',
+    requestKey: Constants.FETCH_APPLICATION_LIST_REQUEST,
+    receiveKey: Constants.FETCH_APPLICATION_LIST_RESPONSE,
+});
