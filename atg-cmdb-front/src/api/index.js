@@ -47,6 +47,10 @@ export const fetchServerList = () => fetchJson('/services/server');
 export const fetchServer = (params) =>
     fetchJson(`/services/server/${params.environment}/${params.hostname}`);
 
+export const fetchAssetList = () => fetchJson('/services/asset');
+
+export const fetchAsset = (params) => fetchJson(`/services/asset/${params}`);
+
 export const fetchSearch = (params) => fetchJson(`/services/search?q=${params}`);
 
 export const fetchInfo = () => fetchJson('/services/info');

@@ -1,22 +1,19 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/applicationActions';
 import { List, ListItem } from 'material-ui/List';
-import Attributes from './Attributes';
 import LoadingIndicator from './LoadingIndicator';
 
-function Application({ application: { name, group, attributes } }) {
-    const content = (
-        <span>
-            {group.id}
-            {attributes && <Attributes attributes={attributes} />}
-        </span>
-    );
-
+function Application({ application: { id, name, description } }) {
     return (
         <ListItem
-            primaryText={name}
-            secondaryText={content}
+            primaryText={
+                <Link to={`/application/${id}`}>
+                    {name}
+                </Link>
+            }
+            secondaryText={description}
         />
     );
 }

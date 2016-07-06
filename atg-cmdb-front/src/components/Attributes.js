@@ -17,9 +17,11 @@ function getPaths(obj, prev = [], acc = []) {
 }
 
 export default function Attributes({ attributes }) {
+    if (!attributes) return <p>No attributes.</p>;
+
     return (
         <ul>
-            {getPaths(attributes).map(({ path, value }) => <li>{path}: {value}</li>)}
+            {getPaths(attributes).map(({ path, value }) => <li key={path}>{path}: {value}</li>)}
         </ul>
     );
 }

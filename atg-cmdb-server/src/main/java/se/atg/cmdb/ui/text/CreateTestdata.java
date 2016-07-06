@@ -164,32 +164,38 @@ public final class CreateTestdata {
       .append("name", "atg.se Web")
       .append("version", "1.0.0")
       .append("group", "atg-web")
+      .append("description", "This application runs the atg.se website")
       .append("attributes", new Document().append("server", new Document().append("name", "dropwizard").append("version", "0.9.1"))));
     applications.insertOne(new Document()
       .append("id", "atg-service-info")
       .append("name", "ATG Service Info")
       .append("version", "2.1.0-feature1")
-      .append("group", "atg-service-info"));
+      .append("group", "atg-service-info")
+      .append("description", "The info service layer."));
     applications.insertOne(new Document()
       .append("id", "atg-service-info-cache")
       .append("name", "ATG Service Info Cache")
       .append("version", "2.4.0-feature1")
-      .append("group", "atg-service-info"));
+      .append("group", "atg-service-info")
+      .append("description", "The info cache supporting the info service layer with cache service."));
     applications.insertOne(new Document()
       .append("id", "atg-service-betting")
       .append("name", "ATG Service Betting")
       .append("version", "2.3.0-feature1")
-      .append("group", "atg-service-betting"));
+      .append("group", "atg-service-betting")
+      .append("description", "The betting service layer."));
     applications.insertOne(new Document()
       .append("id", "tillsammans-service")
       .append("name", "Tillsammans Service")
       .append("version", "5.0")
-      .append("group", "tillsammans"));
+      .append("group", "tillsammans")
+      .append("description", "The service layer supporting the Tillsammans website"));
     applications.insertOne(new Document()
       .append("id", "tillsammans-web")
       .append("name", "Tillsammans Web")
       .append("version", "1.73.0")
-      .append("group", "tillsammans"));
+      .append("group", "tillsammans")
+      .append("description", "This application runs the Tillsammans website"));
   }
 
   private static void createServers(MongoCollection<Document> servers) {

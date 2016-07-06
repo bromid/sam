@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/groupActions';
 import { List, ListItem } from 'material-ui/List';
@@ -31,11 +32,11 @@ function Group({ group, nestedLevel = 0 }) {
     const assetCount = group.assets ? group.assets.length : null;
 
     const text = (
-        <span>
+        <Link to={`/group/${group.id}`}>
             {group.name} ({group.id})
             {appCount && <CountBadge title="Applications" primary={true}>{appCount}</CountBadge>}
             {assetCount && <CountBadge title="Assets" secondary={true}>{assetCount}</CountBadge>}
-        </span>
+        </Link>
     );
 
     return (

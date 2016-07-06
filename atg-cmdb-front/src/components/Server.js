@@ -4,6 +4,27 @@ import { connect } from 'react-redux';
 import * as Actions from '../actions/serverActions';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
+import Attributes from './Attributes';
+
+function Os({ os }) {
+    return (
+        <div>
+            <h3>{os.type}</h3>
+            <p>{os.name} ({os.version})</p>
+            <Attributes attributes={os.attributes} />
+        </div>
+    );
+}
+
+function Network({ network }) {
+    return (
+        <div>
+            <h3>Network</h3>
+            <p>{network.ipv4Address}</p>
+            <Attributes attributes={network.attributes} />
+        </div>
+    );
+}
 
 function DeploymentList({ deployments }) {
     if (!deployments) {
@@ -67,7 +88,10 @@ const ServerContainer = React.createClass({
                 <h2>{server.hostname}@{server.environment}</h2>
                 <div style={{ margin: 16 }}>
                     <p>{server.description}</p>
+                    <Attributes attributes={server.attributes} />
                     <DeploymentList deployments={server.deployments} />
+                    <Os os={server.os} />
+                    <Network network={server.network} />
                 </div>
             </div>
         );
