@@ -29,7 +29,7 @@ const SearchField = React.createClass({
     propTypes: {
         fetchSearch: PropTypes.func,
         searchResults: PropTypes.object,
-        searchIsLoading: PropTypes.bool,
+        searchResultsIsLoading: PropTypes.bool,
     },
 
     getInitialState() {
@@ -61,7 +61,7 @@ const SearchField = React.createClass({
 
     render() {
         const { showIcon, modalOpen } = this.state;
-        const { searchResults, searchIsLoading } = this.props;
+        const { searchResults, searchResultsIsLoading } = this.props;
         return (
             <div style={searchStyles.wrapper}>
                 <form onSubmit={this.handleSubmit}>
@@ -77,7 +77,7 @@ const SearchField = React.createClass({
                 </form>
                 <SearchResultDialog
                     searchResults={searchResults}
-                    searchIsLoading={searchIsLoading}
+                    searchResultsIsLoading={searchResultsIsLoading}
                     modalOpen={modalOpen}
                     handleCloseModal={this.handleCloseModal}
                 />

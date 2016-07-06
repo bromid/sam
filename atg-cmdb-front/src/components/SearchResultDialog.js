@@ -13,7 +13,7 @@ const SearchResultDialog = React.createClass({
     propTypes: {
         searchResults: PropTypes.object,
         modalOpen: PropTypes.bool,
-        searchIsLoading: PropTypes.bool,
+        searchResultsIsLoading: PropTypes.bool,
     },
 
     renderServersTable() {
@@ -63,9 +63,9 @@ const SearchResultDialog = React.createClass({
     },
 
     render() {
-        const { searchResults, searchIsLoading, modalOpen, handleCloseModal } = this.props;
+        const { searchResults, searchResultsIsLoading, modalOpen, handleCloseModal } = this.props;
 
-        const isLoading = searchIsLoading || _.isEmpty(searchResults);
+        const isLoading = searchResultsIsLoading || _.isEmpty(searchResults);
 
         const actions = [
             <RaisedButton
