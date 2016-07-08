@@ -7,6 +7,20 @@ import ExpandMoreIcon from 'material-ui/svg-icons/navigation/expand-more';
 import ExpandLessIcon from 'material-ui/svg-icons/navigation/expand-less';
 import moment from 'moment';
 
+const appBarStyle = {
+    borderRadius: 2,
+    width: '102%',
+    marginLeft: '-1%',
+    padding: '0 24px 0 16px',
+};
+
+const appBarTitleStyle = {
+    fontSize: 14,
+    fontWeight: 500,
+    height: 48,
+    lineHeight: '48px',
+};
+
 function timeSince(time) {
     if (!time) return null;
     return ` (${moment(time).toNow(true)} ago)`;
@@ -68,9 +82,9 @@ const Meta = React.createClass({
                 children={
                     <div>
                         <AppBar
-                            title="Meta"
-                            titleStyle={{ fontSize: 18, height: 48, lineHeight: '48px' }}
-                            style={{ borderRadius: 2, padding: '0 24px 0 16px' }}
+                            title="META"
+                            style={appBarStyle}
+                            titleStyle={appBarTitleStyle}
                             iconStyleRight={{ marginTop: 0 }}
                             showMenuIconButton={false}
                             iconElementRight={

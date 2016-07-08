@@ -52,22 +52,6 @@ function Applications({ applications }) {
     );
 }
 
-function Tag({ tag }) {
-    return <p>{tag.name}</p>;
-}
-
-function Tags({ tags }) {
-    if (!tags) return <p>No tags</p>;
-
-    return (
-        <div>
-            {tags.map(tag => (
-                <Tag key={tag.name} tag={tag} />
-            ))}
-        </div>
-    );
-}
-
 const GroupContainer = React.createClass({
 
     componentDidMount() {
@@ -85,6 +69,7 @@ const GroupContainer = React.createClass({
         if (isLoading) return <LoadingIndicator />;
         if (!name) return <p>No result</p>;
 
+        const subgroups = [];
         const tabs = [
             {
                 name: `Applications ${collectionSize(applications)}`,
@@ -95,8 +80,8 @@ const GroupContainer = React.createClass({
                 node: <Assets assets={assets} />,
             },
             {
-                name: `Tags ${collectionSize(tags)}`,
-                node: <Tags tags={tags} />,
+                name: `Sub groups ${collectionSize(subgroups)}`,
+                node: <div />,
             },
             {
                 name: `Attributes ${collectionSize(attributes)}`,
@@ -109,6 +94,7 @@ const GroupContainer = React.createClass({
                 description={description}
                 meta={meta}
                 tabs={tabs}
+                tags={tags}
             />
         );
     },
