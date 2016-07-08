@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import * as Actions from '../actions/applicationActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
+import ItemView from './ItemView';
 
 const ApplicationContainer = React.createClass({
 
@@ -14,14 +15,20 @@ const ApplicationContainer = React.createClass({
     render() {
         const { application, isLoading } = this.props;
         if (isLoading) return <LoadingIndicator />;
+
+        const tabs = [
+            {
+                name: 'Attributes',
+                node: <Attributes attributes={application.attributes} />,
+            },
+        ];
         return (
-            <div style={{ padding: '8px 0' }}>
-                <h2>{application.name}</h2>
-                <div style={{ margin: 16 }}>
-                    <p>{application.description}</p>
-                    <Attributes attributes={application.attributes} />
-                </div>
-            </div>
+            <ItemView
+                headline={application.name}
+                description={application.description}
+                meta={application.meta}
+                tabs={tabs}
+            />
         );
     },
 });

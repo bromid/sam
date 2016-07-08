@@ -12,6 +12,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
 import se.atg.cmdb.dao.Collections;
+import se.atg.cmdb.helpers.JsonHelper;
 
 public final class CreateTestdata {
 
@@ -56,12 +57,14 @@ public final class CreateTestdata {
       .append("id", "core-switch-hh-1")
       .append("name", "Core switch hästsportenshus 1")
       .append("description", "Nexus 3423 ACI ver2")
-      .append("group", "netman-infrastructure-hh"));
+      .append("group", "netman-infrastructure-hh")
+      .append("meta", defaultMeta()));
     assets.insertOne(new Document()
       .append("id", "core-switch-hh-2")
       .append("name", "Core switch hästsportenshus 2")
       .append("description", "Nexus 3423 ACI ver2")
-      .append("group", "netman-infrastructure-hh"));
+      .append("group", "netman-infrastructure-hh")
+      .append("meta", defaultMeta()));
   }
 
   private static void createGroups(MongoCollection<Document> groups) {
@@ -69,92 +72,111 @@ public final class CreateTestdata {
     groups.insertOne(new Document()
       .append("id", "webbappar")
       .append("name", "Alla webbappar")
+      .append("meta", defaultMeta())
       .append("groups", Lists.newArrayList(new Document("id", "tillsammans"), new Document("id", "atg-se"), new Document("id", "travsport"), new Document("id", "galoppsport")))
       .append("tags", Lists.newArrayList("webapp")));
 
     groups.insertOne(new Document()
       .append("id", "tillsammans")
       .append("name", "Tillsammans")
+      .append("meta", defaultMeta())
       .append("description", "tillsammans.atg.se")
       .append("tags", Lists.newArrayList("webapp", "weblogic")));
 
     groups.insertOne(new Document()
       .append("id", "travsport")
       .append("name", "Travsport")
+      .append("meta", defaultMeta())
       .append("description", "www.travsport.se")
       .append("tags", Lists.newArrayList("webapp", "weblogic", "sportsystem")));
 
     groups.insertOne(new Document()
       .append("id", "galoppsport")
       .append("name", "Galoppsport")
+      .append("meta", defaultMeta())
       .append("description", "www.svenskgalopp.se")
       .append("tags", Lists.newArrayList("webapp", "weblogic", "sportsystem")));
 
     groups.insertOne(new Document()
       .append("id", "atg-se")
       .append("name", "Atg.se")
+      .append("meta", defaultMeta())
       .append("description", "www.atg.se")
       .append("groups", Lists.newArrayList(new Document("id", "atg-web"), new Document("id", "atg-service"), new Document("id", "atg-virtual-racing")))
       .append("tags", Lists.newArrayList("webapp")));
     groups.insertOne(new Document()
       .append("id", "atg-virtual-racing")
       .append("name", "ATG Virtual Racing")
+      .append("meta", defaultMeta())
       .append("description", "Atg.se Spel på virtuella hästar")
       .append("groups", Lists.newArrayList(new Document("id", "atg-service-betting"), new Document("id", "atg-vr-video"))));
     groups.insertOne(new Document()
       .append("id", "atg-vr-video")
-      .append("name", "ATG Virtual Racing games generators"));
+      .append("name", "ATG Virtual Racing games generators")
+      .append("meta", defaultMeta()));
     groups.insertOne(new Document()
       .append("id", "atg-web")
       .append("name", "Atg.se frontend")
+      .append("meta", defaultMeta())
       .append("description", "Atg.se statiska webbresurser"));
     groups.insertOne(new Document()
       .append("id", "atg-service")
       .append("name", "Atg.se tjänstelager")
+      .append("meta", defaultMeta())
       .append("description", "Atg.se tjänstelager")
       .append("groups", Lists.newArrayList(new Document("id", "atg-service-info"), new Document("id", "atg-service-betting"))));
     groups.insertOne(new Document()
       .append("id", "atg-service-info")
       .append("name", "Atg.se info tjänstelager")
+      .append("meta", defaultMeta())
       .append("description", "Atg.se info tjänstelager"));
     groups.insertOne(new Document()
       .append("id", "atg-service-betting")
       .append("name", "Atg.se betting tjänstelager")
+      .append("meta", defaultMeta())
       .append("description", "Atg.se betting tjänstelager"));
 
     groups.insertOne(new Document()
       .append("id", "org-it")
       .append("name", "ATG IT")
+      .append("meta", defaultMeta())
       .append("groups", Lists.newArrayList(new Document("id", "org-it-spel"), new Document("id", "org-it-sport"), new Document("id", "org-it-prod")))
       .append("tags", Lists.newArrayList("webapp")));
     groups.insertOne(new Document()
       .append("id", "org-it-spel")
       .append("name", "ATG IT Spelsektionen")
+      .append("meta", defaultMeta())
       .append("groups", Lists.newArrayList(new Document("id", "tillsammans"), new Document("id", "atg-se"))));
     groups.insertOne(new Document()
       .append("id", "org-it-sport")
       .append("name", "ATG IT Sportsektionen")
+      .append("meta", defaultMeta())
       .append("groups", Lists.newArrayList(new Document("id", "travsport"), new Document("id", "galoppsport"))));
     groups.insertOne(new Document()
       .append("id", "org-it-prod")
       .append("name", "ATG IT Produktionssektionen")
+      .append("meta", defaultMeta())
       .append("groups", Lists.newArrayList(new Document("id", "org-netman"), new Document("id", "org-sysman-linux"))));
     groups.insertOne(new Document()
       .append("id", "org-netman")
       .append("name", "Netman")
+      .append("meta", defaultMeta())
       .append("groups", Lists.newArrayList(new Document("id", "netman-infrastructure-tracks"), new Document("id", "netman-infrastructure-hh")))
       .append("tags", Lists.newArrayList("netman")));
     groups.insertOne(new Document()
       .append("id", "netman-infrastructure-tracks")
       .append("name", "Netman nätverksutrustning på banor")
+      .append("meta", defaultMeta())
       .append("tags", Lists.newArrayList("switches", "routers")));
     groups.insertOne(new Document()
       .append("id", "netman-infrastructure-hh")
       .append("name", "Netman nätverksutrustning hästsportenshus")
+      .append("meta", defaultMeta())
       .append("tags", Lists.newArrayList("switches", "routers")));
     groups.insertOne(new Document()
       .append("id", "org-sysman-linux")
-      .append("name", "Sysman Linux"));
+      .append("name", "Sysman Linux")
+      .append("meta", defaultMeta()));
   }
 
   private static void createApplications(MongoCollection<Document> applications) {
@@ -165,37 +187,43 @@ public final class CreateTestdata {
       .append("version", "1.0.0")
       .append("group", "atg-web")
       .append("description", "This application runs the atg.se website")
+      .append("meta", defaultMeta())
       .append("attributes", new Document().append("server", new Document().append("name", "dropwizard").append("version", "0.9.1"))));
     applications.insertOne(new Document()
       .append("id", "atg-service-info")
       .append("name", "ATG Service Info")
       .append("version", "2.1.0-feature1")
       .append("group", "atg-service-info")
-      .append("description", "The info service layer."));
+      .append("description", "The info service layer.")
+      .append("meta", defaultMeta()));
     applications.insertOne(new Document()
       .append("id", "atg-service-info-cache")
       .append("name", "ATG Service Info Cache")
       .append("version", "2.4.0-feature1")
       .append("group", "atg-service-info")
-      .append("description", "The info cache supporting the info service layer with cache service."));
+      .append("description", "The info cache supporting the info service layer with cache service.")
+      .append("meta", defaultMeta()));
     applications.insertOne(new Document()
       .append("id", "atg-service-betting")
       .append("name", "ATG Service Betting")
       .append("version", "2.3.0-feature1")
       .append("group", "atg-service-betting")
-      .append("description", "The betting service layer."));
+      .append("description", "The betting service layer.")
+      .append("meta", defaultMeta()));
     applications.insertOne(new Document()
       .append("id", "tillsammans-service")
       .append("name", "Tillsammans Service")
       .append("version", "5.0")
       .append("group", "tillsammans")
-      .append("description", "The service layer supporting the Tillsammans website"));
+      .append("description", "The service layer supporting the Tillsammans website")
+      .append("meta", defaultMeta()));
     applications.insertOne(new Document()
       .append("id", "tillsammans-web")
       .append("name", "Tillsammans Web")
       .append("version", "1.73.0")
       .append("group", "tillsammans")
-      .append("description", "This application runs the Tillsammans website"));
+      .append("description", "This application runs the Tillsammans website")
+      .append("meta", defaultMeta()));
   }
 
   private static void createServers(MongoCollection<Document> servers) {
@@ -206,7 +234,7 @@ public final class CreateTestdata {
           "{\"hostname\": \"vltma" + server + "\"," +
             "\"fqdn\": \"vltma" + server + ".test" + env + ".hh.atg.se\"," +
             "\"environment\": \"test" + env + "\"," +
-            "\"description\": \"Runs all important applications\"" +
+            "\"description\": \"Runs all important applications.\n1. Atg service layer betting\n2. Atg service layer info\"" +
             "\"os\": {" +
               "\"name\": \"RedHat Enterprise Linux\"," +
               "\"type\": " + ((server % 2 == 0) ? "\"Linux\"" : "\"Windows\",") +
@@ -225,8 +253,7 @@ public final class CreateTestdata {
             .append("Param1", "Value1")
             .append("Param2", new Document()
               .append("Param3", "Value3")
-          )).append("meta", new Document()
-            .append("createdBy", "testdata"))
+          )).append("meta", defaultMeta())
         );
       }
     }
@@ -234,5 +261,9 @@ public final class CreateTestdata {
     servers.updateOne(Filters.eq("fqdn", "vltma2.test1.hh.atg.se"), Updates.set("description", "Kör både atg.se och atg-service precis som vltma1"));
     servers.updateOne(Filters.eq("fqdn", "vltma1.test2.hh.atg.se"), Updates.set("description", "POB, Jira och Tillsammans i test2 och test1"));
     servers.updateOne(Filters.eq("fqdn", "vltma2.test2.hh.atg.se"), Updates.set("description", "Go-servern är en del av leveranssystemet."));
+  }
+
+  private static Document defaultMeta() {
+    return JsonHelper.addMetaForCreate("{}", "testdata").get("meta", Document.class);
   }
 }

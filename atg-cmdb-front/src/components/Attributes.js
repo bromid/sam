@@ -17,7 +17,7 @@ function getPaths(obj, prev = [], acc = []) {
 }
 
 export default function Attributes({ attributes }) {
-    if (!attributes) return <p>No attributes.</p>;
+    if (!attributes) return <p>No attributes</p>;
 
     return (
         <ul>

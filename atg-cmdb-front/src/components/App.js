@@ -36,6 +36,10 @@ function App(props) {
         height: '100vh',
     };
 
+    const pageStyle = {
+        margin: 20,
+    };
+
     return (
         <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
             <div>
@@ -53,7 +57,9 @@ function App(props) {
                         style={{ height: 100, padding: 20 }}
                         iconElementRight={searchField}
                     />
-                     {children}
+                    <div style={pageStyle}>
+                        {children}
+                    </div>
                 </div>
             </div>
         </MuiThemeProvider>

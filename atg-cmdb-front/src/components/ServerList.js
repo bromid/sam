@@ -33,7 +33,7 @@ const ServerListContainer = React.createClass({
                 <h2>Servers</h2>
                 {servers.map(server => (
                     <Server key={server.hostname + server.environment} server={server} />
-                ))};
+                ))}
             </List>
         );
     },

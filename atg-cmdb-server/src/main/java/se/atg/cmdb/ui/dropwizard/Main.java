@@ -77,7 +77,7 @@ public class Main extends Application<CmdbConfiguration> {
     environment.jersey().register(new ApplicationResource(database, objectMapper));
     environment.jersey().register(new GroupResource(database, objectMapper));
     environment.jersey().register(new AssetResource(database, objectMapper));
-    environment.jersey().register(new SearchResource(database, objectMapper));
+    environment.jersey().register(new SearchResource(database));
 
     // Authentication
     environment.jersey().register(RolesAllowedDynamicFeature.class);

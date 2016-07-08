@@ -8,7 +8,6 @@ import javax.ws.rs.QueryParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
@@ -29,11 +28,9 @@ public class SearchResource {
   static final Logger logger = LoggerFactory.getLogger(ServerResource.class);
 
   private final MongoDatabase database;
-  private final ObjectMapper objectMapper;
 
-  public SearchResource(MongoDatabase database, ObjectMapper objectMapper) {
+  public SearchResource(MongoDatabase database) {
     this.database = database;
-    this.objectMapper = objectMapper;
   }
 
   @GET

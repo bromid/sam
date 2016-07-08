@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import * as Actions from '../actions/assetActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
+import ItemView from './ItemView';
 
 const AssetContainer = React.createClass({
 
@@ -14,12 +15,20 @@ const AssetContainer = React.createClass({
     render() {
         const { asset, isLoading } = this.props;
         if (isLoading) return <LoadingIndicator />;
+
+        const tabs = [
+            {
+                name: 'Attributes',
+                node: <Attributes attributes={asset.attributes} />,
+            },
+        ];
         return (
-            <div>
-                <h2>{asset.name}</h2>
-                <p>{asset.description}</p>
-                <Attributes attributes={asset.attributes} />
-            </div>
+            <ItemView
+                headline={asset.name}
+                description={asset.description}
+                meta={asset.meta}
+                tabs={tabs}
+            />
         );
     },
 });

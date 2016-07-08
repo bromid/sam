@@ -31,7 +31,6 @@ export default {
             }, {
                 test: /\.json$/,
                 loaders: ['json'],
-                include: Paths.src,
             }, {
                 test: /\.(png|jpg)$/,
                 include: Paths.src,

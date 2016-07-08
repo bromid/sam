@@ -33,7 +33,7 @@ const AssetListContainer = React.createClass({
                 <h2>Assets</h2>
                 {assets.map(asset => (
                     <Asset key={asset.id} asset={asset} />
-                ))};
+                ))}
             </List>
         );
     },

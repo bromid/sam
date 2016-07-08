@@ -1,16 +1,36 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
+import size from 'lodash/size';
 import * as Actions from '../actions/serverActions';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
+import ItemView from './ItemView';
+
+const flexWrapper = {
+    display: 'flex',
+    flexFlow: 'row wrap',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+};
+
+const flexChildStyle = {
+    minWidth: 250,
+    padding: '0 16px',
+};
+
+function collectionSize(collection) {
+    if (!collection) return ' (0)';
+    return ` (${size(collection)})`;
+}
 
 function Os({ os }) {
     return (
-        <div>
-            <h3>{os.type}</h3>
+        <div style={flexChildStyle}>
+            <h3>Operativ system</h3>
             <p>{os.name} ({os.version})</p>
+            <h4>Attributes</h4>
             <Attributes attributes={os.attributes} />
         </div>
     );
@@ -18,26 +38,20 @@ function Os({ os }) {
 
 function Network({ network }) {
     return (
-        <div>
+        <div style={flexChildStyle}>
             <h3>Network</h3>
             <p>{network.ipv4Address}</p>
+            <h4>Attributes</h4>
             <Attributes attributes={network.attributes} />
         </div>
     );
 }
 
 function DeploymentList({ deployments }) {
-    if (!deployments) {
-        return (
-            <div>
-                <h3>Deployments</h3>
-                <p>No deployments</p>
-            </div>
-        );
-    }
+    if (!deployments) return <p>No deployments</p>;
+
     return (
         <List>
-            <h3>Deployments</h3>
             {deployments.map(deployment => (
                 <Deployment key={deployment.applicationLink.id} deployment={deployment} />
             ))}
@@ -80,20 +94,42 @@ const ServerContainer = React.createClass({
     },
 
     render() {
-        const { server, isLoading } = this.props;
+        const {
+            isLoading,
+            server: {
+                hostname, environment, description,
+                meta, network, os, deployments, attributes,
+            },
+        } = this.props;
         if (isLoading) return <LoadingIndicator />;
-        if (!server.hostname) return <p>No results</p>;
+        if (!hostname) return <p>No result</p>;
+
+        const tabs = [
+            {
+                name: 'Information',
+                node: (
+                    <div style={{ ...flexWrapper, margin: '16px 0' }}>
+                        <Os os={os} />
+                        <Network network={network} />
+                    </div>
+                ),
+            },
+            {
+                name: `Deployments ${collectionSize(deployments)}`,
+                node: <DeploymentList deployments={deployments} />,
+            },
+            {
+                name: `Attributes ${collectionSize(attributes)}`,
+                node: <Attributes attributes={attributes} />,
+            },
+        ];
         return (
-            <div style={{ padding: '8px 0' }}>
-                <h2>{server.hostname}@{server.environment}</h2>
-                <div style={{ margin: 16 }}>
-                    <p>{server.description}</p>
-                    <Attributes attributes={server.attributes} />
-                    <DeploymentList deployments={server.deployments} />
-                    <Os os={server.os} />
-                    <Network network={server.network} />
-                </div>
-            </div>
+            <ItemView
+                headline={`${hostname}@${environment}`}
+                description={description}
+                meta={meta}
+                tabs={tabs}
+            />
         );
     },
 });

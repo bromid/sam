@@ -6,7 +6,7 @@ import SearchResultDialog from './SearchResultDialog';
 const searchStyles = {
     wrapper: {
         position: 'relative',
-        marginRight: 10,
+        marginRight: 20,
         marginTop: 5,
     },
     icon: {

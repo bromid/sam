@@ -27,8 +27,8 @@ public class Meta {
     this.created = Mapper.mapDateTime(bson, "created");
     this.updatedBy = bson.getString("updatedBy");
     this.updated = Mapper.mapDateTime(bson, "updated");
-    this.updatedBy = bson.getString("refreshedBy");
-    this.updated = Mapper.mapDateTime(bson, "refreshed");
+    this.refreshedBy = bson.getString("refreshedBy");
+    this.refreshed = Mapper.mapDateTime(bson, "refreshed");
     this.hash = bson.getString("hash");
   }
 
