@@ -27,6 +27,7 @@ public class Asset extends Base {
   @NotNull(groups = Create.class)
   @Size(min = 1, max = 50)
   public String name;
+  public GroupLink group;
   @Valid
   public Os os;
   @Valid
@@ -40,6 +41,7 @@ public class Asset extends Base {
 
     this.id = bson.getString("id");
     this.name = bson.getString("name");
+    this.group = Mapper.mapObject(bson, "group", GroupLink::fromBson);
     this.os = Mapper.mapObject(bson, "os", Os::fromBson);
     this.network = Mapper.mapObject(bson, "network", Network::fromBson);
   }

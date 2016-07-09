@@ -4,6 +4,9 @@ import java.net.URI;
 
 import javax.ws.rs.core.Link;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.bson.Document;
 import org.glassfish.jersey.linking.Binding;
 import org.glassfish.jersey.linking.InjectLink;
@@ -11,10 +14,14 @@ import org.glassfish.jersey.linking.InjectLink.Style;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import se.atg.cmdb.ui.rest.Defaults;
 import se.atg.cmdb.ui.rest.GroupResource;
+import se.atg.cmdb.ui.rest.serializer.StringInDatabaseSerializer;
 
-public class GroupLink {
+@JsonSerialize(using = StringInDatabaseSerializer.class)
+public class GroupLink implements StringInDatabase {
 
   public final String id;
   public final String name;
@@ -55,15 +62,31 @@ public class GroupLink {
       .build(id);
   }
 
-  public static GroupLink fromId(String id) {
-    return new GroupLink(id);
-  }
-
   public static GroupLink fromBson(Document bson) {
     return new GroupLink(bson);
   }
 
   public String getId() {
     return id;
+  }
+
+  @Override
+  public String stringInDatabase() {
+    return id;
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, Defaults.STYLE);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
   }
 }

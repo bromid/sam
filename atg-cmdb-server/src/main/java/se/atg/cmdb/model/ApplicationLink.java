@@ -15,11 +15,14 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import se.atg.cmdb.ui.rest.ApplicationResource;
 import se.atg.cmdb.ui.rest.Defaults;
+import se.atg.cmdb.ui.rest.serializer.StringInDatabaseSerializer;
 
-public class ApplicationLink {
+@JsonSerialize(using = StringInDatabaseSerializer.class)
+public class ApplicationLink implements StringInDatabase {
 
   @NotEmpty
   public final String id;
@@ -65,6 +68,11 @@ public class ApplicationLink {
   }
 
   public String getId() {
+    return id;
+  }
+
+  @Override
+  public String stringInDatabase() {
     return id;
   }
 

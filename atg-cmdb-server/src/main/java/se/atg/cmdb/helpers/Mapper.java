@@ -85,6 +85,9 @@ public abstract class Mapper {
     }
     if (object instanceof List) {
       final List<T> list = (List<T>) object;
+      if (list.size() == 0) {
+        return null;
+      }
       Validate.isTrue(list.size() == 1);
       return mapper.apply(list.get(0));
     }
