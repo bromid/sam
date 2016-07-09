@@ -1,4 +1,20 @@
 {
-  "presets": ["es2015", "react"],
-  "plugins": ["transform-object-rest-spread"]
+  "env": {
+    "development": {
+      "presets": ["es2015", "react"],
+      "plugins": ["transform-object-rest-spread"]
+    },
+    "chromeDev": {
+      "presets": ["react"],
+      "plugins": [
+        "transform-es2015-function-name",
+        "transform-es2015-sticky-regex",
+        "transform-es2015-unicode-regex",
+        "check-es2015-constants",
+        "transform-es2015-typeof-symbol",
+        "transform-es2015-modules-commonjs",
+        "transform-object-rest-spread"
+      ]
+    }
+  }
 }
