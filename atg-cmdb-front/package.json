@@ -7,7 +7,7 @@
     "prebuild": "rm -rf dist",
     "build": "webpack",
     "postbuild": "cp index.html dist/static/",
-    "lint": "eslint src"
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",

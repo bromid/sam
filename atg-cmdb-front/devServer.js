@@ -14,18 +14,18 @@ app.use(webpackDevMiddleware(compiler, {
     stats: {
         colors: true,
         chunks: false,
-        assets: false
+        assets: false,
     },
-    publicPath: config.output.publicPath
+    publicPath: config.output.publicPath,
 }));
 
-app.use("/services/*", function(req, res) {
-    req.url = req._parsedUrl.path;
+app.use('/services/*', (req, res) => {
+    req.url = req._parsedUrl.path; // eslint-disable-line
     servicesProxy.web(req, res, {
         target: {
             port: 8080,
-            host: 'localhost'
-        }
+            host: 'localhost',
+        },
     });
 });
 
