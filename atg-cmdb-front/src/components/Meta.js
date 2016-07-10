@@ -46,64 +46,49 @@ function Icon({ open, toggleState }) {
     );
 }
 
-const Meta = React.createClass({
+export default function Meta(props) {
+    if (!props.meta) return null;
 
-    getInitialState() {
-        return {
-            open: true,
-        };
-    },
+    const {
+        open,
+        toggle,
+        meta: {
+            created, createdBy, updated, updatedBy, refreshed, refreshedBy,
+        },
+    } = props;
 
-    toggleOpen() {
-        this.setState({
-            open: !this.state.open,
-        });
-    },
+    const listStyle = {
+        overflow: 'hidden',
+        height: open ? 'auto' : 0,
+        margin: open ? '5px 16px' : '0 16px',
+    };
 
-    render() {
-        if (!this.props.meta) return null;
-        const { open } = this.state;
-        const {
-            meta: {
-                created, createdBy, updated, updatedBy, refreshed, refreshedBy,
-            },
-        } = this.props;
-
-        const listStyle = {
-            overflow: 'hidden',
-            height: open ? 'auto' : 0,
-            margin: open ? '5px 16px' : '0 16px',
-        };
-
-        return (
-            <Paper
-                style={{ minWidth: 250, marginBottom: 30 }}
-                zDepth={2}
-                children={
-                    <div>
-                        <AppBar
-                            title="META"
-                            style={appBarStyle}
-                            titleStyle={appBarTitleStyle}
-                            iconStyleRight={{ marginTop: 0 }}
-                            showMenuIconButton={false}
-                            iconElementRight={
-                                <Icon open={open} toggleState={this.toggleOpen} />
-                            }
-                        />
-                        <dl style={listStyle}>
-                            <dt>Created</dt>
-                            <dd>{createdBy}{timeSince(created)}</dd>
-                            <dt>Updated</dt>
-                            <dd>{updatedBy}{timeSince(updated)}</dd>
-                            <dt>Refreshed</dt>
-                            <dd>{refreshedBy}{timeSince(refreshed)}</dd>
-                        </dl>
-                    </div>
-                }
-            />
-        );
-    },
-});
-
-export default Meta;
+    return (
+        <Paper
+            style={{ minWidth: 250, marginBottom: 30 }}
+            zDepth={2}
+            children={
+                <div>
+                    <AppBar
+                        title="META"
+                        style={appBarStyle}
+                        titleStyle={appBarTitleStyle}
+                        iconStyleRight={{ marginTop: 0 }}
+                        showMenuIconButton={false}
+                        iconElementRight={
+                            <Icon open={open} toggleState={toggle} />
+                        }
+                    />
+                    <dl style={listStyle}>
+                        <dt>Created</dt>
+                        <dd>{createdBy}{timeSince(created)}</dd>
+                        <dt>Updated</dt>
+                        <dd>{updatedBy}{timeSince(updated)}</dd>
+                        <dt>Refreshed</dt>
+                        <dd>{refreshedBy}{timeSince(refreshed)}</dd>
+                    </dl>
+                </div>
+            }
+        />
+    );
+}

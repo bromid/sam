@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
-import * as Actions from '../actions/applicationActions';
+import * as applicationActions from '../actions/applicationActions';
+import * as metaActions from '../actions/metaActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
@@ -16,6 +17,8 @@ const ApplicationContainer = React.createClass({
     render() {
         const {
             isLoading,
+            metaOpen,
+            toggleMeta,
             application: {
                 name, description, group, attributes, meta,
             },
@@ -41,6 +44,8 @@ const ApplicationContainer = React.createClass({
                 headline={name}
                 description={description}
                 meta={meta}
+                metaOpen={metaOpen}
+                toggleMeta={toggleMeta}
                 tabs={tabs}
             />
         );
@@ -48,12 +53,15 @@ const ApplicationContainer = React.createClass({
 });
 
 function mapStateToProps(state, props) {
-    const { application, applicationIsLoading } = state;
+    const { metaOpen, application, applicationIsLoading } = state;
     const { id } = props.params;
     return {
         id,
+        metaOpen,
         application,
         isLoading: applicationIsLoading || applicationIsLoading === null,
     };
 }
+
+const Actions = { ...applicationActions, ...metaActions };
 export default connect(mapStateToProps, Actions)(ApplicationContainer);

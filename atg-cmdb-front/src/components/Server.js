@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import size from 'lodash/size';
-import * as Actions from '../actions/serverActions';
+import * as serverActions from '../actions/serverActions';
+import * as metaActions from '../actions/metaActions';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
@@ -96,6 +97,8 @@ const ServerContainer = React.createClass({
     render() {
         const {
             isLoading,
+            metaOpen,
+            toggleMeta,
             server: {
                 hostname, environment, description,
                 meta, network, os, deployments, attributes,
@@ -128,6 +131,8 @@ const ServerContainer = React.createClass({
                 headline={`${hostname}@${environment}`}
                 description={description}
                 meta={meta}
+                metaOpen={metaOpen}
+                toggleMeta={toggleMeta}
                 tabs={tabs}
             />
         );
@@ -135,13 +140,16 @@ const ServerContainer = React.createClass({
 });
 
 function mapStateToProps(state, props) {
-    const { server, serverIsLoading } = state;
-    const { params } = props;
+    const { metaOpen, server, serverIsLoading } = state;
+    const { environment, hostname } = props.params;
     return {
+        environment,
+        hostname,
+        metaOpen,
         server,
-        environment: params.environment,
-        hostname: params.hostname,
         isLoading: serverIsLoading || serverIsLoading === null,
     };
 }
+
+const Actions = { ...serverActions, ...metaActions };
 export default connect(mapStateToProps, Actions)(ServerContainer);

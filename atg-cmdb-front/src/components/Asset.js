@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
-import * as Actions from '../actions/assetActions';
+import * as assetActions from '../actions/assetActions';
+import * as metaActions from '../actions/metaActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
@@ -16,6 +17,8 @@ const AssetContainer = React.createClass({
     render() {
         const {
             isLoading,
+            metaOpen,
+            toggleMeta,
             asset: {
                 name, description, group, attributes, meta,
             },
@@ -41,6 +44,8 @@ const AssetContainer = React.createClass({
                 headline={name}
                 description={description}
                 meta={meta}
+                metaOpen={metaOpen}
+                toggleMeta={toggleMeta}
                 tabs={tabs}
             />
         );
@@ -48,12 +53,15 @@ const AssetContainer = React.createClass({
 });
 
 function mapStateToProps(state, props) {
-    const { asset, assetIsLoading } = state;
-    const { params } = props;
+    const { metaOpen, asset, assetIsLoading } = state;
+    const { id } = props.params;
     return {
+        id,
+        metaOpen,
         asset,
-        id: params.id,
         isLoading: assetIsLoading || assetIsLoading === null,
     };
 }
+
+const Actions = { ...assetActions, ...metaActions };
 export default connect(mapStateToProps, Actions)(AssetContainer);

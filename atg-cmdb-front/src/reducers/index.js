@@ -8,6 +8,7 @@ import server from './server';
 import assetList from './assets';
 import asset from './asset';
 import { menuOpen } from './menu';
+import { metaOpen } from './meta';
 import searchResults from './search';
 import info from './info';
 import releaseNotes from './releaseNotes';
@@ -22,6 +23,7 @@ const cmdbState = combineReducers({
     ...assetList,
     ...asset,
     menuOpen,
+    metaOpen,
     ...searchResults,
     ...info,
     ...releaseNotes,

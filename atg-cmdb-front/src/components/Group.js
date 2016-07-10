@@ -3,11 +3,12 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import size from 'lodash/size';
 import List from 'material-ui/List';
-import * as Actions from '../actions/groupActions';
+import * as groupActions from '../actions/groupActions';
+import * as metaActions from '../actions/metaActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
-import { Group } from './GroupList';
+import { Group as GroupListItem } from './GroupList';
 
 function collectionSize(collection) {
     if (!collection) return ' (0)';
@@ -28,7 +29,7 @@ function Groups({ groups }) {
     return (
         <List>
             {groups.map(group =>
-                <Group key={group.id} group={group} />
+                <GroupListItem key={group.id} group={group} />
             )}
         </List>
     );
@@ -66,7 +67,56 @@ function Applications({ applications }) {
     );
 }
 
+function Group(props) {
+    const {
+        isLoading, name, description, applications, assets, groups, attributes,
+        tags, meta, metaOpen, toggleMeta, selectedTab, onTabChanged,
+    } = props;
+
+    if (isLoading) return <LoadingIndicator />;
+    if (!name) return <p>No result</p>;
+
+    const tabs = [
+        {
+            name: `Applications ${collectionSize(applications)}`,
+            node: <Applications applications={applications} />,
+        },
+        {
+            name: `Assets ${collectionSize(assets)}`,
+            node: <Assets assets={assets} />,
+        },
+        {
+            name: `Sub groups ${collectionSize(groups)}`,
+            node: <Groups groups={groups} />,
+        },
+        {
+            name: `Attributes ${collectionSize(attributes)}`,
+            node: <Attributes attributes={attributes} />,
+        },
+    ];
+
+    return (
+        <ItemView
+            headline={name}
+            description={description}
+            tags={tags}
+            meta={meta}
+            metaOpen={metaOpen}
+            toggleMeta={toggleMeta}
+            tabs={tabs}
+            selectedTab={selectedTab}
+            onTabChanged={onTabChanged}
+        />
+    );
+}
+
 const GroupContainer = React.createClass({
+
+    getInitialState() {
+        return {
+            selectedTab: 0,
+        };
+    },
 
     componentDidMount() {
         const { id, fetchGroup } = this.props;
@@ -84,55 +134,53 @@ const GroupContainer = React.createClass({
         }
     },
 
+    onTabChanged(tab) {
+        this.setState({
+            selectedTab: tab,
+        });
+    },
+
     render() {
         const {
             isLoading,
+            metaOpen,
+            toggleMeta,
             group: {
                 name, description, applications, assets,
                 tags, attributes, meta, groups,
             },
         } = this.props;
-        if (isLoading) return <LoadingIndicator />;
-        if (!name) return <p>No result</p>;
 
-        const tabs = [
-            {
-                name: `Applications ${collectionSize(applications)}`,
-                node: <Applications applications={applications} />,
-            },
-            {
-                name: `Assets ${collectionSize(assets)}`,
-                node: <Assets assets={assets} />,
-            },
-            {
-                name: `Sub groups ${collectionSize(groups)}`,
-                node: <Groups groups={groups} />,
-            },
-            {
-                name: `Attributes ${collectionSize(attributes)}`,
-                node: <Attributes attributes={attributes} />,
-            },
-        ];
         return (
-            <ItemView
-                headline={name}
+            <Group
+                isLoading={isLoading}
+                name={name}
                 description={description}
-                meta={meta}
-                tabs={tabs}
+                applications={applications}
+                assets={assets}
+                groups={groups}
+                attributes={attributes}
                 tags={tags}
+                meta={meta}
+                metaOpen={metaOpen}
+                toggleMeta={toggleMeta}
+                selectedTab={this.state.selectedTab}
+                onTabChanged={this.onTabChanged}
             />
         );
     },
 });
 
 function mapStateToProps(state, props) {
-    const { group, groupIsLoading } = state;
+    const { metaOpen, group, groupIsLoading } = state;
     const { id } = props.params;
     return {
         id,
+        metaOpen,
         group,
         isLoading: groupIsLoading || groupIsLoading === null,
     };
 }
 
+const Actions = { ...groupActions, ...metaActions };
 export default connect(mapStateToProps, Actions)(GroupContainer);

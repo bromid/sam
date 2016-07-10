@@ -22,7 +22,7 @@ const SearchResultDialog = React.createClass({
         if (_.isEmpty(servers.items)) {
             return (
                 <div>
-                    <h2 style={{ margin: 0 }}>Servers</h2>
+                    <h3>Servers</h3>
                     <p>No results</p>
                 </div>
             );
@@ -45,7 +45,7 @@ const SearchResultDialog = React.createClass({
 
         return (
             <div>
-                <h3 style={{ margin: 0 }}>Servers</h3>
+                <h3>Servers</h3>
                 <Table>
                     <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
                         <TableRow>

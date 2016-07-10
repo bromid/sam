@@ -50,18 +50,24 @@ function Tags({ tags }) {
     );
 }
 
-export default function ItemView({ headline, description, meta, tabs, tags }) {
+export default function ItemView(props) {
+    const {
+        headline, description, tags,
+        meta, metaOpen, toggleMeta,
+        tabs, selectedTab, onTabChanged,
+    } = props;
+
     return (
         <div>
             <h2>{headline}</h2>
             <Tags tags={tags} />
             <div style={{ ...flexWrapper, minHeight: 20 }}>
                 <Description description={description} />
-                <Meta meta={meta} />
+                <Meta meta={meta} open={metaOpen} toggle={toggleMeta} />
             </div>
-            <Tabs>
-                {tabs.map(tab => (
-                    <Tab key={tab.name} label={tab.name}>
+            <Tabs value={selectedTab} onChange={onTabChanged} >
+                {tabs.map((tab, index) => (
+                    <Tab key={tab.name} value={index} label={tab.name}>
                         <div style={containerStyle}>
                             {tab.node}
                         </div>
@@ -71,3 +77,4 @@ export default function ItemView({ headline, description, meta, tabs, tags }) {
         </div>
     );
 }
+
