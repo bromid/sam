@@ -65,7 +65,7 @@ const SearchResultDialog = React.createClass({
     render() {
         const { searchResults, searchResultsIsLoading, modalOpen, handleCloseModal } = this.props;
 
-        const isLoading = searchResultsIsLoading || _.isEmpty(searchResults);
+        const isLoading = searchResultsIsLoading || isEmpty(searchResults);
 
         const actions = [
             <RaisedButton

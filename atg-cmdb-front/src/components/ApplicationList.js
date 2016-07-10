@@ -18,7 +18,7 @@ function Application({ application: { id, name, description } }) {
     );
 }
 
-function ApplicationList({ applications }) {
+function Applications({ applications }) {
     return (
         <List>
             <h2>Applications</h2>
@@ -29,7 +29,7 @@ function ApplicationList({ applications }) {
     );
 }
 
-const ApplicationListContainer = React.createClass({
+const ApplicationsContainer = React.createClass({
 
     componentDidMount() {
         this.props.fetchApplicationList();
@@ -40,7 +40,7 @@ const ApplicationListContainer = React.createClass({
         if (isLoading) return <LoadingIndicator />;
         if (!applications) return <p>No results</p>;
         return (
-            <ApplicationList applications={applications} />
+            <Applications applications={applications} />
         );
     },
 });
@@ -52,4 +52,4 @@ function mapStateToProps(state) {
         isLoading: applicationListIsLoading || applicationListIsLoading === null,
     };
 }
-export default connect(mapStateToProps, Actions)(ApplicationListContainer);
+export default connect(mapStateToProps, Actions)(ApplicationsContainer);

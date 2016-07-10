@@ -1,4 +1,5 @@
 import fetch from 'isomorphic-fetch';
+import isObject from 'lodash/isObject';
 
 const credentials = btoa('web-gui:secret');
 
@@ -26,7 +27,17 @@ const verifySuccessful = (response) => {
     return response;
 };
 
-const fetchJson = (url) => fetch(url, APPLICATION_JSON)
+const addParams = (url, params) => {
+    if (!isObject(params)) return url;
+
+    const query = Object.keys(params)
+        .map((name) => `${name}=${params[name]}`)
+        .join('&');
+
+    return `${url}?${query}`;
+};
+
+const fetchJson = (url, params) => fetch(addParams(url, params), APPLICATION_JSON)
     .then((response) => verifySuccessful(response))
     .then((response) => response.json());
 
@@ -34,9 +45,11 @@ const fetchHtml = (url) => fetch(url, TEXT_HTML)
     .then((response) => verifySuccessful(response))
     .then((response) => response.text());
 
-export const fetchGroupList = () => fetchJson('/services/group');
+export const fetchGroupList = (params) => fetchJson('/services/group', params);
 
 export const fetchGroup = (params) => fetchJson(`/services/group/${params}`);
+
+export const fetchGroupTags = () => fetchJson('/services/group/tag');
 
 export const fetchApplicationList = () => fetchJson('/services/application');
 

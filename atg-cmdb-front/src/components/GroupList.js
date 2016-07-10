@@ -1,10 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { Link, withRouter } from 'react-router';
 import { connect } from 'react-redux';
-import * as Actions from '../actions/groupActions';
 import { List, ListItem } from 'material-ui/List';
 import Badge from 'material-ui/Badge';
+import isArray from 'lodash/isArray';
+import isEqual from 'lodash/isEqual';
+import * as Actions from '../actions/groupActions';
 import LoadingIndicator from './LoadingIndicator';
+import { TagFilter } from './Tag';
 
 function CountBadge({ children, title, primary, secondary }) {
     const style = { padding: '12px' };
@@ -51,10 +54,12 @@ export function Group({ group, nestedLevel = 0 }) {
     );
 }
 
-export function GroupList({ groups }) {
+function GroupList({ isLoading, groups }) {
+    if (isLoading) return <LoadingIndicator />;
+    if (!groups) return <p>No results</p>;
+
     return (
         <List>
-            <h2>Groups</h2>
             {groups.map(group =>
                 <Group group={group} key={group.id} />
             )}
@@ -62,28 +67,102 @@ export function GroupList({ groups }) {
     );
 }
 
-const GroupListContainer = React.createClass({
+function Groups({ groups, groupTags = [], addFilter, removeFilter, activeFilter, isLoading }) {
+    return (
+        <div>
+            <h2>Groups</h2>
+            <TagFilter
+                dataSource={groupTags}
+                addFilter={addFilter}
+                removeFilter={removeFilter}
+                activeFilter={activeFilter}
+            />
+            <GroupList
+                groups={groups}
+                isLoading={isLoading}
+            />
+        </div>
+    );
+}
+
+function toArray(item) {
+    return isArray(item) ? item : [item];
+}
+
+const GroupsContainer = React.createClass({
+    getInitialState() {
+        return {};
+    },
 
     componentDidMount() {
-        this.props.fetchGroupList();
+        this.fetchGroupList();
+    },
+
+    componentWillReceiveProps(nextProps) {
+        const { activeFilter } = this.props;
+
+        if (!isEqual(nextProps.activeFilter, activeFilter, { deep: true })) {
+            this.fetchGroupList(nextProps);
+        }
+    },
+
+    setFilter(filterQuery) {
+        const { router, location } = this.props;
+
+        router.push({
+            query: filterQuery,
+            pathname: location.pathname,
+        });
+    },
+
+    addFilter(newFilter) {
+        const { activeFilter = [] } = this.props;
+
+        const updatedFilter = toArray(activeFilter)
+            .concat(newFilter.name)
+            .join(',');
+
+        this.setFilter({ tags: updatedFilter });
+    },
+
+    removeFilter(filter) {
+        const { activeFilter = [] } = this.props;
+        const updatedFilter = activeFilter.filter((item) => item !== filter);
+
+        this.setFilter(updatedFilter.length ? { tags: updatedFilter } : null);
+    },
+
+    fetchGroupList(props = this.props) {
+        const { activeFilter, fetchGroupList, fetchGroupTags } = props;
+
+        const tags = activeFilter ? { tags: activeFilter.join(',') } : null;
+        fetchGroupList(tags);
+        fetchGroupTags();
     },
 
     render() {
-        const { isLoading, groups } = this.props;
-        if (isLoading) return <LoadingIndicator />;
-        if (!groups) return <p>No results</p>;
+        const { isLoading, groups, groupTags, activeFilter } = this.props;
 
         return (
-            <GroupList groups={groups} isLoading={isLoading} />
+            <Groups
+                isLoading={isLoading}
+                groups={groups}
+                groupTags={groupTags}
+                activeFilter={activeFilter}
+                addFilter={this.addFilter}
+                removeFilter={this.removeFilter}
+            />
         );
     },
 });
 
-function mapStateToProps(state) {
-    const { groupList, groupListIsLoading } = state;
+function mapStateToProps(state, { location: { query } }) {
+    const { groupList, groupListIsLoading, groupTags } = state;
     return {
         groups: groupList.items,
+        groupTags: groupTags.items,
+        activeFilter: query.tags && query.tags.split(','),
         isLoading: groupListIsLoading || groupListIsLoading === null,
     };
 }
-export default connect(mapStateToProps, Actions)(GroupListContainer);
+export default withRouter(connect(mapStateToProps, Actions)(GroupsContainer));

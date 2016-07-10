@@ -18,6 +18,16 @@ function Server({ server }) {
     );
 }
 
+function Servers({ servers }) {
+    return (
+        <List>
+            <h2>Servers</h2>
+            {servers.map(server => (
+                <Server key={server.hostname + server.environment} server={server} />
+            ))}
+        </List>
+    );
+}
 const ServerListContainer = React.createClass({
 
     componentDidMount() {
@@ -29,12 +39,7 @@ const ServerListContainer = React.createClass({
         if (isLoading) return <LoadingIndicator />;
         if (!servers) return <p>No results</p>;
         return (
-            <List>
-                <h2>Servers</h2>
-                {servers.map(server => (
-                    <Server key={server.hostname + server.environment} server={server} />
-                ))}
-            </List>
+            <Servers servers={servers} />
         );
     },
 });
