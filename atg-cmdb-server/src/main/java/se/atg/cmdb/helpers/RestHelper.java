@@ -23,6 +23,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
 import io.dropwizard.jersey.validation.Validators;
@@ -105,5 +108,25 @@ public abstract class RestHelper {
 
   public static <T> PaginatedCollection<T> paginatedList(UriBuilder uriBuilder, Integer limit, Integer start, List<T> list) {
     return new PaginatedCollection<T>(uriBuilder, Optional.ofNullable(limit), Optional.ofNullable(start), list);
+  }
+
+  public static Document mergeAndUpdateMeta(
+      Document existing,
+      Object updateObject,
+      MongoCollection<Document> collection,
+      ObjectMapper objectMapper,
+      SecurityContext securityContext,
+      Request request
+    ) {
+
+    final Optional<String> hash = verifyHash(existing, request);
+    final JsonNode updateNode = JsonHelper.objectToJsonNode(updateObject, objectMapper);
+    JsonHelper.merge(existing, updateNode, objectMapper);
+
+    final User user = getUser(securityContext);
+    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
+
+    MongoHelper.updateDocument(existing, hash, collection);
+    return existing;
   }
 }

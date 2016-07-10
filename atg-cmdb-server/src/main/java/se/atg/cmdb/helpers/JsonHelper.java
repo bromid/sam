@@ -1,5 +1,6 @@
 package se.atg.cmdb.helpers;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
@@ -27,13 +29,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.rest.serializer.LinkDeserializer;
 import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
-import se.atg.cmdb.ui.rest.serializer.TagSerializer;
 
 public abstract class JsonHelper {
 
@@ -134,6 +136,19 @@ public abstract class JsonHelper {
     }
   }
 
+  public static JsonNode objectToJsonNode(Object node, ObjectMapper objectMapper) {
+    try {
+      final TokenBuffer buf = new TokenBuffer(objectMapper, false);
+      objectMapper.writerWithView(View.Db.class).writeValue(buf, node);
+
+      final JsonParser jp = buf.asParser();
+      return objectMapper.readTree(jp);
+    } catch (IOException exc) {
+      logger.error("Failed to generate object for: " + node, exc);
+      return null;
+    }
+  }
+
   public static Document jsonToBson(JsonNode node, ObjectMapper objectMapper) {
     try {
       final String json = objectMapper.writerWithView(View.Db.class).writeValueAsString(node);
@@ -177,7 +192,6 @@ public abstract class JsonHelper {
       private static final long serialVersionUID = 1L;
       {
         addSerializer(new LinkSerializer());
-        addSerializer(new TagSerializer());
         addDeserializer(Link.class, new LinkDeserializer());
       }
     });

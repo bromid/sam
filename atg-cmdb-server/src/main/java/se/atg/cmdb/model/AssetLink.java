@@ -14,11 +14,14 @@ import org.glassfish.jersey.linking.InjectLink.Style;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import se.atg.cmdb.ui.rest.AssetResource;
 import se.atg.cmdb.ui.rest.Defaults;
+import se.atg.cmdb.ui.rest.serializer.StringInDatabaseSerializer;
 
-public class AssetLink {
+@JsonSerialize(using = StringInDatabaseSerializer.class)
+public class AssetLink implements StringInDatabase {
 
   public final String id;
   public final String name;
@@ -64,6 +67,11 @@ public class AssetLink {
   }
 
   public String getId() {
+    return id;
+  }
+
+  @Override
+  public String stringInDatabase() {
     return id;
   }
 

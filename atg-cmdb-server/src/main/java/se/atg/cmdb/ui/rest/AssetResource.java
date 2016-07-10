@@ -1,6 +1,8 @@
 package se.atg.cmdb.ui.rest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
@@ -27,11 +29,13 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.client.FindIterable;
+import com.google.common.collect.Lists;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 
+import io.dropwizard.jersey.PATCH;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -103,6 +107,27 @@ public class AssetResource {
     return linkResponse(Status.CREATED, bson, uriInfo);
   }
 
+  @PATCH
+  @RolesAllowed(Roles.EDIT)
+  @Path("services/asset/{id}")
+  @ApiOperation(value = "Update asset", response = AssetLink.class)
+  public Response updateAsset(
+    @ApiParam("Asset id") @PathParam("id") String id,
+    @ApiParam("Asset") Asset asset,
+    @Context UriInfo uriInfo,
+    @Context Request request,
+    @Context SecurityContext securityContext
+  ) throws IOException {
+    logger.info("Update asset: {}", asset);
+
+    RestHelper.validate(asset, Asset.Update.class);
+
+    final Document existing = getAssetForUpdate(id);
+    final MongoCollection<Document> collection = database.getCollection(Collections.ASSETS);
+    final Document updated = RestHelper.mergeAndUpdateMeta(existing, asset, collection, objectMapper, securityContext, request);
+    return linkResponse(Status.OK, updated, uriInfo);
+  }
+
   @DELETE
   @Path("services/asset/{id}")
   @RolesAllowed(Roles.EDIT)
@@ -122,20 +147,35 @@ public class AssetResource {
 
   private PaginatedCollection<Asset> findAssets(Bson filter) {
 
-    final MongoCollection<Document> collection = database.getCollection(Collections.ASSETS);
-    final FindIterable<Document> query;
-    if (filter == ALL) {
-      query = collection.find();
-    } else {
-      query = collection.find(filter);
+    final List<Bson> pipeline = new ArrayList<>(2);
+    if (filter != ALL) {
+      pipeline.add(Aggregates.match(filter));
     }
-    return RestHelper.paginatedList(query.map(Asset::new));
+    pipeline.add(Aggregates.lookup(Collections.GROUPS, "group", "id", "group"));
+
+    return RestHelper.paginatedList(database
+        .getCollection(Collections.ASSETS)
+        .aggregate(pipeline)
+        .map(Asset::new)
+    );
+  }
+
+  private Document getAssetForUpdate(String id) {
+    final Document bson = database.getCollection(Collections.ASSETS)
+      .find(Filters.eq("id", id))
+      .first();
+    if (bson == null) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
+    return bson;
   }
 
   private Document findAsset(Bson filter) {
     final Document bson = database.getCollection(Collections.ASSETS)
-      .find(filter)
-      .first();
+        .aggregate(Lists.newArrayList(
+            Aggregates.match(filter),
+            Aggregates.lookup(Collections.GROUPS, "group", "id", "group")
+        )).first();
     if (bson == null) {
       throw new WebApplicationException(Status.NOT_FOUND);
     }

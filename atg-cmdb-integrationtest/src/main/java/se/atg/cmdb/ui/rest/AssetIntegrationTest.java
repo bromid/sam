@@ -26,6 +26,8 @@ import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Asset;
 import se.atg.cmdb.model.AssetLink;
+import se.atg.cmdb.model.Group;
+import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
@@ -42,9 +44,14 @@ public class AssetIntegrationTest {
   private ObjectMapper objectMapper;
 
   private MongoCollection<Document> assets;
+  private MongoCollection<Document> groups;
 
   @Before
   public void setUp() {
+
+    groups = database.getCollection(Collections.GROUPS);
+    groups.deleteMany(new Document());
+
     assets = database.getCollection(Collections.ASSETS);
     assets.deleteMany(new Document());
   }
@@ -52,24 +59,38 @@ public class AssetIntegrationTest {
   @Test
   public void getAsset() {
 
+    final Group group1 = new Group() {{
+      id = "group-id1";
+      name = "First group";
+    }};
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
       name = "Min pryl1";
       description = "Very useful asset";
+      group = new GroupLink("group-id1");
     }};
     assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
 
     final Asset response = getAsset(asset1.id);
-    TestHelper.isEqualExceptMeta(asset1, response);
+    verifyAsset(asset1, response);
   }
 
   @Test
   public void getAssets() {
 
+    final Group group1 = new Group() {{
+      id = "group-id1";
+      name = "First group";
+    }};
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
       name = "Min pryl1";
       description = "Very useful asset";
+      group = new GroupLink("group-id1");
     }};
     assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
 
@@ -77,6 +98,7 @@ public class AssetIntegrationTest {
       id = "my-asset2";
       name = "Min pryl2";
       description = "Also a very useful asset";
+      group = new GroupLink("group-id1");
     }};
     assets.insertOne(JsonHelper.addMetaForCreate(asset2, "integration-test", objectMapper));
 
@@ -90,7 +112,7 @@ public class AssetIntegrationTest {
     Assert.assertNull(response.limit);
 
     Assert.assertEquals(2, response.items.size());
-    TestHelper.assertEquals(Arrays.asList(asset1, asset2), response.items, Asset::getId, TestHelper::isEqualExceptMeta);
+    TestHelper.assertEquals(Arrays.asList(asset1, asset2), response.items, Asset::getId, AssetIntegrationTest::verifyAsset);
   }
 
   @Test(expected = NotFoundException.class)
@@ -104,10 +126,17 @@ public class AssetIntegrationTest {
   @Test
   public void addNewAsset() {
 
+    final Group group1 = new Group() {{
+      id = "group-id1";
+      name = "First group";
+    }};
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
       name = "My Asset #1";
       description = "Very important asset";
+      group = new GroupLink("group-id1");
       os = new Os() {{
         name = "RedHat";
         type = "Linux";
@@ -121,7 +150,7 @@ public class AssetIntegrationTest {
     Assert.assertNotNull(createResponse.db);
 
     final Asset response = getAsset(createResponse.link);
-    TestHelper.isEqualExceptMeta(asset1, response);
+    verifyAsset(asset1, response);
   }
 
   @Test
@@ -162,6 +191,52 @@ public class AssetIntegrationTest {
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(asset1));
     TestHelper.assertValidationError("os.name may not be null", response);
+  }
+
+  @Test
+  public void patchAsset() {
+
+    final Group group1 = new Group() {{
+      id = "group-id1";
+      name = "First group";
+    }};
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+
+    /*
+     * Create Application
+     */
+    final Asset asset1 = new Asset() {{
+      id = "my-asset1";
+      name = "My Asset 1";
+      description = "My super asset";
+    }};
+    final AssetResponse createResponse = createAsset(asset1);
+    Assert.assertNotNull(createResponse.db);
+
+    /*
+     * Patch server
+     */
+    final Asset assetPatch = new Asset() {{
+      name = "My patched asset name";
+      description = "New description";
+      group = new GroupLink("group-id1");
+    }};
+    final Response response = client.target(createResponse.link)
+      .request(MediaType.APPLICATION_JSON)
+      .build("PATCH", Entity.json(assetPatch))
+      .invoke();
+    TestHelper.assertSuccessful(response);
+    final AssetLink patchedAssetLink = response.readEntity(AssetLink.class);
+
+    /*
+     * Get and verify
+     */
+    final Asset patchedAsset = getAsset(patchedAssetLink.link);
+    Assert.assertEquals(asset1.id, patchedAsset.id);
+    Assert.assertEquals(assetPatch.name, patchedAsset.name);
+    Assert.assertEquals(assetPatch.description, patchedAsset.description);
+    Assert.assertEquals(group1.id, patchedAsset.group.id);
+    Assert.assertEquals(group1.name, patchedAsset.group.name);
   }
 
   @Test
@@ -213,6 +288,21 @@ public class AssetIntegrationTest {
       .get();
     TestHelper.assertSuccessful(response);
     return response.readEntity(Asset.class);
+  }
+
+  private static void verifyAsset(Asset expected, Asset actual) {
+
+    Assert.assertEquals(expected.id, actual.id);
+    Assert.assertEquals(expected.name, actual.name);
+    Assert.assertEquals(expected.description, actual.description);
+    Assert.assertEquals(expected.attributes, actual.attributes);
+    Assert.assertEquals(expected.network, actual.network);
+    Assert.assertEquals(expected.os, actual.os);
+    if (expected.group != null) {
+      Assert.assertEquals(expected.group.id, actual.group.id);
+      Assert.assertNotNull(actual.group.name);
+      Assert.assertNotNull(actual.group.link);
+    }
   }
 
   static class AssetResponse {

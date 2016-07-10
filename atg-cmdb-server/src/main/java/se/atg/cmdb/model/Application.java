@@ -33,7 +33,7 @@ public class Application extends Base {
 
     this.id = bson.getString("id");
     this.name = bson.getString("name");
-    this.group = Mapper.mapObject(bson, "group", GroupLink::fromId);
+    this.group = Mapper.mapObject(bson, "group", GroupLink::fromBson);
     this.attributes = Mapper.mapAttributes(bson);
   }
 

@@ -1,6 +1,8 @@
 package se.atg.cmdb.ui.rest;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
@@ -26,17 +28,15 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.client.FindIterable;
+import com.google.common.collect.Lists;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 
 import io.dropwizard.jersey.PATCH;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
@@ -46,7 +46,6 @@ import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
 import se.atg.cmdb.model.PaginatedCollection;
-import se.atg.cmdb.model.Server;
 import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
@@ -112,29 +111,21 @@ public class ApplicationResource {
   @RolesAllowed(Roles.EDIT)
   @Path("services/application/{id}")
   @ApiOperation(value = "Update application", response = ApplicationLink.class)
-  @ApiImplicitParams(
-    @ApiImplicitParam(name = "body", paramType = "body", required = true, dataType = "se.atg.cmdb.model.Application")
-  )
   public Response updateApplication(
     @ApiParam("Application id") @PathParam("id") String id,
-    @ApiParam(hidden = true) JsonNode applicationJson,
+    @ApiParam("Application") Application application,
     @Context UriInfo uriInfo,
     @Context Request request,
     @Context SecurityContext securityContext
   ) throws IOException {
+    logger.info("Update application: {}", application);
 
-    final Application application = objectMapper.treeToValue(applicationJson, Application.class);
-    RestHelper.validate(application, Server.Update.class);
+    RestHelper.validate(application, Application.Update.class);
 
-    final Document existing = findApplication(Filters.eq("id", id));
-    final Optional<String> hash = RestHelper.verifyHash(existing, request);
-    JsonHelper.merge(existing, applicationJson, objectMapper);
-
-    final User user = RestHelper.getUser(securityContext);
-    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
-
-    MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.APPLICATIONS));
-    return linkResponse(Status.OK, existing, uriInfo);
+    final Document existing = getApplicationForUpdate(id);
+    final MongoCollection<Document> collection = database.getCollection(Collections.APPLICATIONS);
+    final Document updated = RestHelper.mergeAndUpdateMeta(existing, application, collection, objectMapper, securityContext, request);
+    return linkResponse(Status.OK, updated, uriInfo);
   }
 
   @DELETE
@@ -156,20 +147,35 @@ public class ApplicationResource {
 
   private PaginatedCollection<Application> findApplications(Bson filter) {
 
-    final MongoCollection<Document> collection = database.getCollection(Collections.APPLICATIONS);
-    final FindIterable<Document> query;
-    if (filter == ALL) {
-      query = collection.find();
-    } else {
-      query = collection.find(filter);
+    final List<Bson> pipeline = new ArrayList<>(2);
+    if (filter != ALL) {
+      pipeline.add(Aggregates.match(filter));
     }
-    return RestHelper.paginatedList(query.map(Application::new));
+    pipeline.add(Aggregates.lookup(Collections.GROUPS, "group", "id", "group"));
+
+    return RestHelper.paginatedList(database
+        .getCollection(Collections.APPLICATIONS)
+        .aggregate(pipeline)
+        .map(Application::new)
+    );
+  }
+
+  private Document getApplicationForUpdate(String id) {
+    final Document bson = database.getCollection(Collections.APPLICATIONS)
+       .find(Filters.eq("id", id))
+       .first();
+    if (bson == null) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
+    return bson;
   }
 
   private Document findApplication(Bson filter) {
     final Document bson = database.getCollection(Collections.APPLICATIONS)
-      .find(filter)
-      .first();
+       .aggregate(Lists.newArrayList(
+           Aggregates.match(filter),
+           Aggregates.lookup(Collections.GROUPS, "group", "id", "group")
+       )).first();
     if (bson == null) {
       throw new WebApplicationException(Status.NOT_FOUND);
     }

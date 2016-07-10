@@ -25,6 +25,8 @@ import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
+import se.atg.cmdb.model.Group;
+import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
@@ -40,9 +42,14 @@ public class ApplicationIntegrationTest {
   private ObjectMapper objectMapper;
 
   private MongoCollection<Document> applications;
+  private MongoCollection<Document> groups;
 
   @Before
   public void setUp() {
+
+    groups = database.getCollection(Collections.GROUPS);
+    groups.deleteMany(new Document());
+
     applications = database.getCollection(Collections.APPLICATIONS);
     applications.deleteMany(new Document());
   }
@@ -50,24 +57,38 @@ public class ApplicationIntegrationTest {
   @Test
   public void getApplication() {
 
+    final Group group1 = new Group() {{
+      id = "my-group";
+      name = "My group";
+    }};
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+
     final Application application1 = new Application() {{
       id = "my-application1";
       name = "My Application 1";
       description = "Min testserver";
+      group = new GroupLink("my-group");
     }};
     applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test",  objectMapper));
 
     final Application response = getApplication(application1.id);
-    TestHelper.isEqualExceptMeta(application1, response);
+    verifyApplication(application1, response);
   }
 
   @Test
   public void getApplications() {
 
+    final Group group1 = new Group() {{
+      id = "my-group";
+      name = "My group";
+    }};
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+
     final Application application1 = new Application() {{
       id = "my-application1";
       name = "My Application 1";
       description = "Min testserver";
+      group = new GroupLink("my-group");
     }};
     applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test",  objectMapper));
 
@@ -75,6 +96,7 @@ public class ApplicationIntegrationTest {
       id = "my-application2";
       name = "My Application 2";
       description = "Min testserver";
+      group = new GroupLink("my-group");
     }};
     applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration-test",  objectMapper));
 
@@ -88,25 +110,62 @@ public class ApplicationIntegrationTest {
     Assert.assertNull(response.limit);
 
     Assert.assertEquals(2, response.items.size());
-    TestHelper.assertEquals(Arrays.asList(application1, application2), response.items, Application::getId, TestHelper::isEqualExceptMeta);
+    TestHelper.assertEquals(Arrays.asList(application1, application2), response.items, Application::getId, ApplicationIntegrationTest::verifyApplication);
   }
 
   @Test
   public void addNewApplication() {
 
+    final Group group1 = new Group() {{
+      id = "my-group";
+      name = "My group";
+    }};
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+
     final Application application1 = new Application() {{
       id = "my-application1";
       name = "My Application 1";
       description = "Min testserver";
+      group = new GroupLink("my-group");
     }};
     final ApplicationResponse createResponse = createApplication(application1);
 
     final Application response = getApplication(createResponse.link);
-    TestHelper.isEqualExceptMeta(application1, response);
+    verifyApplication(application1, response);
+  }
+
+  @Test
+  public void newApplicationMustHaveId() {
+
+    final Application application1 = new Application() {{
+      name = "My Application #1";
+    }};
+    final Response response = testEndpoint.path("application")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .put(Entity.json(application1));
+    TestHelper.assertValidationError("id may not be null", response);
+  }
+
+  @Test
+  public void newApplicationMustHaveName() {
+
+    final Application application1 = new Application() {{
+      id = "my-application1";
+    }};
+    final Response response = testEndpoint.path("application")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .put(Entity.json(application1));
+    TestHelper.assertValidationError("name may not be null", response);
   }
 
   @Test
   public void patchApplication() {
+
+    final Group group1 = new Group() {{
+      id = "my-group";
+      name = "My group";
+    }};
+    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
 
     /*
      * Create Application
@@ -114,7 +173,7 @@ public class ApplicationIntegrationTest {
     final Application application1 = new Application() {{
       id = "my-application1";
       name = "My Application 1";
-      description = "Min testserver";
+      description = "My super application";
     }};
     final ApplicationResponse createResponse = createApplication(application1);
     Assert.assertNotNull(createResponse.db);
@@ -123,8 +182,9 @@ public class ApplicationIntegrationTest {
      * Patch server
      */
     final Application applicationPatch = new Application() {{
-      name = "My Patched application name";
+      name = "My patched application name";
       description = "New description";
+      group = new GroupLink("my-group");
     }};
     final Response response = client.target(createResponse.link)
       .request(MediaType.APPLICATION_JSON)
@@ -140,6 +200,8 @@ public class ApplicationIntegrationTest {
     Assert.assertEquals(application1.id, patchedApplication.id);
     Assert.assertEquals(applicationPatch.name, patchedApplication.name);
     Assert.assertEquals(applicationPatch.description, patchedApplication.description);
+    Assert.assertEquals(group1.id, patchedApplication.group.id);
+    Assert.assertEquals(group1.name, patchedApplication.group.name);
   }
 
   @Test
@@ -191,6 +253,19 @@ public class ApplicationIntegrationTest {
       .get();
     TestHelper.assertSuccessful(response);
     return response.readEntity(Application.class);
+  }
+
+  public static void verifyApplication(Application expected, Application actual) {
+
+    Assert.assertEquals(expected.id, actual.id);
+    Assert.assertEquals(expected.name, actual.name);
+    Assert.assertEquals(expected.description, actual.description);
+    Assert.assertEquals(expected.attributes, actual.attributes);
+    if (expected.group != null) {
+      Assert.assertEquals(expected.group.id, actual.group.id);
+      Assert.assertNotNull(actual.group.name);
+      Assert.assertNotNull(actual.group.link);
+    }
   }
 
   static class ApplicationResponse {

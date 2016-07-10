@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.BsonField;
@@ -40,8 +40,6 @@ import com.mongodb.client.model.UnwindOptions;
 
 import io.dropwizard.jersey.PATCH;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
@@ -205,29 +203,22 @@ public class ServerResource {
   @RolesAllowed(Roles.EDIT)
   @Path("services/server/{environment}/{hostname}")
   @ApiOperation(value = "Update server", response = ServerLink.class)
-  @ApiImplicitParams(@ApiImplicitParam(name = "body", paramType = "body", required = true, dataType = "se.atg.cmdb.model.Server"))
   public Response updateServer(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
     @ApiParam("Test environment") @PathParam("environment") String environment,
-    @ApiParam(hidden = true) JsonNode serverJson,
+    @ApiParam("Server") Server server,
     @Context UriInfo uriInfo,
     @Context Request request,
     @Context SecurityContext securityContext
   ) throws IOException {
-
-    final Server server = objectMapper.treeToValue(serverJson, Server.class);
     logger.info("Update server: {}", server);
+
     RestHelper.validate(server, Server.Update.class);
 
     final Document existing = getServerForUpdate(hostname, environment);
-    final Optional<String> hash = RestHelper.verifyHash(existing, request);
-    JsonHelper.merge(existing, serverJson, objectMapper);
-
-    final User user = RestHelper.getUser(securityContext);
-    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
-
-    MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
-    return serverLinkResponse(Status.OK, existing, uriInfo);
+    final MongoCollection<Document> collection = database.getCollection(Collections.SERVERS);
+    final Document updated = RestHelper.mergeAndUpdateMeta(existing, server, collection, objectMapper, securityContext, request);
+    return serverLinkResponse(Status.OK, updated, uriInfo);
   }
 
   @DELETE

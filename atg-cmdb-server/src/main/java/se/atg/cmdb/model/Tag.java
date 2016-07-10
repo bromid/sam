@@ -5,10 +5,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import se.atg.cmdb.ui.rest.Defaults;
+import se.atg.cmdb.ui.rest.serializer.StringInDatabaseSerializer;
 
-public class Tag {
+@JsonSerialize(using = StringInDatabaseSerializer.class)
+public class Tag implements StringInDatabase {
 
   public String name;
   public boolean editable = true;
@@ -22,6 +25,11 @@ public class Tag {
 
   public static Tag fromName(String name) {
     return new Tag(name);
+  }
+
+  @Override
+  public String stringInDatabase() {
+    return name;
   }
 
   @Override
