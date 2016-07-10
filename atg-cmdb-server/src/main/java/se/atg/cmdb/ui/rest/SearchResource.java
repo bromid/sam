@@ -17,7 +17,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.RestHelper;
+import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.SearchResult;
+import se.atg.cmdb.model.search.ApplicationSearchResult;
+import se.atg.cmdb.model.search.AssetSearchResult;
+import se.atg.cmdb.model.search.GroupSearchResult;
 import se.atg.cmdb.model.search.ServerSearchResult;
 
 @Path("/")
@@ -38,15 +42,39 @@ public class SearchResource {
   public SearchResult getAssets(
     @ApiParam(value = "Sökparameter", required = true) @QueryParam("q") String query
   ) {
-    final SearchResult result = new SearchResult();
-    result.servers = RestHelper.paginatedList(
+
+    final PaginatedCollection<ServerSearchResult> servers = RestHelper.paginatedList(
       database.getCollection(Collections.SERVERS)
         .find(Filters.text(query))
         .projection(Projections.metaTextScore("score"))
         .sort(Sorts.metaTextScore("score"))
         .map(ServerSearchResult::new)
     );
-    result.groups = null;
-    return result;
+
+    final PaginatedCollection<GroupSearchResult> groups = RestHelper.paginatedList(
+      database.getCollection(Collections.GROUPS)
+        .find(Filters.text(query))
+        .projection(Projections.metaTextScore("score"))
+        .sort(Sorts.metaTextScore("score"))
+        .map(GroupSearchResult::new)
+    );
+
+    final PaginatedCollection<ApplicationSearchResult> applications = RestHelper.paginatedList(
+        database.getCollection(Collections.APPLICATIONS)
+          .find(Filters.text(query))
+          .projection(Projections.metaTextScore("score"))
+          .sort(Sorts.metaTextScore("score"))
+          .map(ApplicationSearchResult::new)
+    );
+
+    final PaginatedCollection<AssetSearchResult> assets = RestHelper.paginatedList(
+        database.getCollection(Collections.ASSETS)
+          .find(Filters.text(query))
+          .projection(Projections.metaTextScore("score"))
+          .sort(Sorts.metaTextScore("score"))
+          .map(AssetSearchResult::new)
+    );
+
+    return new SearchResult(servers, groups, applications, assets);
   }
 }

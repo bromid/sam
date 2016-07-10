@@ -53,12 +53,42 @@ public final class CreateDatabase {
     ));
 
     final MongoCollection<Document> applications = database.getCollection(Collections.APPLICATIONS);
-    applications.createIndex(ascending("id"), new IndexOptions().unique(true));
+    applications.createIndexes(Lists.newArrayList(
+      new IndexModel(
+        ascending("id"),
+        new IndexOptions().unique(true)
+      ),
+      new IndexModel(
+        compoundIndex(Indexes.text("id"), Indexes.text("name"), Indexes.text("description")),
+        new IndexOptions().weights(new Document().append("id", 10).append("name", 10)).defaultLanguage("sv")
+      )
+    ));
 
     final MongoCollection<Document> groups = database.getCollection(Collections.GROUPS);
-    groups.createIndex(ascending("id"), new IndexOptions().unique(true));
+    groups.createIndexes(Lists.newArrayList(
+      new IndexModel(
+        ascending("id"),
+        new IndexOptions().unique(true)
+      ),
+      new IndexModel(
+        ascending("tags")
+      ),
+      new IndexModel(
+        compoundIndex(Indexes.text("id"), Indexes.text("name"), Indexes.text("description"), Indexes.text("tags")),
+        new IndexOptions().weights(new Document().append("id", 10).append("name", 10).append("tags", 5)).defaultLanguage("sv")
+      )
+    ));
 
     final MongoCollection<Document> assets = database.getCollection(Collections.ASSETS);
-    assets.createIndex(ascending("id"), new IndexOptions().unique(true));
+    assets.createIndexes(Lists.newArrayList(
+      new IndexModel(
+        ascending("id"),
+        new IndexOptions().unique(true)
+      ),
+      new IndexModel(
+        compoundIndex(Indexes.text("id"), Indexes.text("name"), Indexes.text("description")),
+        new IndexOptions().weights(new Document().append("id", 10).append("name", 10)).defaultLanguage("sv")
+      )
+    ));
   }
 }

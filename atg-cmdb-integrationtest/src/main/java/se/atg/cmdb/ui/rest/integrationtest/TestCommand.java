@@ -77,6 +77,7 @@ public class TestCommand extends EnvironmentCommand<CmdbConfiguration> {
     });
 
     // Init database
+    database.drop();
     verifyDatabaseHealth(database);
     CreateDatabase.initDatabase(database);
 
