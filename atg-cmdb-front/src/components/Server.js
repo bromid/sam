@@ -106,7 +106,7 @@ const ServerContainer = React.createClass({
 
         const tabs = [
             {
-                name: 'Information',
+                name: 'Details',
                 node: (
                     <div style={{ ...flexWrapper, margin: '16px 0' }}>
                         <Os os={os} />

@@ -23,7 +23,7 @@ function CountBadge({ children, title, primary, secondary }) {
     );
 }
 
-function Group({ group, nestedLevel = 0 }) {
+export function Group({ group, nestedLevel = 0 }) {
     const nestedItems = group.groups ?
         group.groups.map(item => <Group group={item} key={item.id} />)
         : undefined;
@@ -51,11 +51,13 @@ function Group({ group, nestedLevel = 0 }) {
     );
 }
 
-function GroupList({ groups }) {
+export function GroupList({ groups }) {
     return (
         <List>
             <h2>Groups</h2>
-            {groups.map(group => <Group group={group} key={group.id} />)}
+            {groups.map(group =>
+                <Group group={group} key={group.id} />
+            )}
         </List>
     );
 }

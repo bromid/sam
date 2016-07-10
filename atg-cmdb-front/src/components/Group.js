@@ -2,10 +2,12 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import size from 'lodash/size';
+import List from 'material-ui/List';
 import * as Actions from '../actions/groupActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
+import { Group } from './GroupList';
 
 function collectionSize(collection) {
     if (!collection) return ' (0)';
@@ -17,6 +19,18 @@ function Asset({ asset }) {
         <p>
             <Link to={`/asset/${asset.id}`}>{asset.name}</Link>
         </p>
+    );
+}
+
+function Groups({ groups }) {
+    if (!groups) return <p>No groups</p>;
+
+    return (
+        <List>
+            {groups.map(group =>
+                <Group key={group.id} group={group} />
+            )}
+        </List>
     );
 }
 
@@ -59,17 +73,28 @@ const GroupContainer = React.createClass({
         fetchGroup(id);
     },
 
+    componentWillReceiveProps(newProps) {
+        const { id, fetchGroup } = this.props;
+        const {
+            id: newId,
+        } = newProps;
+
+        if (newId !== id) {
+            fetchGroup(newId);
+        }
+    },
+
     render() {
         const {
             isLoading,
             group: {
-                name, description, applications, assets, tags, attributes, meta,
+                name, description, applications, assets,
+                tags, attributes, meta, groups,
             },
         } = this.props;
         if (isLoading) return <LoadingIndicator />;
         if (!name) return <p>No result</p>;
 
-        const subgroups = [];
         const tabs = [
             {
                 name: `Applications ${collectionSize(applications)}`,
@@ -80,8 +105,8 @@ const GroupContainer = React.createClass({
                 node: <Assets assets={assets} />,
             },
             {
-                name: `Sub groups ${collectionSize(subgroups)}`,
-                node: <div />,
+                name: `Sub groups ${collectionSize(groups)}`,
+                node: <Groups groups={groups} />,
             },
             {
                 name: `Attributes ${collectionSize(attributes)}`,

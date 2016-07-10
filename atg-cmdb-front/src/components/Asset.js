@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/assetActions';
 import LoadingIndicator from './LoadingIndicator';
@@ -13,20 +14,33 @@ const AssetContainer = React.createClass({
     },
 
     render() {
-        const { asset, isLoading } = this.props;
+        const {
+            isLoading,
+            asset: {
+                name, description, group, attributes, meta,
+            },
+        } = this.props;
         if (isLoading) return <LoadingIndicator />;
 
         const tabs = [
             {
-                name: 'Attributes',
-                node: <Attributes attributes={asset.attributes} />,
+                name: 'Details',
+                node: (
+                    <div>
+                        <dl>
+                            <dt>Group</dt>
+                            <dd>{group && <Link to={`/group/${group.id}`}>{group.name}</Link>}</dd>
+                        </dl>
+                        <Attributes attributes={attributes} />
+                    </div>
+                ),
             },
         ];
         return (
             <ItemView
-                headline={asset.name}
-                description={asset.description}
-                meta={asset.meta}
+                headline={name}
+                description={description}
+                meta={meta}
                 tabs={tabs}
             />
         );

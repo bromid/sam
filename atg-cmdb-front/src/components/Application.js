@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import * as Actions from '../actions/applicationActions';
 import LoadingIndicator from './LoadingIndicator';
@@ -13,20 +14,33 @@ const ApplicationContainer = React.createClass({
     },
 
     render() {
-        const { application, isLoading } = this.props;
+        const {
+            isLoading,
+            application: {
+                name, description, group, attributes, meta,
+            },
+        } = this.props;
         if (isLoading) return <LoadingIndicator />;
 
         const tabs = [
             {
-                name: 'Attributes',
-                node: <Attributes attributes={application.attributes} />,
+                name: 'Details',
+                node: (
+                    <div>
+                        <dl>
+                            <dt>Group</dt>
+                            <dd>{group && <Link to={`/group/${group.id}`}>{group.name}</Link>}</dd>
+                        </dl>
+                        <Attributes attributes={attributes} />
+                    </div>
+                ),
             },
         ];
         return (
             <ItemView
-                headline={application.name}
-                description={application.description}
-                meta={application.meta}
+                headline={name}
+                description={description}
+                meta={meta}
                 tabs={tabs}
             />
         );
