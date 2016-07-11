@@ -39,6 +39,7 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UnwindOptions;
 
+import io.dropwizard.jersey.PATCH;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -128,6 +129,27 @@ public class GroupResource {
     return linkResponse(Status.CREATED, bson, uriInfo);
   }
 
+  @PATCH
+  @RolesAllowed(Roles.EDIT)
+  @Path("services/group/{id}")
+  @ApiOperation(value = "Update group", response = GroupLink.class)
+  public Response updateGroup(
+    @ApiParam("Group id") @PathParam("id") String id,
+    @ApiParam("Group") Group group,
+    @Context UriInfo uriInfo,
+    @Context Request request,
+    @Context SecurityContext securityContext
+  ) throws IOException {
+    logger.info("Update group: {}", group);
+
+    RestHelper.validate(group, Group.Update.class);
+
+    final Document existing = getGroupForUpdate(id);
+    final MongoCollection<Document> collection = database.getCollection(Collections.GROUPS);
+    final Document updated = RestHelper.mergeAndUpdateMeta(existing, group, collection, objectMapper, securityContext, request);
+    return linkResponse(Status.OK, updated, uriInfo);
+  }
+
   @DELETE
   @Path("services/group/{id}")
   @RolesAllowed(Roles.EDIT)
@@ -148,6 +170,13 @@ public class GroupResource {
     final Optional<String> hash = RestHelper.verifyHash(existing, request);
     MongoHelper.deleteDocument(filter, hash, collection);
     return Response.noContent().build();
+  }
+
+  private Document getGroupForUpdate(String id) {
+    return database
+      .getCollection(Collections.GROUPS)
+      .find(Filters.eq("id", id))
+      .first();
   }
 
   /*

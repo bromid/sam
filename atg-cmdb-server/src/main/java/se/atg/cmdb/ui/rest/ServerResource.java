@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
@@ -151,6 +152,13 @@ public class ServerResource {
     return deployment;
   }
 
+  @GET
+  @Path("services/server/environment")
+  @ApiOperation("Fetch all server environments")
+  public PaginatedCollection<String> getServerEnvironments() {
+    return getEnvironments();
+  }
+
   @PUT
   @Path("services/server/{environment}/{hostname}/deployment")
   @RolesAllowed(Roles.EDIT)
@@ -176,7 +184,7 @@ public class ServerResource {
     JsonHelper.updateMetaForUpdate(existing, hash, user.name);
 
     MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
-    return serverLinkResponse(Status.OK, existing, uriInfo);
+    return linkResponse(Status.OK, existing, uriInfo);
   }
 
   @PUT
@@ -196,7 +204,7 @@ public class ServerResource {
     final Document bson = JsonHelper.addMetaForCreate(server, user.name, objectMapper);
 
     database.getCollection(Collections.SERVERS).insertOne(bson);
-    return serverLinkResponse(Status.CREATED, bson, uriInfo);
+    return linkResponse(Status.CREATED, bson, uriInfo);
   }
 
   @PATCH
@@ -218,7 +226,7 @@ public class ServerResource {
     final Document existing = getServerForUpdate(hostname, environment);
     final MongoCollection<Document> collection = database.getCollection(Collections.SERVERS);
     final Document updated = RestHelper.mergeAndUpdateMeta(existing, server, collection, objectMapper, securityContext, request);
-    return serverLinkResponse(Status.OK, updated, uriInfo);
+    return linkResponse(Status.OK, updated, uriInfo);
   }
 
   @DELETE
@@ -241,6 +249,15 @@ public class ServerResource {
       database.getCollection(Collections.SERVERS)
     );
     return Response.noContent().build();
+  }
+
+  private PaginatedCollection<String> getEnvironments() {
+    return RestHelper.paginatedList(database
+    .getCollection(Collections.SERVERS)
+    .aggregate(Lists.newArrayList(
+        Aggregates.group("$environment")
+      )).map(t->t.getString("_id"))
+    );
   }
 
   private Document getServerForUpdate(String hostname, String environment) {
@@ -298,7 +315,7 @@ public class ServerResource {
     return pipeline;
   }
 
-  private Response serverLinkResponse(Status status, Document bson, UriInfo uriInfo) {
+  private Response linkResponse(Status status, Document bson, UriInfo uriInfo) {
 
     final ServerLink response = ServerLink.buildFromUri(uriInfo.getBaseUri(), bson.getString("hostname"), bson.getString("environment"));
     return Response

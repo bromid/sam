@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -30,7 +31,9 @@ public class Group extends Base {
   @Size(min = 1, max = 50)
   public String name;
   public List<Group> groups;
+  @Null(groups = Update.class)
   public List<ApplicationLink> applications;
+  @Null(groups = Update.class)
   public List<AssetLink> assets;
   public List<Tag> tags;
 
