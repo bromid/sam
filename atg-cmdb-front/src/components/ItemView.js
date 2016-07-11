@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Tabs, Tab } from 'material-ui/Tabs';
-import Chip from 'material-ui/Chip';
 import Meta from './Meta';
+import { Tags } from './Tag';
 
 const flexWrapper = {
     display: 'flex',
@@ -11,17 +11,10 @@ const flexWrapper = {
     alignItems: 'stretch',
 };
 
-const tagStyle = {
-    margin: '0.5em 0.5em 0 0',
-};
-
 const containerStyle = {
     flex: 1,
     margin: 10,
 };
-
-function deleteTag() {
-}
 
 function Description({ description }) {
     if (!description) return <div style={containerStyle} />;
@@ -34,29 +27,12 @@ function Description({ description }) {
     );
 }
 
-function Tags({ tags }) {
-    if (!tags) return null;
-    return (
-        <div style={{ ...flexWrapper, height: 40 }}>
-            {tags.map(tag => (
-                <Chip
-                    key={tag.name}
-                    style={tagStyle}
-                    onRequestDelete={deleteTag}
-                    children={tag.name}
-                />
-            ))}
-        </div>
-    );
-}
-
 export default function ItemView(props) {
     const {
         headline, description, tags,
         meta, metaOpen, toggleMeta,
         tabs, selectedTab, onTabChanged,
     } = props;
-
     return (
         <div>
             <h2>{headline}</h2>
@@ -77,4 +53,3 @@ export default function ItemView(props) {
         </div>
     );
 }
-

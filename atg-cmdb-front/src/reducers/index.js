@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import groupList from './groups';
 import group from './group';
+import groupTags from './groupTags';
 import applicationList from './applications';
 import application from './application';
 import serverList from './servers';
@@ -16,6 +17,7 @@ import releaseNotes from './releaseNotes';
 const cmdbState = combineReducers({
     ...groupList,
     ...group,
+    ...groupTags,
     ...applicationList,
     ...application,
     ...serverList,

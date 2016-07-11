@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import identity from 'lodash/identity';
 
 const keyRequired = (key) => { throw new Error(`${key} must be specified!`); };
 
@@ -7,8 +7,8 @@ export default function createFetchActions(options) {
         apiCall = keyRequired('ApiCall'),
         requestKey = keyRequired('requestKey'),
         receiveKey = keyRequired('receiveKey'),
-        payloadTransform = _.identity,
-        errorTransform = _.identity,
+        payloadTransform = identity,
+        errorTransform = identity,
         shouldFetch,
     } = options;
 

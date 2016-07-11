@@ -2,7 +2,7 @@ import React from 'react';
 import * as Actions from '../actions/infoActions';
 import LoadingIndicator from './LoadingIndicator';
 import { connect } from 'react-redux';
-import _ from 'lodash';
+import isString from 'lodash/isString';
 
 const ReleaseNotesContainer = React.createClass({
 
@@ -23,7 +23,7 @@ const ReleaseNotesContainer = React.createClass({
 function mapStateToProps(state) {
     const { releaseNotes, releaseNotesIsLoading } = state;
     return {
-        error: !_.isString(releaseNotes),
+        error: !isString(releaseNotes),
         releaseNotesHtml: { __html: releaseNotes },
         isLoading: releaseNotesIsLoading || releaseNotesIsLoading === null,
     };

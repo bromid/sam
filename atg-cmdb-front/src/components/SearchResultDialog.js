@@ -7,7 +7,7 @@ import {
     Table, TableBody, TableHeader, TableHeaderColumn,
     TableRow, TableRowColumn,
 } from 'material-ui/Table';
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 const SearchResultDialog = React.createClass({
     propTypes: {
@@ -19,7 +19,7 @@ const SearchResultDialog = React.createClass({
     renderServersTable() {
         const { searchResults: { servers }, handleCloseModal } = this.props;
 
-        if (_.isEmpty(servers.items)) {
+        if (isEmpty(servers.items)) {
             return (
                 <div>
                     <h3>Servers</h3>
@@ -65,7 +65,7 @@ const SearchResultDialog = React.createClass({
     render() {
         const { searchResults, searchResultsIsLoading, modalOpen, handleCloseModal } = this.props;
 
-        const isLoading = searchResultsIsLoading || _.isEmpty(searchResults);
+        const isLoading = searchResultsIsLoading || isEmpty(searchResults);
 
         const actions = [
             <RaisedButton
