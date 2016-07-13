@@ -29,28 +29,6 @@ function patchNotification(result, error, isPending) {
 }
 
 const ApplicationContainer = React.createClass({
-
-    getInitialState() {
-        return { initiated: false };
-    },
-
-    componentDidMount() {
-        const { id, fetchApplication } = this.props;
-        fetchApplication(id);
-    },
-
-    componentWillReceiveProps(newProps) {
-        const { id, patchResult, fetchApplication } = this.props;
-        const { id: newId, patchResult: newPatchResult } = newProps;
-
-        const isDifferentEtag = newPatchResult.etag !== patchResult.etag;
-        const isUpdatedEtag = !isEmpty(newPatchResult) && isDifferentEtag;
-        if (newId !== id || isUpdatedEtag) {
-            this.setState({ initiated: true });
-            fetchApplication(newId);
-        }
-    },
-
     updateDescription(description) {
         const { id, patchApplication, application: { meta } } = this.props;
         patchApplication(id, { description }, {
@@ -68,13 +46,17 @@ const ApplicationContainer = React.createClass({
     render() {
         const {
             isLoading,
-            metaOpen, toggleMeta,
-            patchResult, patchError, patchIsPending,
-            application: {
-                id, name, description = '', group, attributes, meta,
-            },
+            metaOpen,
+            toggleMeta,
+            patchResult,
+            patchError,
+            patchIsPending,
+            application,
         } = this.props;
-        if (isLoading && !this.state.initiated) return <LoadingIndicator />;
+
+        if (isLoading && isEmpty(application)) return <LoadingIndicator />;
+
+        const { id, name, description = '', group, attributes, meta } = application;
 
         const tabs = [
             {
@@ -125,9 +107,12 @@ function mapStateToProps(state, props) {
         patchResult: applicationPatchResult,
         patchError: applicationPatchResultError,
         patchIsPending: applicationPatchResultIsPending,
-        isLoading: applicationIsPending || applicationIsPending === null,
+        isLoading: applicationIsPending,
     };
 }
 
-const Actions = { ...applicationActions, ...metaActions };
+const Actions = {
+    patchApplication: applicationActions.patchApplication,
+    toggleMeta: metaActions.toggleMeta,
+};
 export default connect(mapStateToProps, Actions)(ApplicationContainer);
