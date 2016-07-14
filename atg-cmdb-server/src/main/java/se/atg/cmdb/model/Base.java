@@ -21,9 +21,13 @@ public abstract class Base {
   }
 
   Base(Document bson) {
-    this.description = bson.getString("description");
-    this.meta = Mapper.mapObject(bson, "meta", Meta::fromBson);
-    this.attributes = Mapper.mapAttributes(bson);
+    mapToBase(bson, this);
+  }
+
+  public static void mapToBase(Document bson, Base base) {
+    base.description = bson.getString("description");
+    base.meta = Mapper.mapObject(bson, "meta", Meta::fromBson);
+    base.attributes = Mapper.mapAttributes(bson);
   }
 
   public interface Validation {

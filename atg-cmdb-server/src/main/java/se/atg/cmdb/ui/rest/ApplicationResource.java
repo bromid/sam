@@ -34,6 +34,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 
 import io.dropwizard.jersey.PATCH;
 import io.swagger.annotations.Api;
@@ -46,6 +47,7 @@ import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
 import se.atg.cmdb.model.PaginatedCollection;
+import se.atg.cmdb.model.ServerDeployment;
 import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
@@ -85,6 +87,18 @@ public class ApplicationResource {
       .ok(new Application(application))
       .tag(RestHelper.getEntityTag(application).orElse(null))
       .build();
+  }
+
+  @GET
+  @RolesAllowed(Roles.READ)
+  @Path("services/application/{id}/deployment")
+  @ApiOperation(value = "Fetch deployed instances of the application")
+  public PaginatedCollection<ServerDeployment> getApplicationDeployments(
+    @ApiParam @PathParam("id") String id
+  ) {
+    return RestHelper.paginatedList(
+      findApplicationDeployments(id)
+    );
   }
 
   @PUT
@@ -190,5 +204,15 @@ public class ApplicationResource {
       .entity(response)
       .tag(RestHelper.getEntityTag(bson).orElse(null))
       .build();
+  }
+
+  private Iterable<ServerDeployment> findApplicationDeployments(String applicationId) {
+    return database.getCollection(Collections.SERVERS)
+      .find(
+        Filters.eq("deployments.applicationId", applicationId)
+      ).projection(Projections.fields(
+        Projections.include("hostname", "environment"),
+        Projections.elemMatch("deployments")
+      )).map(ServerDeployment::fromBson);
   }
 }

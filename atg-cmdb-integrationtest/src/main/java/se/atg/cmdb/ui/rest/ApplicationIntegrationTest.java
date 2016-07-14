@@ -1,6 +1,8 @@
 package se.atg.cmdb.ui.rest;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -16,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -25,9 +28,12 @@ import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
+import se.atg.cmdb.model.Deployment;
 import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
+import se.atg.cmdb.model.Server;
+import se.atg.cmdb.model.ServerDeployment;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class ApplicationIntegrationTest {
@@ -43,6 +49,7 @@ public class ApplicationIntegrationTest {
 
   private MongoCollection<Document> applications;
   private MongoCollection<Document> groups;
+  private MongoCollection<Document> servers;
 
   @Before
   public void setUp() {
@@ -52,6 +59,9 @@ public class ApplicationIntegrationTest {
 
     applications = database.getCollection(Collections.APPLICATIONS);
     applications.deleteMany(new Document());
+
+    servers = database.getCollection(Collections.SERVERS);
+    servers.deleteMany(new Document());
   }
 
   @Test
@@ -111,6 +121,71 @@ public class ApplicationIntegrationTest {
 
     Assert.assertEquals(2, response.items.size());
     TestHelper.assertEquals(Arrays.asList(application1, application2), response.items, Application::getId, ApplicationIntegrationTest::verifyApplication);
+  }
+
+  @Test
+  public void getApplicationDeployments() {
+
+    final String applicationId1 = "application1";
+    final String applicationId2 = "application2";
+    final String applicationId3 = "application3";
+    final Deployment deployment1 = new Deployment(applicationId1) {{
+      version = "1.0.0";
+      releaseNotes = "http://localhost/release-notes1";
+      description = "Description 1";
+    }};
+    final Deployment deployment2 = new Deployment(applicationId2) {{
+      version = "1.2.1";
+      releaseNotes = "http://localhost/release-notes2";
+      description = "Description 2";
+    }};
+    final Deployment deployment3 = new Deployment(applicationId3) {{
+      version = "0.0.1";
+      releaseNotes = "http://localhost/release-notes3";
+      description = "Description 3";
+    }};
+    final Deployment deployment4 = new Deployment(applicationId1) {{
+      version = "1.0";
+      releaseNotes = "http://localhost/release-notes4";
+      description = "Description 4";
+    }};
+    final Deployment deployment5 = new Deployment(applicationId2) {{
+      version = "1.0";
+      releaseNotes = "http://localhost/release-notes5";
+      description = "Description 5";
+    }};
+
+    final Server server1 = new Server() {{
+      hostname = "vltma1";
+      environment = "test1";
+      fqdn = "vltma1.test1.hh.atg.se";
+      description = "Min testserver #1";
+      deployments = Arrays.asList(deployment1, deployment2, deployment3);
+    }};
+    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+
+    final Server server2 = new Server() {{
+      hostname = "vltma2";
+      environment = "test1";
+      fqdn = "vltma2.test1.hh.atg.se";
+      description = "Min testserver #2";
+      deployments = Arrays.asList(deployment3, deployment4, deployment5);
+    }};
+    servers.insertOne(JsonHelper.addMetaForCreate(server2, "integration-test", objectMapper));
+
+    final PaginatedCollection<ServerDeployment> response = testEndpoint
+      .path("application").path(applicationId1).path("deployment")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(new GenericType<PaginatedCollection<ServerDeployment>>(){});
+
+    final Collection<ServerDeployment> actualDeployments = response.items;
+    Assert.assertEquals(2, actualDeployments.size());
+
+    final Map<String, ServerDeployment> expectedMap = ImmutableMap.of(
+      serverId(server1), new ServerDeployment(server1, deployment1),
+      serverId(server2), new ServerDeployment(server2, deployment4)
+    );
+    TestHelper.assertEquals(expectedMap, actualDeployments, ApplicationIntegrationTest::serverId, Assert::assertEquals);
   }
 
   @Test
@@ -253,6 +328,14 @@ public class ApplicationIntegrationTest {
       .get();
     TestHelper.assertSuccessful(response);
     return response.readEntity(Application.class);
+  }
+
+  private static String serverId(Server server) {
+    return server.hostname + "-" + server.environment;
+  }
+
+  private static String serverId(ServerDeployment deployment) {
+    return deployment.hostname + "-" + deployment.environment;
   }
 
   public static void verifyApplication(Application expected, Application actual) {
