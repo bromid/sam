@@ -6,7 +6,12 @@ import org.bson.Document;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.annotations.ApiModel;
+
+@ApiModel(description = "Describes a search result for a server.")
+@JsonPropertyOrder({ "hostname", "environment", "fqdn", "description", "score", "link" })
 public class ServerSearchResult {
 
   public final String hostname;

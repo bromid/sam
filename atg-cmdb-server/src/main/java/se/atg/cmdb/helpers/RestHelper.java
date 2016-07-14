@@ -25,11 +25,11 @@ import org.bson.conversions.Bson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
 import io.dropwizard.jersey.validation.Validators;
-import jersey.repackaged.com.google.common.collect.Lists;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.User;
 
