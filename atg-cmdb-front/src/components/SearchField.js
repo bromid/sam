@@ -1,6 +1,9 @@
 import React, { PropTypes } from 'react';
+import IconButton from 'material-ui/IconButton';
 import SearchIcon from 'material-ui/svg-icons/action/search';
+import ClearIcon from 'material-ui/svg-icons/content/clear';
 import { blue800 } from 'material-ui/styles/colors';
+import isEmpty from 'lodash/isEmpty';
 import SearchResultDialog from './SearchResultDialog';
 
 const searchStyles = {
@@ -11,8 +14,9 @@ const searchStyles = {
     },
     icon: {
         position: 'absolute',
-        right: 5,
-        top: 8,
+        padding: 0,
+        top: 0,
+        right: 0,
     },
     input: {
         fontSize: 14,
@@ -25,6 +29,9 @@ const searchStyles = {
     },
 };
 
+const iconSearchButtonId = 'search-button';
+const iconClearButtonId = 'search-clear-button';
+
 const SearchField = React.createClass({
     propTypes: {
         fetchSearch: PropTypes.func,
@@ -34,17 +41,37 @@ const SearchField = React.createClass({
 
     getInitialState() {
         return {
-            showIcon: true,
+            showSearchIcon: true,
+            showClearIcon: false,
             modalOpen: false,
         };
     },
 
     handleFocus() {
-        this.setState({ showIcon: false });
+        this.setState({ showSearchIcon: false });
+        this.handleChange();
     },
 
-    handleBlur() {
-        this.setState({ showIcon: true });
+    handleBlur(event) {
+        // Don't hide the clear button if it's the target when the input loses focus
+        if (!event.relatedTarget || event.relatedTarget.id !== iconClearButtonId) {
+            this.setState({
+                showSearchIcon: true,
+                showClearIcon: false,
+            });
+        }
+    },
+
+    handleChange() {
+        if (!isEmpty(this.refs.input.value)) {
+            this.setState({
+                showClearIcon: true,
+            });
+        } else if (this.state.showClearIcon) {
+            this.setState({
+                showClearIcon: false,
+            });
+        }
     },
 
     handleCloseModal() {
@@ -59,8 +86,13 @@ const SearchField = React.createClass({
         this.setState({ modalOpen: true });
     },
 
+    clear() {
+        this.refs.input.value = null;
+        this.refs.input.focus();
+    },
+
     render() {
-        const { showIcon, modalOpen } = this.state;
+        const { showSearchIcon, showClearIcon, modalOpen } = this.state;
         const { searchResults, searchResultsIsLoading } = this.props;
         return (
             <div style={searchStyles.wrapper}>
@@ -69,11 +101,25 @@ const SearchField = React.createClass({
                         ref="input"
                         onFocus={this.handleFocus}
                         onBlur={this.handleBlur}
+                        onChange={this.handleChange}
                         style={searchStyles.input}
                         type="text"
                         placeholder="Search..."
                     />
-                    {showIcon && <SearchIcon style={searchStyles.icon} color={blue800} />}
+                    {showSearchIcon && <IconButton
+                        id={iconSearchButtonId}
+                        tooltip="Search"
+                        style={searchStyles.icon}
+                        onTouchTap={this.handleSubmit}
+                        children={<SearchIcon color={blue800} />}
+                    />}
+                    {showClearIcon && <IconButton
+                        id={iconClearButtonId}
+                        tooltip="Clear"
+                        style={searchStyles.icon}
+                        onTouchTap={this.clear}
+                        children={<ClearIcon color={blue800} />}
+                    />}
                 </form>
                 <SearchResultDialog
                     searchResults={searchResults}

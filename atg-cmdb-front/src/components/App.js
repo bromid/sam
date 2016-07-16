@@ -11,8 +11,23 @@ import SearchField from './SearchField';
 import * as searchActions from '../actions/searchActions';
 
 const theme = {
+    spacing: {
+        iconSize: 20,
+        desktopGutter: 20,
+    },
     palette: {
         primary1Color: blue800,
+    },
+    tableRow: {
+        height: 30,
+    },
+    tableRowColumn: {
+        height: 40,
+        spacing: 10,
+    },
+    tableHeaderColumn: {
+        height: 30,
+        spacing: 10,
     },
 };
 

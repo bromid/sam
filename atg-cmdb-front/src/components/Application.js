@@ -15,6 +15,15 @@ const ApplicationContainer = React.createClass({
         fetchApplication(id);
     },
 
+    componentWillReceiveProps(newProps) {
+        const { id, fetchApplication } = this.props;
+        const { id: newId } = newProps;
+
+        if (newId !== id) {
+            fetchApplication(newId);
+        }
+    },
+
     render() {
         const {
             isLoading,

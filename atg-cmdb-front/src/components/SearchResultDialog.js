@@ -1,6 +1,7 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import { Link } from 'react-router';
 import Dialog from 'material-ui/Dialog';
+import AppBar from 'material-ui/AppBar';
 import RaisedButton from 'material-ui/RaisedButton';
 import LoadingIndicator from './LoadingIndicator';
 import {
@@ -8,87 +9,157 @@ import {
     TableRow, TableRowColumn,
 } from 'material-ui/Table';
 import isEmpty from 'lodash/isEmpty';
+import { container } from '../style';
+import { Tags } from './Tag';
 
-const SearchResultDialog = React.createClass({
-    propTypes: {
-        searchResults: PropTypes.object,
-        modalOpen: PropTypes.bool,
-        searchResultsIsLoading: PropTypes.bool,
-    },
-
-    renderServersTable() {
-        const { searchResults: { servers }, handleCloseModal } = this.props;
-
-        if (isEmpty(servers.items)) {
-            return (
-                <div>
-                    <h3>Servers</h3>
+function ResultsTable({ header, tableHeaders, rows }) {
+    if (isEmpty(rows)) {
+        return (
+            <div style={{ marginBottom: 20 }}>
+                <h3>{header}</h3>
+                <div style={{ ...container, fontSize: 13 }}>
                     <p>No results</p>
                 </div>
-            );
-        }
-
-        const serverTableRows = servers && servers.items.map((server, index) =>
-            <TableRow key={`tableRow-${index}`}>
-                <TableRowColumn>
-                    <Link
-                        onClick={handleCloseModal}
-                        to={`/server/${server.environment}/${server.hostname}`}
-                    >
-                        {server.hostname}@{server.environment}
-                    </Link>
-                </TableRowColumn>
-                <TableRowColumn>{server.fqdn}</TableRowColumn>
-                <TableRowColumn>{server.description}</TableRowColumn>
-            </TableRow>
-            );
-
-        return (
-            <div>
-                <h3>Servers</h3>
-                <Table>
+            </div>
+        );
+    }
+    return (
+        <div style={{ marginBottom: 20 }}>
+            <h3>{header}</h3>
+            <div style={container}>
+                <Table selectable={false}>
                     <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
                         <TableRow>
-                            <TableHeaderColumn>Host</TableHeaderColumn>
-                            <TableHeaderColumn>FQDN</TableHeaderColumn>
-                            <TableHeaderColumn>Description</TableHeaderColumn>
+                            {tableHeaders.map((tableHeader, index) =>
+                                <TableHeaderColumn key={`headerColumn-${index}`}>
+                                    {tableHeader}
+                                </TableHeaderColumn>
+                            )}
                         </TableRow>
                     </TableHeader>
                     <TableBody displayRowCheckbox={false}>
-                               {serverTableRows}
+                        {rows.map((row, rowIndex) =>
+                            <TableRow key={`tableRow-${rowIndex}`}>
+                                {row.map((col, colIndex) =>
+                                    <TableRowColumn key={`tableColumn-${colIndex}`}>
+                                        {col}
+                                    </TableRowColumn>
+                                )}
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </div>
-        );
-    },
+        </div>
+    );
+}
 
-    render() {
-        const { searchResults, searchResultsIsLoading, modalOpen, handleCloseModal } = this.props;
+function GroupsTable({ groups, handleCloseModal }) {
+    const tableHeaders = ['Name', 'Description', 'Tags'];
+    const rows = groups.items && groups.items.map(group => [
+        <Link onClick={handleCloseModal} to={`/group/${group.id}`}>
+            {group.name}
+        </Link>,
+        group.description,
+        <Tags tags={group.tags} />,
+    ]);
+    return <ResultsTable header="Groups" tableHeaders={tableHeaders} rows={rows} />;
+}
 
-        const isLoading = searchResultsIsLoading || isEmpty(searchResults);
+function ApplicationsTable({ applications, handleCloseModal }) {
+    const tableHeaders = ['Name', 'Description'];
+    const rows = applications.items && applications.items.map(application => [
+        <Link onClick={handleCloseModal} to={`/application/${application.id}`}>
+            {application.name}
+        </Link>,
+        application.description,
+    ]);
+    return <ResultsTable header="Applications" tableHeaders={tableHeaders} rows={rows} />;
+}
 
-        const actions = [
-            <RaisedButton
-                label="Close"
-                secondary={true}
-                onTouchTap={handleCloseModal}
-            />,
-        ];
+function ServersTable({ servers, handleCloseModal }) {
+    const tableHeaders = ['Host', 'FQDN', 'Description'];
+    const rows = servers.items && servers.items.map(server => [
+        <Link
+            onClick={handleCloseModal}
+            to={`/server/${server.environment}/${server.hostname}`}
+        >
+            {server.hostname}@{server.environment}
+        </Link>,
+        server.fqdn,
+        server.description,
+    ]);
+    return <ResultsTable header="Servers" tableHeaders={tableHeaders} rows={rows} />;
+}
 
-        return (
-            <Dialog
-                title="Search Results"
-                open={modalOpen}
-                actions={actions}
-                autoScrollBodyContent={true}
-            >
-                <div style={{ minHeight: 500, marginTop: 20 }}>
-                     {isLoading && <LoadingIndicator />}
-                     {!isLoading && this.renderServersTable()}
-                </div>
-            </Dialog>
-        );
-    },
-});
+function AssetsTable({ assets, handleCloseModal }) {
+    const tableHeaders = ['Name', 'Description'];
+    const rows = assets.items && assets.items.map(asset => [
+        <Link onClick={handleCloseModal} to={`/asset/${asset.id}`}>
+            {asset.name}
+        </Link>,
+        asset.description,
+    ]);
+    return <ResultsTable header="Assets" tableHeaders={tableHeaders} rows={rows} />;
+}
 
-export default SearchResultDialog;
+function SearchResults({ searchResults, isLoading, handleCloseModal }) {
+    const { groups, applications, servers, assets } = searchResults;
+    if (isLoading) return <LoadingIndicator />;
+    return (
+        <div>
+            <GroupsTable groups={groups} handleCloseModal={handleCloseModal} />
+            <ApplicationsTable applications={applications} handleCloseModal={handleCloseModal} />
+            <ServersTable servers={servers} handleCloseModal={handleCloseModal} />
+            <AssetsTable assets={assets} handleCloseModal={handleCloseModal} />
+        </div>
+    );
+}
+
+export default function SearchResultDialog(props) {
+    const { searchResults, searchResultsIsLoading, modalOpen, handleCloseModal } = props;
+    const isLoading = searchResultsIsLoading || isEmpty(searchResults);
+
+    const actions = [
+        <RaisedButton
+            label="Close"
+            secondary={true}
+            onTouchTap={handleCloseModal}
+        />,
+    ];
+
+    const titleBar = (
+        <AppBar
+            title="SEARCH RESULT"
+            style={{
+                borderRadius: 2,
+                padding: '0 24px 0 16px',
+            }}
+            titleStyle={{
+                fontSize: 14,
+                fontWeight: 500,
+                height: 48,
+                lineHeight: '48px',
+            }}
+            showMenuIconButton={false}
+        />
+    );
+
+    return (
+        <Dialog
+            title={titleBar}
+            open={modalOpen}
+            actions={actions}
+            onRequestClose={handleCloseModal}
+            autoScrollBodyContent={true}
+        >
+            <div style={{ minHeight: 500, marginTop: 20 }}>
+                <SearchResults
+                    isLoading={isLoading}
+                    handleCloseModal={handleCloseModal}
+                    searchResults={searchResults}
+                />
+            </div>
+        </Dialog>
+    );
+}

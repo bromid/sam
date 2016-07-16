@@ -69,8 +69,11 @@ function Applications({ applications }) {
 
 function Group(props) {
     const {
-        isLoading, name, description, applications, assets, groups, attributes,
-        tags, meta, metaOpen, toggleMeta, selectedTab, onTabChanged,
+        group: {
+            name, description, applications, assets,
+            tags, attributes, meta, groups,
+        },
+        isLoading, metaOpen, toggleMeta, selectedTab, onTabChanged, onTagDelete,
     } = props;
 
     if (isLoading) return <LoadingIndicator />;
@@ -100,6 +103,7 @@ function Group(props) {
             headline={name}
             description={description}
             tags={tags}
+            onTagDelete={onTagDelete}
             meta={meta}
             metaOpen={metaOpen}
             toggleMeta={toggleMeta}
@@ -125,13 +129,15 @@ const GroupContainer = React.createClass({
 
     componentWillReceiveProps(newProps) {
         const { id, fetchGroup } = this.props;
-        const {
-            id: newId,
-        } = newProps;
+        const { id: newId } = newProps;
 
         if (newId !== id) {
             fetchGroup(newId);
         }
+    },
+
+    onTagDelete(name) {
+        return name;
     },
 
     onTabChanged(tab) {
@@ -145,23 +151,14 @@ const GroupContainer = React.createClass({
             isLoading,
             metaOpen,
             toggleMeta,
-            group: {
-                name, description, applications, assets,
-                tags, attributes, meta, groups,
-            },
+            group,
         } = this.props;
 
         return (
             <Group
+                group={group}
                 isLoading={isLoading}
-                name={name}
-                description={description}
-                applications={applications}
-                assets={assets}
-                groups={groups}
-                attributes={attributes}
-                tags={tags}
-                meta={meta}
+                onTagDelete={this.onTagDelete}
                 metaOpen={metaOpen}
                 toggleMeta={toggleMeta}
                 selectedTab={this.state.selectedTab}
