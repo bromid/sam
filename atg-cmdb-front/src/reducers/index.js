@@ -4,6 +4,7 @@ import group from './group';
 import groupTags from './groupTags';
 import applicationList from './applications';
 import application from './application';
+import applicationDeployments from './applicationDeployments';
 import serverList from './servers';
 import server from './server';
 import assetList from './assets';
@@ -20,6 +21,7 @@ const cmdbState = combineReducers({
     ...groupTags,
     ...applicationList,
     ...application,
+    ...applicationDeployments,
     ...serverList,
     ...server,
     ...assetList,

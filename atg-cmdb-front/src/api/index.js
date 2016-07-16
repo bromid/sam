@@ -45,15 +45,19 @@ const fetchHtml = (url) => fetch(url, TEXT_HTML)
     .then((response) => verifySuccessful(response))
     .then((response) => response.text());
 
-export const fetchGroupList = (params) => fetchJson('/services/group', params);
+export const fetchGroupList = (queryParams) => fetchJson('/services/group', queryParams);
 
-export const fetchGroup = (params) => fetchJson(`/services/group/${params}`);
+export const fetchGroup = (groupId) => fetchJson(`/services/group/${groupId}`);
 
 export const fetchGroupTags = () => fetchJson('/services/group/tag');
 
 export const fetchApplicationList = () => fetchJson('/services/application');
 
-export const fetchApplication = (params) => fetchJson(`/services/application/${params}`);
+export const fetchApplication = (applicationId) =>
+    fetchJson(`/services/application/${applicationId}`);
+
+export const fetchApplicationDeployments = (applicationId) =>
+    fetchJson(`/services/application/${applicationId}/deployment`);
 
 export const fetchServerList = () => fetchJson('/services/server');
 
@@ -62,9 +66,9 @@ export const fetchServer = (params) =>
 
 export const fetchAssetList = () => fetchJson('/services/asset');
 
-export const fetchAsset = (params) => fetchJson(`/services/asset/${params}`);
+export const fetchAsset = (assetId) => fetchJson(`/services/asset/${assetId}`);
 
-export const fetchSearch = (params) => fetchJson(`/services/search?q=${params}`);
+export const fetchSearch = (searchQuery) => fetchJson(`/services/search?q=${searchQuery}`);
 
 export const fetchInfo = () => fetchJson('/services/info');
 
