@@ -8,7 +8,7 @@ const flexWrapper = {
     display: 'flex',
     flexFlow: 'row wrap',
     justifyContent: 'flex-start',
-    alignItems: 'stretch',
+    alignItems: 'flex-start',
 };
 
 const containerStyle = {

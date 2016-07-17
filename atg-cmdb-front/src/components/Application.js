@@ -6,6 +6,7 @@ import * as metaActions from '../actions/metaActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
+import ApplicationDeployments from './ApplicationDeployments';
 
 const ApplicationContainer = React.createClass({
 
@@ -20,7 +21,7 @@ const ApplicationContainer = React.createClass({
             metaOpen,
             toggleMeta,
             application: {
-                name, description, group, attributes, meta,
+                id, name, description, group, attributes, meta,
             },
         } = this.props;
         if (isLoading) return <LoadingIndicator />;
@@ -37,6 +38,10 @@ const ApplicationContainer = React.createClass({
                         <Attributes attributes={attributes} />
                     </div>
                 ),
+            },
+            {
+                name: 'Deployments',
+                node: <ApplicationDeployments id={id} />,
             },
         ];
         return (
