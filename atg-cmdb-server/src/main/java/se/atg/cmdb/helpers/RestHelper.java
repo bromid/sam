@@ -35,6 +35,8 @@ import se.atg.cmdb.model.User;
 
 public abstract class RestHelper {
 
+  public static final int HTTP_STATUS_VALIDATION_ERROR = 422;
+
   private static final ValidatorFactory VALIDATOR_FACTORY = Validators.newValidatorFactory();
 
   public static Optional<Function<String, Bson>> parseFilterFromQuery(String queryString) {
@@ -128,5 +130,18 @@ public abstract class RestHelper {
 
     MongoHelper.updateDocument(existing, hash, collection);
     return existing;
+  }
+
+  public static String verifyNotEmpty(String param, String msg) {
+
+    final String trimmed = StringUtils.trimToNull(param);
+    if (trimmed == null) {
+      throw validationError(msg);
+    }
+    return trimmed;
+  }
+
+  public static WebApplicationException validationError(String string) {
+    return new WebApplicationException(string, HTTP_STATUS_VALIDATION_ERROR);
   }
 }

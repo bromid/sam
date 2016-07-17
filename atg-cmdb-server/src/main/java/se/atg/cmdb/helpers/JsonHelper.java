@@ -39,7 +39,7 @@ import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
 
 public abstract class JsonHelper {
 
-  static final Logger logger = LoggerFactory.getLogger(JsonHelper.class);
+  private static final Logger logger = LoggerFactory.getLogger(JsonHelper.class);
 
   public static UpdateMetaResult updateMetaForUpdate(Document bson, Optional<String> hash, String updatedBy) {
 

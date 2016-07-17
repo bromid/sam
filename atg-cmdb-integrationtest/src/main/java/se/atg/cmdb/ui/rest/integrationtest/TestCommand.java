@@ -35,8 +35,8 @@ import se.atg.cmdb.ui.text.CreateDatabase;
 
 public class TestCommand extends EnvironmentCommand<CmdbConfiguration> {
 
-  static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
-  static final Logger LOGGER = LoggerFactory.getLogger("integration-test");
+  private static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
+  private static final Logger LOGGER = LoggerFactory.getLogger("integration-test");
 
   private Class<?>[] testClasses;
   private Optional<Description> testFilter;

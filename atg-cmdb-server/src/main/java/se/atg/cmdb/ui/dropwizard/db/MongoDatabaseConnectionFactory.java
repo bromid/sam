@@ -19,7 +19,7 @@ import io.dropwizard.lifecycle.setup.LifecycleEnvironment;
 
 public class MongoDatabaseConnectionFactory {
 
-  static final Logger logger = LoggerFactory.getLogger(MongoDatabaseConnectionFactory.class);
+  private static final Logger logger = LoggerFactory.getLogger(MongoDatabaseConnectionFactory.class);
 
   @NotNull
   @JsonProperty

@@ -1,10 +1,12 @@
 package se.atg.cmdb.ui.rest;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.bson.Document;
 import org.junit.Assert;
@@ -63,47 +65,59 @@ public class SearchIntegrationTest {
   }
 
   @Test
-  public void searchServer() {
+  public void searchParameterIsMandatory() {
 
-    final Server server1 = new Server() {{
-      hostname = "vltma1";
-      environment = "test1";
-      fqdn = "vltma1.test1.hh.atg.se";
-      description = "Hit on servername";
-    }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server1, "intergration-test", objectMapper));
+    final Response response = testEndpoint
+      .path("search")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(Response.class);
+    TestHelper.assertValidationError("A search string must be provided in the query parameter 'q'", response);
+  }
 
-    final Server server2 = new Server() {{
-      hostname = "vltma2";
-      environment = "test1";
-      fqdn = "vltma2.test1.hh.atg.se";
-      description = "No hit";
-    }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server2, "intergration-test", objectMapper));
+  @Test
+  public void searchParameterCantBeEmpty() {
 
-    final Server server3 = new Server() {{
-      hostname = "vltma1";
-      environment = "test2";
-      fqdn = "vltma1.test2.hh.atg.se";
-      description = "Hit on servername";
-    }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server3, "intergration-test", objectMapper));
+    final Response response = testEndpoint
+      .path("search").queryParam("q", "")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(Response.class);
+    TestHelper.assertValidationError("A search string must be provided in the query parameter 'q'", response);
+  }
 
-    final Server server4 = new Server() {{
-      hostname = "vltma4";
-      environment = "test1";
-      fqdn = "vltma4.test1.hh.atg.se";
-      description = "Hit on description/vltma1";
-    }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server4, "intergration-test", objectMapper));
+  @Test
+  public void specialCharactersNotAllowedInWildcardSearch() {
 
-    final Server server5 = new Server() {{
-      hostname = "vltma5";
-      environment = "vltma1";
-      fqdn = "vltma5.test1.hh.atg.se";
-      description = "Hit on environment";
-    }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server5, "intergration-test", objectMapper));
+    final Response response = testEndpoint
+      .path("search").queryParam("q", "vl/tm*")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(Response.class);
+    TestHelper.assertValidationError("The only allowed special characters in a wildcard search is the wildcard operator", response);
+  }
+
+  @Test
+  public void multiplelWildcardOperatorsNotAllowed() {
+
+    final Response response = testEndpoint
+      .path("search").queryParam("q", "*ltma*")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(Response.class);
+    TestHelper.assertValidationError("A wildcard search can only contain one wildcard operator", response);
+  }
+
+  @Test
+  public void allowedCharactersInWildcardSearch() {
+
+    final Response response = testEndpoint
+      .path("search").queryParam("q", "special-id.atg*")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(Response.class);
+    TestHelper.assertSuccessful(response);
+  }
+
+  @Test
+  public void textSearchServer() {
+
+    final ArrayList<Server> testServers = addServerTestset();
 
     final SearchResult searchResult = testEndpoint
       .path("search").queryParam("q", "vltma1")
@@ -111,27 +125,373 @@ public class SearchIntegrationTest {
       .get(SearchResult.class);
 
     final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
-    Assert.assertEquals(4, actualServers.size());
     Assert.assertNull(searchResult.groups.items);
     Assert.assertNull(searchResult.applications.items);
     Assert.assertNull(searchResult.assets.items);
 
     final Map<String, Server> expectedMap = ImmutableMap.of(
-        server1.fqdn, server1,
-        server3.fqdn, server3,
-        server4.fqdn, server4,
-        server5.fqdn, server5
+      testServers.get(0).fqdn, testServers.get(0),
+      testServers.get(2).fqdn, testServers.get(2),
+      testServers.get(3).fqdn, testServers.get(3),
+      testServers.get(4).fqdn, testServers.get(4)
     );
     TestHelper.assertEquals(expectedMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
   }
 
   @Test
-  public void searchGroup() {
+  public void wildcardSearchBeginningOfServer() {
+
+    final ArrayList<Server> testServers = addServerTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "vltm*")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
+    Assert.assertNull(searchResult.groups.items);
+    Assert.assertNull(searchResult.applications.items);
+    Assert.assertNull(searchResult.assets.items);
+
+    final Map<String, Server> expectedMap = ImmutableMap.of(
+      testServers.get(0).fqdn, testServers.get(0),
+      testServers.get(2).fqdn, testServers.get(2),
+      testServers.get(3).fqdn, testServers.get(3),
+      testServers.get(4).fqdn, testServers.get(4)
+    );
+    TestHelper.assertEquals(expectedMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
+  }
+
+  @Test
+  public void wildcardSearchEndOfServer() {
+
+    final ArrayList<Server> testServers = addServerTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "*st1")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
+    Assert.assertNull(searchResult.groups.items);
+    Assert.assertNull(searchResult.applications.items);
+    Assert.assertNull(searchResult.assets.items);
+
+    final Map<String, Server> expectedMap = ImmutableMap.of(
+      testServers.get(0).fqdn, testServers.get(0),
+      testServers.get(1).fqdn, testServers.get(1),
+      testServers.get(3).fqdn, testServers.get(3)
+    );
+    TestHelper.assertEquals(expectedMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
+  }
+
+  @Test
+  public void wildcardSearchMiddleOfServer() {
+
+    final ArrayList<Server> testServers = addServerTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "vlp*se")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
+    Assert.assertNull(searchResult.groups.items);
+    Assert.assertNull(searchResult.applications.items);
+    Assert.assertNull(searchResult.assets.items);
+
+    final Map<String, Server> expectedMap = ImmutableMap.of(
+      testServers.get(1).fqdn, testServers.get(1),
+      testServers.get(4).fqdn, testServers.get(4)
+    );
+    TestHelper.assertEquals(expectedMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
+  }
+
+  @Test
+  public void textSearchGroup() {
+
+    final ArrayList<Group> testGroups = addGroupTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "groupid1")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<GroupSearchResult> actualGroups = searchResult.groups.items;
+    Assert.assertNull(searchResult.servers.items);
+    Assert.assertNull(searchResult.applications.items);
+    Assert.assertNull(searchResult.assets.items);
+
+    final Map<String, Group> expectedMap = ImmutableMap.of(
+      testGroups.get(0).id, testGroups.get(0),
+      testGroups.get(2).id, testGroups.get(2),
+      testGroups.get(3).id, testGroups.get(3),
+      testGroups.get(4).id, testGroups.get(4)
+    );
+    TestHelper.assertEquals(expectedMap, actualGroups, GroupSearchResult::getId, SearchIntegrationTest::verifyGroupSearchResult);
+  }
+
+  @Test
+  public void wildcardSearchGroup() {
+
+    final ArrayList<Group> testGroups = addGroupTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "*pid1")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<GroupSearchResult> actualGroups = searchResult.groups.items;
+    Assert.assertNull(searchResult.servers.items);
+    Assert.assertNull(searchResult.applications.items);
+    Assert.assertNull(searchResult.assets.items);
+
+    final Map<String, Group> expectedMap = ImmutableMap.of(
+      testGroups.get(0).id, testGroups.get(0),
+      testGroups.get(2).id, testGroups.get(2),
+      testGroups.get(4).id, testGroups.get(4)
+    );
+    TestHelper.assertEquals(expectedMap, actualGroups, GroupSearchResult::getId, SearchIntegrationTest::verifyGroupSearchResult);
+  }
+
+  @Test
+  public void textSearchApplications() {
+
+    final ArrayList<Application> testApplications = addApplicationTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "applicationid1")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<ApplicationSearchResult> actualApplications = searchResult.applications.items;
+    Assert.assertNull(searchResult.servers.items);
+    Assert.assertNull(searchResult.groups.items);
+    Assert.assertNull(searchResult.assets.items);
+
+    final Map<String, Application> expectedMap = ImmutableMap.of(
+      testApplications.get(0).id, testApplications.get(0),
+      testApplications.get(2).id, testApplications.get(2),
+      testApplications.get(3).id, testApplications.get(3)
+    );
+    TestHelper.assertEquals(expectedMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+  }
+
+  @Test
+  public void wildcardSearchApplications() {
+
+    final ArrayList<Application> testApplications = addApplicationTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "appname*")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<ApplicationSearchResult> actualApplications = searchResult.applications.items;
+    Assert.assertNull(searchResult.servers.items);
+    Assert.assertNull(searchResult.groups.items);
+    Assert.assertNull(searchResult.assets.items);
+
+    final Map<String, Application> expectedMap = ImmutableMap.of(
+      testApplications.get(1).id, testApplications.get(1),
+      testApplications.get(3).id, testApplications.get(3),
+      testApplications.get(4).id, testApplications.get(4)
+    );
+    TestHelper.assertEquals(expectedMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+  }
+
+  @Test
+  public void textSearchAssets() {
+
+    final ArrayList<Asset> testAssets = addAssetTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "assetid1")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<AssetSearchResult> actualAssets = searchResult.assets.items;
+    Assert.assertEquals(3, actualAssets.size());
+    Assert.assertNull(searchResult.servers.items);
+    Assert.assertNull(searchResult.groups.items);
+    Assert.assertNull(searchResult.applications.items);
+
+    final Map<String, Asset> expectedMap = ImmutableMap.of(
+      testAssets.get(0).id, testAssets.get(0),
+      testAssets.get(2).id, testAssets.get(2),
+      testAssets.get(3).id, testAssets.get(3)
+    );
+    TestHelper.assertEquals(expectedMap, actualAssets, AssetSearchResult::getId, SearchIntegrationTest::verifyAssetSearchResult);
+  }
+
+  @Test
+  public void wildcardSearchAssets() {
+
+    final ArrayList<Asset> testAssets = addAssetTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "ass*1")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Collection<AssetSearchResult> actualAssets = searchResult.assets.items;
+    Assert.assertEquals(3, actualAssets.size());
+    Assert.assertNull(searchResult.servers.items);
+    Assert.assertNull(searchResult.groups.items);
+    Assert.assertNull(searchResult.applications.items);
+
+    final Map<String, Asset> expectedMap = ImmutableMap.of(
+      testAssets.get(0).id, testAssets.get(0),
+      testAssets.get(2).id, testAssets.get(2),
+      testAssets.get(4).id, testAssets.get(4)
+    );
+    TestHelper.assertEquals(expectedMap, actualAssets, AssetSearchResult::getId, SearchIntegrationTest::verifyAssetSearchResult);
+  }
+
+  @Test
+  public void textSearchCombined() {
+
+    final ArrayList<Server> testServers = addServerTestset();
+    final ArrayList<Group> testGroups = addGroupTestset();
+    final ArrayList<Application> testApplications = addApplicationTestset();
+    final ArrayList<Asset> testAssets = addAssetTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "webbapp och asset")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Map<String, Server> expectedServersMap = ImmutableMap.of(
+      testServers.get(4).fqdn,
+      testServers.get(4)
+    );
+    final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
+    TestHelper.assertEquals(expectedServersMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
+
+    final Map<String, Group> expectedGroupsMap = ImmutableMap.of(
+      testGroups.get(0).id, testGroups.get(0),
+      testGroups.get(2).id, testGroups.get(2)
+    );
+    final Collection<GroupSearchResult> actualGroups = searchResult.groups.items;
+    TestHelper.assertEquals(expectedGroupsMap, actualGroups, GroupSearchResult::getId, SearchIntegrationTest::verifyGroupSearchResult);
+
+    final Map<String, Application> expectedApplicationsMap = ImmutableMap.of(
+      testApplications.get(0).id, testApplications.get(0),
+      testApplications.get(5).id, testApplications.get(5)
+    );
+    final Collection<ApplicationSearchResult> actualApplications = searchResult.applications.items;
+    TestHelper.assertEquals(expectedApplicationsMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+
+    final Map<String, Asset> expectedAssetsMap = ImmutableMap.of(
+      testAssets.get(1).id, testAssets.get(1),
+      testAssets.get(3).id, testAssets.get(3),
+      testAssets.get(6).id, testAssets.get(6)
+    );
+    final Collection<AssetSearchResult> actualAssets = searchResult.assets.items;
+    TestHelper.assertEquals(expectedAssetsMap, actualAssets, AssetSearchResult::getId, SearchIntegrationTest::verifyAssetSearchResult);
+  }
+
+  @Test
+  public void wildcardSearchCombined() {
+
+    final ArrayList<Server> testServers = addServerTestset();
+    final ArrayList<Group> testGroups = addGroupTestset();
+    final ArrayList<Application> testApplications = addApplicationTestset();
+    final ArrayList<Asset> testAssets = addAssetTestset();
+
+    final SearchResult searchResult = testEndpoint
+      .path("search").queryParam("q", "web*")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get(SearchResult.class);
+
+    final Map<String, Server> expectedServersMap = ImmutableMap.of(
+      testServers.get(5).fqdn,
+      testServers.get(5)
+    );
+    final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
+    TestHelper.assertEquals(expectedServersMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
+
+    final Map<String, Group> expectedGroupsMap = ImmutableMap.of(
+      testGroups.get(0).id, testGroups.get(0)
+    );
+    final Collection<GroupSearchResult> actualGroups = searchResult.groups.items;
+    TestHelper.assertEquals(expectedGroupsMap, actualGroups, GroupSearchResult::getId, SearchIntegrationTest::verifyGroupSearchResult);
+
+    final Map<String, Application> expectedApplicationsMap = ImmutableMap.of(
+      testApplications.get(0).id, testApplications.get(0),
+      testApplications.get(5).id, testApplications.get(5)
+    );
+    final Collection<ApplicationSearchResult> actualApplications = searchResult.applications.items;
+    TestHelper.assertEquals(expectedApplicationsMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+
+    final Map<String, Asset> expectedAssetsMap = ImmutableMap.of(
+      testAssets.get(1).id, testAssets.get(1),
+      testAssets.get(5).id, testAssets.get(5),
+      testAssets.get(6).id, testAssets.get(6)
+    );
+    final Collection<AssetSearchResult> actualAssets = searchResult.assets.items;
+    TestHelper.assertEquals(expectedAssetsMap, actualAssets, AssetSearchResult::getId, SearchIntegrationTest::verifyAssetSearchResult);
+  }
+
+  private ArrayList<Server> addServerTestset() {
+
+    final Server server1 = new Server() {{
+      hostname = "vlTma1";
+      environment = "teST1";
+      fqdn = "vLtma1.test1.hh.atg.SE";
+      description = "Hit on servername";
+    }};
+    servers.insertOne(JsonHelper.addMetaForCreate(server1, "intergration-test", objectMapper));
+
+    final Server server2 = new Server() {{
+      hostname = "vLPma2";
+      environment = "tesT1";
+      fqdn = "vLPpma2.test1.hh.atg.SE";
+      description = "No hit";
+    }};
+    servers.insertOne(JsonHelper.addMetaForCreate(server2, "intergration-test", objectMapper));
+
+    final Server server3 = new Server() {{
+      hostname = "vltmA1";
+      environment = "tEst2";
+      fqdn = "vltmA1.test2.hh.atg.Se";
+      description = "Hit on servername";
+    }};
+    servers.insertOne(JsonHelper.addMetaForCreate(server3, "intergration-test", objectMapper));
+
+    final Server server4 = new Server() {{
+      hostname = "vlTMa4";
+      environment = "test1";
+      fqdn = "vlTMa4.test1.hh.atg.Se";
+      description = "Hit on description/vltma1";
+    }};
+    servers.insertOne(JsonHelper.addMetaForCreate(server4, "intergration-test", objectMapper));
+
+    final Server server5 = new Server() {{
+      hostname = "VLpma5";
+      environment = "VLTMA1";
+      fqdn = "VLpma5.test1.hh.atg.sE";
+      description = "Denna server kör alla webbapparna.";
+    }};
+    servers.insertOne(JsonHelper.addMetaForCreate(server5, "intergration-test", objectMapper));
+
+    final Server server6 = new Server() {{
+      hostname = "webapp1";
+      environment = "test10";
+      fqdn = "test.atg.se";
+    }};
+    servers.insertOne(JsonHelper.addMetaForCreate(server6, "intergration-test", objectMapper));
+
+    return Lists.newArrayList(server1, server2, server3, server4, server5, server6);
+  }
+
+  private ArrayList<Group> addGroupTestset() {
 
     final Group group1 = new Group() {{
       id = "groupid1";
       name = "groupname1";
       description = "Hit on group id";
+      tags = Lists.newArrayList(new Tag("tag1"), new Tag("tag2"), new Tag("webbappar"), new Tag("tag4"));
     }};
     groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
 
@@ -145,7 +505,7 @@ public class SearchIntegrationTest {
     final Group group3 = new Group() {{
       id = "groupid3";
       name = "groupid1";
-      description = "Hit on name";
+      description = "Denna grupp innehåller webbappar och en massa annat.";
     }};
     groups.insertOne(JsonHelper.addMetaForCreate(group3, "intergration-test", objectMapper));
 
@@ -164,32 +524,14 @@ public class SearchIntegrationTest {
     }};
     groups.insertOne(JsonHelper.addMetaForCreate(group5, "intergration-test", objectMapper));
 
-    final SearchResult searchResult = testEndpoint
-      .path("search").queryParam("q", "groupid1")
-      .request(MediaType.APPLICATION_JSON_TYPE)
-      .get(SearchResult.class);
-
-    final Collection<GroupSearchResult> actualGroups = searchResult.groups.items;
-    Assert.assertEquals(4, actualGroups.size());
-    Assert.assertNull(searchResult.servers.items);
-    Assert.assertNull(searchResult.applications.items);
-    Assert.assertNull(searchResult.assets.items);
-
-    final Map<String, Group> expectedMap = ImmutableMap.of(
-        group1.id, group1,
-        group3.id, group3,
-        group4.id, group4,
-        group5.id, group5
-    );
-    TestHelper.assertEquals(expectedMap, actualGroups, GroupSearchResult::getId, SearchIntegrationTest::verifyGroupSearchResult);
+    return Lists.newArrayList(group1, group2, group3, group4, group5);
   }
 
-  @Test
-  public void searchApplications() {
+  private ArrayList<Application> addApplicationTestset() {
 
     final Application application1 = new Application() {{
       id = "applicationid1";
-      name = "applicationname1";
+      name = "webbapp";
       description = "Hit on id";
       group = new GroupLink("my-group");
     }};
@@ -197,7 +539,7 @@ public class SearchIntegrationTest {
 
     final Application application2 = new Application() {{
       id = "applicationid2";
-      name = "applicationname2";
+      name = "appname2";
       description = "No hit (no search on group).";
       group = new GroupLink("applicationid1");
     }};
@@ -212,32 +554,27 @@ public class SearchIntegrationTest {
 
     final Application application4 = new Application() {{
       id = "applicationid4";
-      name = "applicationname4";
+      name = "appname4";
       description = "Hit on description:applicationid1:er";
     }};
     applications.insertOne(JsonHelper.addMetaForCreate(application4, "integration-test",  objectMapper));
 
-    final SearchResult searchResult = testEndpoint
-      .path("search").queryParam("q", "applicationid1")
-      .request(MediaType.APPLICATION_JSON_TYPE)
-      .get(SearchResult.class);
+    final Application application5 = new Application() {{
+      id = "appname5";
+      name = "Strange id";
+    }};
+    applications.insertOne(JsonHelper.addMetaForCreate(application5, "integration-test",  objectMapper));
 
-    final Collection<ApplicationSearchResult> actualApplications = searchResult.applications.items;
-    Assert.assertEquals(3, actualApplications.size());
-    Assert.assertNull(searchResult.servers.items);
-    Assert.assertNull(searchResult.groups.items);
-    Assert.assertNull(searchResult.assets.items);
+    final Application application6 = new Application() {{
+      id = "webbappar-id1";
+      name = "Some Name";
+    }};
+    applications.insertOne(JsonHelper.addMetaForCreate(application6, "integration-test",  objectMapper));
 
-    final Map<String, Application> expectedMap = ImmutableMap.of(
-        application1.id, application1,
-        application3.id, application3,
-        application4.id, application4
-    );
-    TestHelper.assertEquals(expectedMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+    return Lists.newArrayList(application1, application2, application3, application4, application5, application6);
   }
 
-  @Test
-  public void searchAssets() {
+  private ArrayList<Asset> addAssetTestset() {
 
     final Asset asset1 = new Asset() {{
       id = "assetid1";
@@ -249,7 +586,7 @@ public class SearchIntegrationTest {
 
     final Asset asset2 = new Asset() {{
       id = "assetid2";
-      name = "assetname2";
+      name = "webbapp";
       description = "No hit (no search on group).";
       group = new GroupLink("assetid1");
     }};
@@ -263,172 +600,31 @@ public class SearchIntegrationTest {
     assets.insertOne(JsonHelper.addMetaForCreate(asset3, "integration-test",  objectMapper));
 
     final Asset asset4 = new Asset() {{
-      id = "assetid4";
+      id = "asset-id4";
       name = "assetname4";
       description = "Hit on description\\assetid1!";
     }};
     assets.insertOne(JsonHelper.addMetaForCreate(asset4, "integration-test",  objectMapper));
 
-    final SearchResult searchResult = testEndpoint
-      .path("search").queryParam("q", "assetid1")
-      .request(MediaType.APPLICATION_JSON_TYPE)
-      .get(SearchResult.class);
-
-    final Collection<AssetSearchResult> actualAssets = searchResult.assets.items;
-    Assert.assertEquals(3, actualAssets.size());
-    Assert.assertNull(searchResult.servers.items);
-    Assert.assertNull(searchResult.groups.items);
-    Assert.assertNull(searchResult.applications.items);
-
-    final Map<String, Asset> expectedMap = ImmutableMap.of(
-        asset1.id, asset1,
-        asset3.id, asset3,
-        asset4.id, asset4
-    );
-    TestHelper.assertEquals(expectedMap, actualAssets, AssetSearchResult::getId, SearchIntegrationTest::verifyAssetSearchResult);
-  }
-
-  @Test
-  public void searchCombined() {
-
-    /*
-     * Servers
-     */
-    final Server server1 = new Server() {{
-      hostname = "vltma1";
-      environment = "test1";
-      fqdn = "vltma1.test1.hh.atg.se";
+    final Asset asset5 = new Asset() {{
+      id = "assetid5";
+      name = "assetname1";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server1, "intergration-test", objectMapper));
+    assets.insertOne(JsonHelper.addMetaForCreate(asset5, "integration-test",  objectMapper));
 
-    final Server server2 = new Server() {{
-      hostname = "vltma2";
-      environment = "test1";
-      fqdn = "vltma2.test1.hh.atg.se";
-    }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server2, "intergration-test", objectMapper));
-
-    final Server server3 = new Server() {{
-      hostname = "vltma1";
-      environment = "test2";
-      fqdn = "vltma1.test2.hh.atg.se";
-      description = "Denna server kör alla webbapparna";
-    }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server3, "intergration-test", objectMapper));
-
-    /*
-     * Groups
-     */
-    final Group group1 = new Group() {{
-      id = "tillsammans1";
-      name = "groupname1";
-      description = "Hit on group id";
-      tags = Lists.newArrayList(new Tag("tag1"), new Tag("webbappar"), new Tag("tag3"), new Tag("tag4"));
-    }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
-
-    final Group group2 = new Group() {{
-      id = "groupid2";
-      name = "groupname2";
-      description = "Denna grupp innehåller webbappar och en massa annat.";
-    }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group2, "intergration-test", objectMapper));
-
-    final Group group3 = new Group() {{
-      id = "groupid3";
-      name = "groupid1";
-      description = "Hit on name";
-    }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group3, "intergration-test", objectMapper));
-
-    /*
-     * Applications
-     */
-    final Application application1 = new Application() {{
-      id = "tillsammans1";
-      name = "webbapp";
-      description = "Hit on id";
-      group = new GroupLink("my-group");
-    }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test",  objectMapper));
-
-    final Application application2 = new Application() {{
-      id = "applicationid2";
-      name = "applicationname2";
-      group = new GroupLink("applicationid1");
-    }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration-test",  objectMapper));
-
-    final Application application3 = new Application() {{
-      id = "webbappar-id1";
-      name = "applicationid1";
-      description = "Hit on name";
-    }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application3, "integration-test",  objectMapper));
-
-    /*
-     * Assets
-     */
-    final Asset asset1 = new Asset() {{
-      id = "tillsammans1";
-      name = "webbapp";
-    }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test",  objectMapper));
-
-    final Asset asset2 = new Asset() {{
-      id = "asset-id2";
-      name = "assetname2";
-      group = new GroupLink("webbapper");
-    }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset2, "integration-test",  objectMapper));
-
-    final Asset asset3 = new Asset() {{
-      id = "webbapp";
-      name = "asset:id1";
-      description = "This description doesn't render any hit.";
-    }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset3, "integration-test",  objectMapper));
-
-    final Asset asset4 = new Asset() {{
+    final Asset asset6 = new Asset() {{
       id = "webbap";
-      name = "assetid1";
-      group = new GroupLink("webbapp");
-      description = "This description doesn't render any hit.";
+      name = "assetname6";
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset4, "integration-test",  objectMapper));
+    assets.insertOne(JsonHelper.addMetaForCreate(asset6, "integration-test",  objectMapper));
 
-    final SearchResult searchResult = testEndpoint
-      .path("search").queryParam("q", "webbapp och asset")
-      .request(MediaType.APPLICATION_JSON_TYPE)
-      .get(SearchResult.class);
+    final Asset asset7 = new Asset() {{
+      id = "webbapp";
+      name = "assetname7";
+    }};
+    assets.insertOne(JsonHelper.addMetaForCreate(asset7, "integration-test",  objectMapper));
 
-    final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
-    Assert.assertEquals(1, actualServers.size());
-
-    final Map<String, Server> expectedServersMap = ImmutableMap.of(server3.fqdn, server3);
-    TestHelper.assertEquals(expectedServersMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
-
-    final Collection<GroupSearchResult> actualGroups = searchResult.groups.items;
-    Assert.assertEquals(2, actualGroups.size());
-
-    final Map<String, Group> expectedGroupsMap = ImmutableMap.of(group1.id, group1, group2.id, group2);
-    TestHelper.assertEquals(expectedGroupsMap, actualGroups, GroupSearchResult::getId, SearchIntegrationTest::verifyGroupSearchResult);
-
-    final Collection<ApplicationSearchResult> actualApplications = searchResult.applications.items;
-    Assert.assertEquals(2, actualApplications.size());
-
-    final Map<String, Application> expectedApplicationsMap = ImmutableMap.of(application1.id, application1, application3.id, application3);
-    TestHelper.assertEquals(expectedApplicationsMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
-
-    final Collection<AssetSearchResult> actualAssets = searchResult.assets.items;
-    Assert.assertEquals(3, actualAssets.size());
-
-    final Map<String, Asset> expectedAssetsMap = ImmutableMap.of(
-        asset1.id, asset1,
-        asset2.id, asset2,
-        asset3.id, asset3
-    );
-    TestHelper.assertEquals(expectedAssetsMap, actualAssets, AssetSearchResult::getId, SearchIntegrationTest::verifyAssetSearchResult);
+    return Lists.newArrayList(asset1, asset2, asset3, asset4, asset5, asset6, asset7);
   }
 
   private static void verifyServerSearchResult(Server expected, ServerSearchResult actual) {
