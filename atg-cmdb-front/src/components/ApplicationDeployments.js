@@ -57,7 +57,7 @@ const ApplicationDeploymentsContainer = React.createClass({
     },
 });
 
-function mapStateToProps(state, props) {
+function mapStateToProps(state) {
     const { applicationDeployments, applicationDeploymentsIsLoading } = state;
     return {
         deployments: applicationDeployments.items,

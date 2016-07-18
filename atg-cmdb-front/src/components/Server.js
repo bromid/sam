@@ -5,16 +5,10 @@ import size from 'lodash/size';
 import * as serverActions from '../actions/serverActions';
 import * as metaActions from '../actions/metaActions';
 import { List, ListItem } from 'material-ui/List';
+import { flexWrapperStyle } from '../style';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
-
-const flexWrapper = {
-    display: 'flex',
-    flexFlow: 'row wrap',
-    justifyContent: 'flex-start',
-    alignItems: 'stretch',
-};
 
 const flexChildStyle = {
     minWidth: 250,
@@ -111,7 +105,7 @@ const ServerContainer = React.createClass({
             {
                 name: 'Details',
                 node: (
-                    <div style={{ ...flexWrapper, margin: '16px 0' }}>
+                    <div style={{ ...flexWrapperStyle, margin: '16px 0' }}>
                         <Os os={os} />
                         <Network network={network} />
                     </div>

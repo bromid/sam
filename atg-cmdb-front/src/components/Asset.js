@@ -14,6 +14,15 @@ const AssetContainer = React.createClass({
         fetchAsset(id);
     },
 
+    componentWillReceiveProps(newProps) {
+        const { id, fetchAsset } = this.props;
+        const { id: newId } = newProps;
+
+        if (newId !== id) {
+            fetchAsset(newId);
+        }
+    },
+
     render() {
         const {
             isLoading,
