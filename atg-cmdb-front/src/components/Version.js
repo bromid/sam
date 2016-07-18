@@ -23,10 +23,10 @@ const InfoContainer = React.createClass({
 });
 
 function mapStateToProps(state) {
-    const { info, infoIsLoading } = state;
+    const { info, infoIsPending } = state;
     return {
         info,
-        isLoading: infoIsLoading || infoIsLoading === null,
+        isLoading: infoIsPending || infoIsPending === null,
     };
 }
 

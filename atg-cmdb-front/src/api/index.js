@@ -37,13 +37,48 @@ const addParams = (url, params) => {
     return `${url}?${query}`;
 };
 
-const fetchJson = (url, params) => fetch(addParams(url, params), APPLICATION_JSON)
-    .then((response) => verifySuccessful(response))
-    .then((response) => response.json());
+function fetchJson(url, params) {
+    return fetch(addParams(url, params), APPLICATION_JSON)
+        .then((response) => verifySuccessful(response))
+        .then((response) =>
+            response.json().then((data) => ({
+                data,
+                response,
+            }))
+        );
+}
 
-const fetchHtml = (url) => fetch(url, TEXT_HTML)
-    .then((response) => verifySuccessful(response))
-    .then((response) => response.text());
+function fetchHtml(url, params) {
+    return fetch(addParams(url, params), TEXT_HTML)
+        .then((response) => verifySuccessful(response))
+        .then((response) =>
+            response.text().then((data) => ({
+                data,
+                response,
+            }))
+        );
+}
+
+function patchJson(url, obj, { hash, params } = {}) {
+    const headers = (hash) ? {
+        ...APPLICATION_JSON.headers,
+        'If-Match': `"${hash}"`,
+    } : APPLICATION_JSON.headers;
+
+    const options = {
+        headers,
+        method: 'PATCH',
+        body: JSON.stringify(obj),
+    };
+    return fetch(addParams(url, params), options)
+        .then((response) => verifySuccessful(response))
+        .then((response) =>
+            response.json().then((data) => ({
+                data,
+                response,
+            }))
+        );
+}
 
 export const fetchGroupList = (queryParams) => fetchJson('/services/group', queryParams);
 
@@ -58,6 +93,9 @@ export const fetchApplication = (applicationId) =>
 
 export const fetchApplicationDeployments = (applicationId) =>
     fetchJson(`/services/application/${applicationId}/deployment`);
+
+export const patchApplication = (applicationId, obj, options) =>
+    patchJson(`/services/application/${applicationId}`, obj, options);
 
 export const fetchServerList = () => fetchJson('/services/server');
 

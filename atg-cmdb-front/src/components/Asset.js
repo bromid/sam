@@ -62,13 +62,13 @@ const AssetContainer = React.createClass({
 });
 
 function mapStateToProps(state, props) {
-    const { metaOpen, asset, assetIsLoading } = state;
+    const { metaOpen, asset, assetIsPending } = state;
     const { id } = props.params;
     return {
         id,
         metaOpen,
         asset,
-        isLoading: assetIsLoading || assetIsLoading === null,
+        isLoading: assetIsPending || assetIsPending === null,
     };
 }
 

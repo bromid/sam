@@ -58,10 +58,10 @@ const ApplicationDeploymentsContainer = React.createClass({
 });
 
 function mapStateToProps(state) {
-    const { applicationDeployments, applicationDeploymentsIsLoading } = state;
+    const { applicationDeployments, applicationDeploymentsIsPending } = state;
     return {
         deployments: applicationDeployments.items,
-        isLoading: applicationDeploymentsIsLoading || applicationDeploymentsIsLoading === null,
+        isLoading: applicationDeploymentsIsPending || applicationDeploymentsIsPending === null,
     };
 }
 

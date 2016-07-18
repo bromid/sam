@@ -157,12 +157,12 @@ const GroupsContainer = React.createClass({
 });
 
 function mapStateToProps(state, { location: { query } }) {
-    const { groupList, groupListIsLoading, groupTags } = state;
+    const { groupList, groupListIsPending, groupTags } = state;
     return {
         groups: groupList.items,
         groupTags: groupTags.items,
         activeFilter: query.tags && query.tags.split(','),
-        isLoading: groupListIsLoading || groupListIsLoading === null,
+        isLoading: groupListIsPending || groupListIsPending === null,
     };
 }
 export default withRouter(connect(mapStateToProps, Actions)(GroupsContainer));

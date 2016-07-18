@@ -16,7 +16,7 @@ export default function createFetchActions(options) {
 
     const receivePayload = payload => ({
         type: receiveKey,
-        payload: payloadTransform(payload),
+        payload: payloadTransform(payload.data, payload.response),
     });
 
     const receivePayloadError = error => ({
@@ -27,12 +27,12 @@ export default function createFetchActions(options) {
         },
     });
 
-    return function fetchPayload(param) {
+    return function fetchPayload(...param) {
         return (dispatch, getState) => {
             if (shouldFetch && !shouldFetch(getState())) return null;
 
             dispatch(requestPayload());
-            return apiCall(param)
+            return apiCall(...param)
                 .then(response => dispatch(receivePayload(response)))
                 .catch(error => dispatch(receivePayloadError(error)));
         };

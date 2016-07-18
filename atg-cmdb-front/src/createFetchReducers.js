@@ -6,7 +6,8 @@ export default function createFetchReducers(options) {
         requestKey = keyRequired('requestKey'),
         receiveKey = keyRequired('receiveKey'),
     } = options;
-    function resourceIsLoading(state = null, action) {
+
+    function resourceIsPending(state = null, action) {
         switch (action.type) {
             case requestKey:
                 return true;
@@ -29,6 +30,6 @@ export default function createFetchReducers(options) {
 
     return {
         [resourceName]: resource,
-        [`${resourceName}IsLoading`]: resourceIsLoading,
+        [`${resourceName}IsPending`]: resourceIsPending,
     };
 }

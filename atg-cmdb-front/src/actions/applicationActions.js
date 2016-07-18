@@ -19,3 +19,13 @@ export const fetchApplicationDeployments = createFetchActions({
     requestKey: Constants.FETCH_APPLICATION_DEPLOYMENTS_REQUEST,
     receiveKey: Constants.FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
 });
+
+export const patchApplication = createFetchActions({
+    apiCall: API.patchApplication,
+    requestKey: Constants.PATCH_APPLICATION_REQUEST,
+    receiveKey: Constants.PATCH_APPLICATION_RESPONSE,
+    payloadTransform: (data, response) => ({
+        ...data,
+        etag: response.headers.get('etag'),
+    }),
+});

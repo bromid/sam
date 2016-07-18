@@ -34,14 +34,14 @@ const theme = {
 function App(props) {
     const {
         mdPlus, mainMenuOpen, openMenu, closeMenu, setMenuOpen,
-        children, fetchSearch, searchResults, searchResultsIsLoading,
+        children, fetchSearch, searchResults, searchResultsIsPending,
     } = props;
 
     const searchField = (
         <SearchField
             fetchSearch={fetchSearch}
             searchResults={searchResults}
-            searchResultsIsLoading={searchResultsIsLoading}
+            searchResultsIsPending={searchResultsIsPending}
         />
     );
 
@@ -85,7 +85,7 @@ function mapStateToProps(state, { mdPlus }) {
     return {
         mainMenuOpen: state.menuOpen || mdPlus,
         searchResults: state.searchResults,
-        searchResultsIsLoading: state.searchResultsIsLoading,
+        searchResultsIsPending: state.searchResultsIsPending,
     };
 }
 

@@ -9,8 +9,7 @@ import SearchResultDialog from './SearchResultDialog';
 const searchStyles = {
     wrapper: {
         position: 'relative',
-        marginRight: 20,
-        marginTop: 5,
+        marginRight: 16,
     },
     icon: {
         position: 'absolute',
@@ -80,10 +79,11 @@ const SearchField = React.createClass({
 
     handleSubmit(event) {
         event.preventDefault();
-        const { fetchSearch } = this.props;
         const searchString = this.refs.input.value;
-        fetchSearch(searchString);
-        this.setState({ modalOpen: true });
+        if (!isEmpty(searchString)) {
+            this.props.fetchSearch(searchString);
+            this.setState({ modalOpen: true });
+        }
     },
 
     clear() {
