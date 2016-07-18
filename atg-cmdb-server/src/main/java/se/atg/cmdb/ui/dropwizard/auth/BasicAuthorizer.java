@@ -9,7 +9,7 @@ import se.atg.cmdb.model.User;
 
 public class BasicAuthorizer implements Authorizer<User> {
 
-  static final Logger logger = LoggerFactory.getLogger(BasicAuthorizer.class);
+  private static final Logger logger = LoggerFactory.getLogger(BasicAuthorizer.class);
 
   @Override
   public boolean authorize(User user, String role) {

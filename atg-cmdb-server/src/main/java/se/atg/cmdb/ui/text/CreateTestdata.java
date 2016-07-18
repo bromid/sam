@@ -16,7 +16,7 @@ import se.atg.cmdb.helpers.JsonHelper;
 
 public final class CreateTestdata {
 
-  static final Logger logger = LoggerFactory.getLogger(CreateTestdata.class);
+  private static final Logger logger = LoggerFactory.getLogger(CreateTestdata.class);
 
   private CreateTestdata() {}
 

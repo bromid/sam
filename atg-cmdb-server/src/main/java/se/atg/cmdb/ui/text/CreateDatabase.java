@@ -19,7 +19,7 @@ import se.atg.cmdb.dao.Collections;
 
 public final class CreateDatabase {
 
-  static final Logger logger = LoggerFactory.getLogger(CreateDatabase.class);
+  private static final Logger logger = LoggerFactory.getLogger(CreateDatabase.class);
 
   private CreateDatabase() {}
 

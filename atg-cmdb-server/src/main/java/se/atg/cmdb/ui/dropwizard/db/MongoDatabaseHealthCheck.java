@@ -10,7 +10,7 @@ import com.mongodb.client.MongoDatabase;
 
 public class MongoDatabaseHealthCheck extends HealthCheck {
 
-  static final Logger logger = LoggerFactory.getLogger(MongoDatabaseHealthCheck.class);
+  private static final Logger logger = LoggerFactory.getLogger(MongoDatabaseHealthCheck.class);
 
   private final MongoDatabase mongoDatabase;
 

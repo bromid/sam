@@ -60,7 +60,7 @@ import se.atg.cmdb.ui.dropwizard.auth.Roles;
 @Produces(Defaults.MEDIA_TYPE_JSON)
 public class GroupResource {
 
-  static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
+  private static final Logger logger = LoggerFactory.getLogger(GroupResource.class);
 
   private final MongoDatabase database;
   private final ObjectMapper objectMapper;
