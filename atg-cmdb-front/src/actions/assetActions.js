@@ -13,3 +13,13 @@ export const fetchAsset = createFetchActions({
     requestKey: Constants.FETCH_ASSET_REQUEST,
     receiveKey: Constants.FETCH_ASSET_RESPONSE,
 });
+
+export const patchAsset = createFetchActions({
+    apiCall: API.patchAsset,
+    requestKey: Constants.PATCH_ASSET_REQUEST,
+    receiveKey: Constants.PATCH_ASSET_RESPONSE,
+    payloadTransform: (data, response) => ({
+        ...data,
+        etag: response.headers.get('etag'),
+    }),
+});

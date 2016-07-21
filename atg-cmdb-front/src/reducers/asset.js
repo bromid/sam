@@ -7,6 +7,12 @@ const asset = createFetchReducers({
     receiveKey: Constants.FETCH_ASSET_RESPONSE,
 });
 
+const assetPatchResult = createFetchReducers({
+    resourceName: 'assetPatchResult',
+    requestKey: Constants.PATCH_ASSET_REQUEST,
+    receiveKey: Constants.PATCH_ASSET_RESPONSE,
+});
+
 const assetList = createFetchReducers({
     resourceName: 'assetList',
     requestKey: Constants.FETCH_ASSET_LIST_REQUEST,
@@ -15,5 +21,6 @@ const assetList = createFetchReducers({
 
 export default {
     ...asset,
+    ...assetPatchResult,
     ...assetList,
 };

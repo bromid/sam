@@ -13,3 +13,13 @@ export const fetchServer = createFetchActions({
     requestKey: Constants.FETCH_SERVER_REQUEST,
     receiveKey: Constants.FETCH_SERVER_RESPONSE,
 });
+
+export const patchServer = createFetchActions({
+    apiCall: API.patchServer,
+    requestKey: Constants.PATCH_SERVER_REQUEST,
+    receiveKey: Constants.PATCH_SERVER_RESPONSE,
+    payloadTransform: (data, response) => ({
+        ...data,
+        etag: response.headers.get('etag'),
+    }),
+});

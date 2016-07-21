@@ -28,8 +28,19 @@ export default function createFetchReducers(options) {
         }
     }
 
+    function error(state = {}, action) {
+        switch (action.type) {
+            case receiveKey:
+                if (!action.error) return {};
+                return action.payload;
+            default:
+                return state;
+        }
+    }
+
     return {
         [resourceName]: resource,
+        [`${resourceName}Error`]: error,
         [`${resourceName}IsPending`]: resourceIsPending,
     };
 }

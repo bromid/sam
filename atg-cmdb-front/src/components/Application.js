@@ -9,7 +9,30 @@ import Attributes from './Attributes';
 import ItemView from './ItemView';
 import ApplicationDeployments from './ApplicationDeployments';
 
+function patchNotification(result, error, isPending) {
+    if (isPending) return {};
+    if (!isEmpty(error)) {
+        return {
+            message: 'Failed to update application!',
+            duration: 4000,
+            action: {
+                name: 'info',
+            },
+        };
+    }
+    if (!isEmpty(result)) {
+        return {
+            message: `Updated application ${result.name}`,
+        };
+    }
+    return {};
+}
+
 const ApplicationContainer = React.createClass({
+
+    getInitialState() {
+        return { initiated: false };
+    },
 
     componentDidMount() {
         const { id, fetchApplication } = this.props;
@@ -23,6 +46,7 @@ const ApplicationContainer = React.createClass({
         const isDifferentEtag = newPatchResult.etag !== patchResult.etag;
         const isUpdatedEtag = !isEmpty(newPatchResult) && isDifferentEtag;
         if (newId !== id || isUpdatedEtag) {
+            this.setState({ initiated: true });
             fetchApplication(newId);
         }
     },
@@ -44,13 +68,13 @@ const ApplicationContainer = React.createClass({
     render() {
         const {
             isLoading,
-            metaOpen,
-            toggleMeta,
+            metaOpen, toggleMeta,
+            patchResult, patchError, patchIsPending,
             application: {
-                id, name, description, group, attributes, meta,
+                id, name, description = '', group, attributes, meta,
             },
         } = this.props;
-        if (isLoading) return <LoadingIndicator />;
+        if (isLoading && !this.state.initiated) return <LoadingIndicator />;
 
         const tabs = [
             {
@@ -80,19 +104,27 @@ const ApplicationContainer = React.createClass({
                 meta={meta}
                 metaOpen={metaOpen}
                 toggleMeta={toggleMeta}
+                notification={() => patchNotification(patchResult, patchError, patchIsPending)}
             />
         );
     },
 });
 
 function mapStateToProps(state, props) {
-    const { metaOpen, application, applicationPatchResult, applicationIsPending } = state;
+    const {
+        metaOpen,
+        application, applicationError, applicationIsPending,
+        applicationPatchResult, applicationPatchResultError, applicationPatchResultIsPending,
+    } = state;
     const { id } = props.params;
     return {
         id,
         metaOpen,
         application,
+        fetchError: applicationError,
         patchResult: applicationPatchResult,
+        patchError: applicationPatchResultError,
+        patchIsPending: applicationPatchResultIsPending,
         isLoading: applicationIsPending || applicationIsPending === null,
     };
 }

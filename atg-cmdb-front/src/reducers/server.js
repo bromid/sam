@@ -7,6 +7,12 @@ const server = createFetchReducers({
     receiveKey: Constants.FETCH_SERVER_RESPONSE,
 });
 
+const serverPatchResult = createFetchReducers({
+    resourceName: 'serverPatchResult',
+    requestKey: Constants.PATCH_SERVER_REQUEST,
+    receiveKey: Constants.PATCH_SERVER_RESPONSE,
+});
+
 const serverList = createFetchReducers({
     resourceName: 'serverList',
     requestKey: Constants.FETCH_SERVER_LIST_REQUEST,
@@ -15,5 +21,6 @@ const serverList = createFetchReducers({
 
 export default {
     ...server,
+    ...serverPatchResult,
     ...serverList,
 };

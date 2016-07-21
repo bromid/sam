@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import size from 'lodash/size';
+import isEmpty from 'lodash/isEmpty';
 import * as serverActions from '../actions/serverActions';
 import * as metaActions from '../actions/metaActions';
 import { List, ListItem } from 'material-ui/List';
@@ -15,6 +16,25 @@ const flexChildStyle = {
     padding: '0 16px',
 };
 
+function patchNotification(result, error, isPending) {
+    if (isPending) return {};
+    if (!isEmpty(error)) {
+        return {
+            message: 'Failed to update server!',
+            duration: 4000,
+            action: {
+                name: 'info',
+            },
+        };
+    }
+    if (!isEmpty(result)) {
+        return {
+            message: `Updated server ${result.hostname}@${result.environment}`,
+        };
+    }
+    return {};
+}
+
 function collectionSize(collection) {
     if (!collection) return ' (0)';
     return ` (${size(collection)})`;
@@ -23,7 +43,7 @@ function collectionSize(collection) {
 function Os({ os }) {
     return (
         <div style={flexChildStyle}>
-            <h3>Operativ system</h3>
+            <h3>Operative system</h3>
             <p>{os.name} ({os.version})</p>
             <h4>Attributes</h4>
             <Attributes attributes={os.attributes} />
@@ -68,19 +88,27 @@ function Deployment({ deployment }) {
 
 const ServerContainer = React.createClass({
 
+    getInitialState() {
+        return { initiated: false };
+    },
+
     componentDidMount() {
         const { environment, hostname, fetchServer } = this.props;
         fetchServer({ environment, hostname });
     },
 
     componentWillReceiveProps(newProps) {
-        const { environment, hostname, fetchServer } = this.props;
+        const { environment, hostname, patchResult, fetchServer } = this.props;
         const {
             environment: newEnvironment,
             hostname: newHostname,
+            patchResult: newPatchResult,
         } = newProps;
 
-        if (newEnvironment !== environment || newHostname !== hostname) {
+        const isDifferentEtag = newPatchResult.etag !== patchResult.etag;
+        const isUpdatedEtag = !isEmpty(newPatchResult) && isDifferentEtag;
+        if (newEnvironment !== environment || newHostname !== hostname || isUpdatedEtag) {
+            this.setState({ initiated: true });
             fetchServer({
                 environment: newEnvironment,
                 hostname: newHostname,
@@ -88,17 +116,24 @@ const ServerContainer = React.createClass({
         }
     },
 
+    updateDescription(description) {
+        const { environment, hostname, patchServer, server: { meta } } = this.props;
+        patchServer({ environment, hostname }, { description }, {
+            hash: meta.hash,
+        });
+    },
+
     render() {
         const {
             isLoading,
-            metaOpen,
-            toggleMeta,
+            metaOpen, toggleMeta,
+            patchResult, patchError, patchIsPending,
             server: {
-                hostname, environment, description,
+                hostname, environment, description = '',
                 meta, network, os, deployments, attributes,
             },
         } = this.props;
-        if (isLoading) return <LoadingIndicator />;
+        if (isLoading && !this.state.initiated) return <LoadingIndicator />;
         if (!hostname) return <p>No result</p>;
 
         const tabs = [
@@ -124,23 +159,33 @@ const ServerContainer = React.createClass({
             <ItemView
                 headline={`${hostname}@${environment}`}
                 description={description}
+                updateDescription={this.updateDescription}
                 meta={meta}
                 metaOpen={metaOpen}
                 toggleMeta={toggleMeta}
                 tabs={tabs}
+                notification={() => patchNotification(patchResult, patchError, patchIsPending)}
             />
         );
     },
 });
 
 function mapStateToProps(state, props) {
-    const { metaOpen, server, serverIsPending } = state;
+    const {
+        metaOpen,
+        server, serverError, serverIsPending,
+        serverPatchResult, serverPatchResultError, serverPatchResultIsPending,
+    } = state;
     const { environment, hostname } = props.params;
     return {
         environment,
         hostname,
         metaOpen,
         server,
+        fetchError: serverError,
+        patchResult: serverPatchResult,
+        patchError: serverPatchResultError,
+        patchIsPending: serverPatchResultIsPending,
         isLoading: serverIsPending || serverIsPending === null,
     };
 }
