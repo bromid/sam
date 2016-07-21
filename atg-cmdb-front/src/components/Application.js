@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
+import isEmpty from 'lodash/isEmpty';
 import * as applicationActions from '../actions/applicationActions';
 import * as metaActions from '../actions/metaActions';
 import LoadingIndicator from './LoadingIndicator';
@@ -16,12 +17,28 @@ const ApplicationContainer = React.createClass({
     },
 
     componentWillReceiveProps(newProps) {
-        const { id, fetchApplication } = this.props;
-        const { id: newId } = newProps;
+        const { id, patchResult, fetchApplication } = this.props;
+        const { id: newId, patchResult: newPatchResult } = newProps;
 
-        if (newId !== id) {
+        const isDifferentEtag = newPatchResult.etag !== patchResult.etag;
+        const isUpdatedEtag = !isEmpty(newPatchResult) && isDifferentEtag;
+        if (newId !== id || isUpdatedEtag) {
             fetchApplication(newId);
         }
+    },
+
+    updateDescription(description) {
+        const { id, patchApplication, application: { meta } } = this.props;
+        patchApplication(id, { description }, {
+            hash: meta.hash,
+        });
+    },
+
+    updateName(name) {
+        const { id, patchApplication, application: { meta } } = this.props;
+        patchApplication(id, { name }, {
+            hash: meta.hash,
+        });
     },
 
     render() {
@@ -55,25 +72,28 @@ const ApplicationContainer = React.createClass({
         ];
         return (
             <ItemView
+                tabs={tabs}
                 headline={name}
+                updateHeadline={this.updateName}
                 description={description}
+                updateDescription={this.updateDescription}
                 meta={meta}
                 metaOpen={metaOpen}
                 toggleMeta={toggleMeta}
-                tabs={tabs}
             />
         );
     },
 });
 
 function mapStateToProps(state, props) {
-    const { metaOpen, application, applicationIsLoading } = state;
+    const { metaOpen, application, applicationPatchResult, applicationIsPending } = state;
     const { id } = props.params;
     return {
         id,
         metaOpen,
         application,
-        isLoading: applicationIsLoading || applicationIsLoading === null,
+        patchResult: applicationPatchResult,
+        isLoading: applicationIsPending || applicationIsPending === null,
     };
 }
 

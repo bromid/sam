@@ -46,10 +46,10 @@ const ApplicationsContainer = React.createClass({
 });
 
 function mapStateToProps(state) {
-    const { applicationList, applicationListIsLoading } = state;
+    const { applicationList, applicationListIsPending } = state;
     return {
         applications: applicationList.items,
-        isLoading: applicationListIsLoading || applicationListIsLoading === null,
+        isLoading: applicationListIsPending || applicationListIsPending === null,
     };
 }
 export default connect(mapStateToProps, Actions)(ApplicationsContainer);

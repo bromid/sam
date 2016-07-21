@@ -169,13 +169,13 @@ const GroupContainer = React.createClass({
 });
 
 function mapStateToProps(state, props) {
-    const { metaOpen, group, groupIsLoading } = state;
+    const { metaOpen, group, groupIsPending } = state;
     const { id } = props.params;
     return {
         id,
         metaOpen,
         group,
-        isLoading: groupIsLoading || groupIsLoading === null,
+        isLoading: groupIsPending || groupIsPending === null,
     };
 }
 

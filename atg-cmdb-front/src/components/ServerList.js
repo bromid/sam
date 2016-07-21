@@ -45,10 +45,10 @@ const ServerListContainer = React.createClass({
 });
 
 function mapStateToProps(state) {
-    const { serverList, serverListIsLoading } = state;
+    const { serverList, serverListIsPending } = state;
     return {
         servers: serverList.items,
-        isLoading: serverListIsLoading || serverListIsLoading === null,
+        isLoading: serverListIsPending || serverListIsPending === null,
     };
 }
 export default connect(mapStateToProps, Actions)(ServerListContainer);

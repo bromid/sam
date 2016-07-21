@@ -134,14 +134,14 @@ const ServerContainer = React.createClass({
 });
 
 function mapStateToProps(state, props) {
-    const { metaOpen, server, serverIsLoading } = state;
+    const { metaOpen, server, serverIsPending } = state;
     const { environment, hostname } = props.params;
     return {
         environment,
         hostname,
         metaOpen,
         server,
-        isLoading: serverIsLoading || serverIsLoading === null,
+        isLoading: serverIsPending || serverIsPending === null,
     };
 }
 

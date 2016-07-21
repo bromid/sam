@@ -1,6 +1,6 @@
 import { OPEN_MENU, CLOSE_MENU } from '../constants';
 
-export const menuOpen = (state = false, action) => {
+export default function menuOpen(state = false, action) {
     switch (action.type) {
         case OPEN_MENU:
             return true;
@@ -9,4 +9,4 @@ export const menuOpen = (state = false, action) => {
         default:
             return state;
     }
-};
+}

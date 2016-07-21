@@ -40,10 +40,10 @@ const AssetListContainer = React.createClass({
 });
 
 function mapStateToProps(state) {
-    const { assetList, assetListIsLoading } = state;
+    const { assetList, assetListIsPending } = state;
     return {
         assets: assetList.items,
-        isLoading: assetListIsLoading || assetListIsLoading === null,
+        isLoading: assetListIsPending || assetListIsPending === null,
     };
 }
 export default connect(mapStateToProps, Actions)(AssetListContainer);

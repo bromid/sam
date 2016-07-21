@@ -21,11 +21,11 @@ const ReleaseNotesContainer = React.createClass({
 });
 
 function mapStateToProps(state) {
-    const { releaseNotes, releaseNotesIsLoading } = state;
+    const { releaseNotes, releaseNotesIsPending } = state;
     return {
         error: !isString(releaseNotes),
         releaseNotesHtml: { __html: releaseNotes },
-        isLoading: releaseNotesIsLoading || releaseNotesIsLoading === null,
+        isLoading: releaseNotesIsPending || releaseNotesIsPending === null,
     };
 }
 
