@@ -19,3 +19,13 @@ export const fetchGroupTags = createFetchActions({
     requestKey: Constants.FETCH_GROUP_TAG_REQUEST,
     receiveKey: Constants.FETCH_GROUP_TAG_RESPONSE,
 });
+
+export const patchGroup = createFetchActions({
+    apiCall: API.patchGroup,
+    requestKey: Constants.PATCH_GROUP_REQUEST,
+    receiveKey: Constants.PATCH_GROUP_RESPONSE,
+    payloadTransform: (data, response) => ({
+        ...data,
+        etag: response.headers.get('etag'),
+    }),
+});

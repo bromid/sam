@@ -20,9 +20,11 @@ const TEXT_HTML = {
 
 const verifySuccessful = (response) => {
     if (response.status >= 400) {
-        throw new Error(
+        const error = new Error(
             `Got status ${response.statusText} (${response.status}) for ${response.url}.`
         );
+        error.response = response;
+        throw error;
     }
     return response;
 };
@@ -80,13 +82,20 @@ function patchJson(url, obj, { hash, params } = {}) {
         );
 }
 
-export const fetchGroupList = (queryParams) => fetchJson('/services/group', queryParams);
+export const fetchGroupList = (queryParams) =>
+    fetchJson('/services/group', queryParams);
 
-export const fetchGroup = (groupId) => fetchJson(`/services/group/${groupId}`);
+export const fetchGroup = (groupId) =>
+    fetchJson(`/services/group/${groupId}`);
 
-export const fetchGroupTags = () => fetchJson('/services/group/tag');
+export const fetchGroupTags = () =>
+    fetchJson('/services/group/tag');
 
-export const fetchApplicationList = () => fetchJson('/services/application');
+export const patchGroup = (groupId, group, options) =>
+    patchJson(`/services/group/${groupId}`, group, options);
+
+export const fetchApplicationList = () =>
+    fetchJson('/services/application');
 
 export const fetchApplication = (applicationId) =>
     fetchJson(`/services/application/${applicationId}`);
@@ -94,20 +103,32 @@ export const fetchApplication = (applicationId) =>
 export const fetchApplicationDeployments = (applicationId) =>
     fetchJson(`/services/application/${applicationId}/deployment`);
 
-export const patchApplication = (applicationId, obj, options) =>
-    patchJson(`/services/application/${applicationId}`, obj, options);
+export const patchApplication = (applicationId, application, options) =>
+    patchJson(`/services/application/${applicationId}`, application, options);
 
-export const fetchServerList = () => fetchJson('/services/server');
+export const fetchServerList = () =>
+    fetchJson('/services/server');
 
 export const fetchServer = (params) =>
     fetchJson(`/services/server/${params.environment}/${params.hostname}`);
 
-export const fetchAssetList = () => fetchJson('/services/asset');
+export const patchServer = (params, server, options) =>
+    patchJson(`/services/server/${params.environment}/${params.hostname}`, server, options);
 
-export const fetchAsset = (assetId) => fetchJson(`/services/asset/${assetId}`);
+export const fetchAssetList = () =>
+    fetchJson('/services/asset');
 
-export const fetchSearch = (searchQuery) => fetchJson(`/services/search?q=${searchQuery}`);
+export const fetchAsset = (assetId) =>
+    fetchJson(`/services/asset/${assetId}`);
 
-export const fetchInfo = () => fetchJson('/services/info');
+export const patchAsset = (assetId, asset, options) =>
+    patchJson(`/services/asset/${assetId}`, asset, options);
 
-export const fetchReleaseNotes = () => fetchHtml('/services/info/release-notes');
+export const fetchSearch = (searchQuery) =>
+    fetchJson(`/services/search?q=${searchQuery}`);
+
+export const fetchInfo = () =>
+    fetchJson('/services/info');
+
+export const fetchReleaseNotes = () =>
+    fetchHtml('/services/info/release-notes');

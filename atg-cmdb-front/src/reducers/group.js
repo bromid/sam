@@ -7,6 +7,12 @@ const group = createFetchReducers({
     receiveKey: Constants.FETCH_GROUP_RESPONSE,
 });
 
+const groupPatchResult = createFetchReducers({
+    resourceName: 'groupPatchResult',
+    requestKey: Constants.PATCH_GROUP_REQUEST,
+    receiveKey: Constants.PATCH_GROUP_RESPONSE,
+});
+
 const groupTags = createFetchReducers({
     resourceName: 'groupTags',
     requestKey: Constants.FETCH_GROUP_TAG_REQUEST,
@@ -21,6 +27,7 @@ const groupList = createFetchReducers({
 
 export default {
     ...group,
+    ...groupPatchResult,
     ...groupTags,
     ...groupList,
 };

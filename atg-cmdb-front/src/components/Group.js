@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import size from 'lodash/size';
+import isEmpty from 'lodash/isEmpty';
 import List from 'material-ui/List';
 import * as groupActions from '../actions/groupActions';
 import * as metaActions from '../actions/metaActions';
@@ -9,6 +10,25 @@ import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
 import { Group as GroupListItem } from './GroupList';
+
+function patchNotification(result, error, isPending) {
+    if (isPending) return {};
+    if (!isEmpty(error)) {
+        return {
+            message: 'Failed to update group!',
+            duration: 4000,
+            action: {
+                name: 'info',
+            },
+        };
+    }
+    if (!isEmpty(result)) {
+        return {
+            message: `Updated group ${result.name}`,
+        };
+    }
+    return {};
+}
 
 function collectionSize(collection) {
     if (!collection) return ' (0)';
@@ -25,7 +45,6 @@ function Asset({ asset }) {
 
 function Groups({ groups }) {
     if (!groups) return <p>No groups</p>;
-
     return (
         <List>
             {groups.map(group =>
@@ -37,7 +56,6 @@ function Groups({ groups }) {
 
 function Assets({ assets }) {
     if (!assets) return <p>No assets</p>;
-
     return (
         <div>
             {assets.map(asset => (
@@ -57,7 +75,6 @@ function Application({ application }) {
 
 function Applications({ applications }) {
     if (!applications) return <p>No applications</p>;
-
     return (
         <div>
             {applications.map(application => (
@@ -70,15 +87,14 @@ function Applications({ applications }) {
 function Group(props) {
     const {
         group: {
-            name, description, applications, assets,
+            name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
-        isLoading, metaOpen, toggleMeta, selectedTab, onTabChanged, onTagDelete,
+        notification, updateName, updateDescription,
+        metaOpen, toggleMeta, onTagDelete,
     } = props;
 
-    if (isLoading) return <LoadingIndicator />;
     if (!name) return <p>No result</p>;
-
     const tabs = [
         {
             name: `Applications ${collectionSize(applications)}`,
@@ -97,19 +113,19 @@ function Group(props) {
             node: <Attributes attributes={attributes} />,
         },
     ];
-
     return (
         <ItemView
             headline={name}
+            updateHeadline={updateName}
             description={description}
+            updateDescription={updateDescription}
             tags={tags}
             onTagDelete={onTagDelete}
             meta={meta}
             metaOpen={metaOpen}
             toggleMeta={toggleMeta}
             tabs={tabs}
-            selectedTab={selectedTab}
-            onTabChanged={onTabChanged}
+            notification={notification}
         />
     );
 }
@@ -117,9 +133,7 @@ function Group(props) {
 const GroupContainer = React.createClass({
 
     getInitialState() {
-        return {
-            selectedTab: 0,
-        };
+        return { initiated: false };
     },
 
     componentDidMount() {
@@ -128,10 +142,13 @@ const GroupContainer = React.createClass({
     },
 
     componentWillReceiveProps(newProps) {
-        const { id, fetchGroup } = this.props;
-        const { id: newId } = newProps;
+        const { id, patchResult, fetchGroup } = this.props;
+        const { id: newId, patchResult: newPatchResult } = newProps;
 
-        if (newId !== id) {
+        const isDifferentEtag = newPatchResult.etag !== patchResult.etag;
+        const isUpdatedEtag = !isEmpty(newPatchResult) && isDifferentEtag;
+        if (newId !== id || isUpdatedEtag) {
+            this.setState({ initiated: true });
             fetchGroup(newId);
         }
     },
@@ -140,20 +157,28 @@ const GroupContainer = React.createClass({
         return name;
     },
 
-    onTabChanged(tab) {
-        this.setState({
-            selectedTab: tab,
+    updateName(name) {
+        const { id, patchGroup, group: { meta } } = this.props;
+        patchGroup(id, { name }, {
+            hash: meta.hash,
+        });
+    },
+
+    updateDescription(description) {
+        const { id, patchGroup, group: { meta } } = this.props;
+        patchGroup(id, { description }, {
+            hash: meta.hash,
         });
     },
 
     render() {
         const {
-            isLoading,
-            metaOpen,
-            toggleMeta,
-            group,
+            group, isLoading,
+            metaOpen, toggleMeta,
+            patchResult, patchError, patchIsPending,
         } = this.props;
 
+        if (isLoading && !this.state.initiated) return <LoadingIndicator />;
         return (
             <Group
                 group={group}
@@ -161,20 +186,29 @@ const GroupContainer = React.createClass({
                 onTagDelete={this.onTagDelete}
                 metaOpen={metaOpen}
                 toggleMeta={toggleMeta}
-                selectedTab={this.state.selectedTab}
-                onTabChanged={this.onTabChanged}
+                updateName={this.updateName}
+                updateDescription={this.updateDescription}
+                notification={() => patchNotification(patchResult, patchError, patchIsPending)}
             />
         );
     },
 });
 
 function mapStateToProps(state, props) {
-    const { metaOpen, group, groupIsPending } = state;
+    const {
+        metaOpen,
+        group, groupError, groupIsPending,
+        groupPatchResult, groupPatchResultError, groupPatchResultIsPending,
+    } = state;
     const { id } = props.params;
     return {
         id,
         metaOpen,
         group,
+        fetchError: groupError,
+        patchResult: groupPatchResult,
+        patchError: groupPatchResultError,
+        patchIsPending: groupPatchResultIsPending,
         isLoading: groupIsPending || groupIsPending === null,
     };
 }

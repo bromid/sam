@@ -23,7 +23,7 @@ export default function createFetchActions(options) {
         type: receiveKey,
         error: true,
         payload: {
-            status: errorTransform(error),
+            status: errorTransform(error, error.response),
         },
     });
 
