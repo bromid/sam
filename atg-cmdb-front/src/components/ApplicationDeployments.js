@@ -4,38 +4,25 @@ import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import * as applicationActions from '../actions/applicationActions';
 import LoadingIndicator from './LoadingIndicator';
+import { serverName, serverLink } from './Server';
 
-function serverName(deployment, separator = '@') {
-    return deployment.hostname + separator + deployment.environment;
-}
+const Deployment = ({ deployment }) => (
+    <Link to={serverLink(deployment)}>
+        <ListItem primaryText={`${serverName(deployment)} (${deployment.version})`} />
+    </Link>
+);
 
-function serverLink(deployment) {
-    return `/server/${deployment.environment}/${deployment.hostname}`;
-}
-
-function DeploymentList({ deployments }) {
+export const DeploymentList = ({ deployments, header }) => {
     if (!deployments) return <p>No deployments</p>;
-
     return (
         <List>
+            {header}
             {deployments.map(deployment => (
                 <Deployment key={serverName(deployment)} deployment={deployment} />
             ))}
         </List>
     );
-}
-
-function Deployment({ deployment }) {
-    return (
-        <ListItem
-            primaryText={
-                <Link to={serverLink(deployment)}>
-                    {`${serverName(deployment)} (${deployment.version})`}
-                </Link>
-            }
-        />
-    );
-}
+};
 
 const ApplicationDeploymentsContainer = React.createClass({
 
@@ -45,12 +32,9 @@ const ApplicationDeploymentsContainer = React.createClass({
     },
 
     render() {
-        const {
-            isLoading,
-            deployments,
-        } = this.props;
-        if (isLoading) return <LoadingIndicator />;
+        const { isLoading, deployments } = this.props;
 
+        if (isLoading) return <LoadingIndicator />;
         return (
             <DeploymentList deployments={deployments} />
         );

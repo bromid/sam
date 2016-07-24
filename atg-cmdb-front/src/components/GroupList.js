@@ -9,7 +9,11 @@ import * as Actions from '../actions/groupActions';
 import LoadingIndicator from './LoadingIndicator';
 import { TagFilter } from './Tag';
 
-function CountBadge({ children, title, primary, secondary }) {
+const toArray = item => (
+    isArray(item) ? item : [item]
+);
+
+const CountBadge = ({ children, title, primary, secondary }) => {
     const style = { padding: '12px' };
     const badgeStyle = { width: '16px', height: '16px', fontSize: '10px' };
 
@@ -24,9 +28,9 @@ function CountBadge({ children, title, primary, secondary }) {
             badgeStyle={badgeStyle}
         />
     );
-}
+};
 
-export function Group({ group, nestedLevel = 0 }) {
+const Group = ({ group, nestedLevel = 0 }) => {
     const nestedItems = group.groups ?
         group.groups.map(item => <Group group={item} key={item.id} />)
         : undefined;
@@ -52,22 +56,22 @@ export function Group({ group, nestedLevel = 0 }) {
             innerDivStyle={{ borderBottom: '1px solid lightgray' }}
         />
     );
-}
+};
 
-function GroupList({ isLoading, groups }) {
-    if (isLoading) return <LoadingIndicator />;
-    if (!groups) return <p>No results</p>;
-
+export const GroupList = ({ groups, header }) => {
+    if (!groups) return <p>No groups</p>;
     return (
         <List>
+            {header}
             {groups.map(group =>
                 <Group group={group} key={group.id} />
             )}
         </List>
     );
-}
+};
 
-function Groups({ groups, groupTags = [], addFilter, removeFilter, activeFilter, isLoading }) {
+const Groups = ({ groups, groupTags = [], addFilter, removeFilter, activeFilter, isLoading }) => {
+    if (isLoading) return <LoadingIndicator />;
     return (
         <div>
             <h2>Groups</h2>
@@ -83,11 +87,7 @@ function Groups({ groups, groupTags = [], addFilter, removeFilter, activeFilter,
             />
         </div>
     );
-}
-
-function toArray(item) {
-    return isArray(item) ? item : [item];
-}
+};
 
 const GroupsContainer = React.createClass({
     getInitialState() {

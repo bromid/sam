@@ -4,30 +4,26 @@ import { connect } from 'react-redux';
 import * as Actions from '../actions/serverActions';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
+import { serverName, serverLink } from './Server';
 
-function Server({ server }) {
-    return (
-        <ListItem
-            primaryText={
-                <Link to={`/server/${server.environment}/${server.hostname}`}>
-                    {`${server.hostname}@${server.environment}`}
-                </Link>
-            }
-            secondaryText={server.description}
-        />
-    );
-}
+const Server = ({ server }) => (
+    <Link to={serverLink(server)}>
+        <ListItem primaryText={serverName(server)} secondaryText={server.description} />
+    </Link>
+);
 
-function Servers({ servers }) {
+export const Servers = ({ servers, header }) => {
+    if (!servers) return <p>No servers</p>;
     return (
         <List>
-            <h2>Servers</h2>
+            {header}
             {servers.map(server => (
-                <Server key={server.hostname + server.environment} server={server} />
+                <Server key={serverName(server)} server={server} />
             ))}
         </List>
     );
-}
+};
+
 const ServerListContainer = React.createClass({
 
     componentDidMount() {
@@ -37,9 +33,8 @@ const ServerListContainer = React.createClass({
     render() {
         const { servers, isLoading } = this.props;
         if (isLoading) return <LoadingIndicator />;
-        if (!servers) return <p>No results</p>;
         return (
-            <Servers servers={servers} />
+            <Servers servers={servers} header={<h2>Servers</h2>} />
         );
     },
 });
