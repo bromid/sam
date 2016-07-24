@@ -1,17 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import size from 'lodash/size';
 import isEmpty from 'lodash/isEmpty';
-import List from 'material-ui/List';
 import * as groupActions from '../actions/groupActions';
 import * as metaActions from '../actions/metaActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
-import { Group as GroupListItem } from './GroupList';
+import { GroupList } from './GroupList';
+import { AssetList } from './AssetList';
+import { ApplicationList } from './ApplicationList';
 
-function patchNotification(result, error, isPending) {
+const patchNotification = (result, error, isPending) => {
     if (isPending) return {};
     if (!isEmpty(error)) {
         return {
@@ -28,63 +28,14 @@ function patchNotification(result, error, isPending) {
         };
     }
     return {};
-}
+};
 
-function collectionSize(collection) {
+const collectionSize = collection => {
     if (!collection) return ' (0)';
     return ` (${size(collection)})`;
-}
+};
 
-function Asset({ asset }) {
-    return (
-        <p>
-            <Link to={`/asset/${asset.id}`}>{asset.name}</Link>
-        </p>
-    );
-}
-
-function Groups({ groups }) {
-    if (!groups) return <p>No groups</p>;
-    return (
-        <List>
-            {groups.map(group =>
-                <GroupListItem key={group.id} group={group} />
-            )}
-        </List>
-    );
-}
-
-function Assets({ assets }) {
-    if (!assets) return <p>No assets</p>;
-    return (
-        <div>
-            {assets.map(asset => (
-                <Asset key={asset.id} asset={asset} />
-            ))}
-        </div>
-    );
-}
-
-function Application({ application }) {
-    return (
-        <p>
-            <Link to={`/application/${application.id}`}>{application.name}</Link>
-        </p>
-    );
-}
-
-function Applications({ applications }) {
-    if (!applications) return <p>No applications</p>;
-    return (
-        <div>
-            {applications.map(application => (
-                <Application key={application.id} application={application} />
-            ))}
-        </div>
-    );
-}
-
-function Group(props) {
+const Group = props => {
     const {
         group: {
             name, description = '', applications, assets,
@@ -98,15 +49,15 @@ function Group(props) {
     const tabs = [
         {
             name: `Applications ${collectionSize(applications)}`,
-            node: <Applications applications={applications} />,
+            node: <ApplicationList applications={applications} />,
         },
         {
             name: `Assets ${collectionSize(assets)}`,
-            node: <Assets assets={assets} />,
+            node: <AssetList assets={assets} />,
         },
         {
             name: `Sub groups ${collectionSize(groups)}`,
-            node: <Groups groups={groups} />,
+            node: <GroupList groups={groups} />,
         },
         {
             name: `Attributes ${collectionSize(attributes)}`,
@@ -128,7 +79,7 @@ function Group(props) {
             notification={notification}
         />
     );
-}
+};
 
 const GroupContainer = React.createClass({
 

@@ -5,18 +5,23 @@ import * as Actions from '../actions/assetActions';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
 
-function Asset({ asset: { id, name, description } }) {
+const Asset = ({ asset: { id, name, description } }) => (
+    <Link to={`/asset/${id}`}>
+        <ListItem primaryText={name} secondaryText={description} />
+    </Link>
+);
+
+export const AssetList = ({ assets, header }) => {
+    if (!assets) return <p>No assets</p>;
     return (
-        <ListItem
-            primaryText={
-                <Link to={`/asset/${id}`}>
-                    {name}
-                </Link>
-            }
-            secondaryText={description}
-        />
+        <List>
+            {header}
+            {assets.map(asset => (
+                <Asset key={asset.id} asset={asset} />
+            ))}
+        </List>
     );
-}
+};
 
 const AssetListContainer = React.createClass({
 
@@ -27,15 +32,7 @@ const AssetListContainer = React.createClass({
     render() {
         const { assets, isLoading } = this.props;
         if (isLoading) return <LoadingIndicator />;
-        if (!assets) return <p>No results</p>;
-        return (
-            <List>
-                <h2>Assets</h2>
-                {assets.map(asset => (
-                    <Asset key={asset.id} asset={asset} />
-                ))}
-            </List>
-        );
+        return <AssetList assets={assets} header={<h2>Assets</h2>} />;
     },
 });
 

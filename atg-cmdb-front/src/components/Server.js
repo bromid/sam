@@ -16,7 +16,20 @@ const flexChildStyle = {
     padding: '0 16px',
 };
 
-function patchNotification(result, error, isPending) {
+const collectionSize = collection => {
+    if (!collection) return ' (0)';
+    return ` (${size(collection)})`;
+};
+
+export const serverName = server => (
+    `${server.hostname}@${server.environment}`
+);
+
+export const serverLink = server => (
+    `/server/${server.environment}/${server.hostname}`
+);
+
+const patchNotification = (result, error, isPending) => {
     if (isPending) return {};
     if (!isEmpty(error)) {
         return {
@@ -33,38 +46,34 @@ function patchNotification(result, error, isPending) {
         };
     }
     return {};
-}
+};
 
-function collectionSize(collection) {
-    if (!collection) return ' (0)';
-    return ` (${size(collection)})`;
-}
+const Os = ({ os }) => (
+    <div style={flexChildStyle}>
+        <h3>Operative system</h3>
+        <p>{os.name} ({os.version})</p>
+        <h4>Attributes</h4>
+        <Attributes attributes={os.attributes} />
+    </div>
+);
 
-function Os({ os }) {
-    return (
-        <div style={flexChildStyle}>
-            <h3>Operative system</h3>
-            <p>{os.name} ({os.version})</p>
-            <h4>Attributes</h4>
-            <Attributes attributes={os.attributes} />
-        </div>
-    );
-}
+const Network = ({ network }) => (
+    <div style={flexChildStyle}>
+        <h3>Network</h3>
+        <p>{network.ipv4Address}</p>
+        <h4>Attributes</h4>
+        <Attributes attributes={network.attributes} />
+    </div>
+);
 
-function Network({ network }) {
-    return (
-        <div style={flexChildStyle}>
-            <h3>Network</h3>
-            <p>{network.ipv4Address}</p>
-            <h4>Attributes</h4>
-            <Attributes attributes={network.attributes} />
-        </div>
-    );
-}
+const Deployment = ({ deployment: { applicationLink }, deployment }) => (
+    <Link to={`/application/${applicationLink.id}`}>
+        <ListItem primaryText={`${applicationLink.name} (${deployment.version})`} />
+    </Link>
+);
 
-function DeploymentList({ deployments }) {
+const DeploymentList = ({ deployments }) => {
     if (!deployments) return <p>No deployments</p>;
-
     return (
         <List>
             {deployments.map(deployment => (
@@ -72,19 +81,7 @@ function DeploymentList({ deployments }) {
             ))}
         </List>
     );
-}
-
-function Deployment({ deployment }) {
-    return (
-        <ListItem
-            primaryText={
-                <Link to={`/application/${deployment.applicationLink.id}`}>
-                    {`${deployment.applicationLink.name} (${deployment.version})`}
-                </Link>
-            }
-        />
-    );
-}
+};
 
 const ServerContainer = React.createClass({
 

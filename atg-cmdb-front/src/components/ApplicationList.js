@@ -5,29 +5,23 @@ import * as Actions from '../actions/applicationActions';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
 
-function Application({ application: { id, name, description } }) {
-    return (
-        <ListItem
-            primaryText={
-                <Link to={`/application/${id}`}>
-                    {name}
-                </Link>
-            }
-            secondaryText={description}
-        />
-    );
-}
+const Application = ({ application: { id, name, description } }) => (
+    <Link to={`/application/${id}`}>
+        <ListItem primaryText={name} secondaryText={description} />
+    </Link>
+);
 
-function Applications({ applications }) {
+export const ApplicationList = ({ applications, header }) => {
+    if (!applications) return <p>No applications</p>;
     return (
         <List>
-            <h2>Applications</h2>
+            {header}
             {applications.map(application => (
                 <Application key={application.id} application={application} />
             ))}
         </List>
     );
-}
+};
 
 const ApplicationsContainer = React.createClass({
 
@@ -38,9 +32,8 @@ const ApplicationsContainer = React.createClass({
     render() {
         const { isLoading, applications } = this.props;
         if (isLoading) return <LoadingIndicator />;
-        if (!applications) return <p>No results</p>;
         return (
-            <Applications applications={applications} />
+            <ApplicationList applications={applications} header={<h2>Applications</h2>} />
         );
     },
 });
