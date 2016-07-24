@@ -20,7 +20,7 @@ const ItemView = React.createClass({
         tabs: PropTypes.array,
         tags: PropTypes.array,
         onTagDelete: PropTypes.func,
-        notification: React.PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+        notification: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
     },
 
     getInitialState() {

@@ -1,31 +1,43 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
 import Snackbar from 'material-ui/Snackbar';
 
+const getNotification = param => {
+    const notification = isFunction(param) ? param() : param;
+    return {
+        message: '',
+        duration: 2000,
+        action: {},
+        ...notification,
+    };
+};
+
 const Notifier = React.createClass({
+    propTypes: {
+        notification: PropTypes.oneOfType([PropTypes.object, PropTypes.func]).isRequired,
+    },
 
     getInitialState() {
+        const notification = getNotification(this.props.notification);
         return {
+            ...notification,
             open: false,
-            message: '',
         };
     },
 
     componentWillReceiveProps({ notification }) {
-        const notificationObj = isFunction(notification) ? notification() : notification;
-        const { message: newMessage, duration = 2000, action = {} } = notificationObj;
-        const emptyMessage = isEmpty(newMessage);
-        if (!emptyMessage && newMessage !== this.state.message) {
+        const newNotification = getNotification(notification);
+        const newMessage = newNotification.message;
+
+        if (!isEmpty(newMessage) && newMessage !== this.state.message) {
             this.setState({
-                duration,
-                action,
+                ...newNotification,
                 open: true,
-                message: newMessage,
             });
         } else {
             this.setState({
-                message: (emptyMessage) ? '' : newMessage,
+                message: newNotification.message,
             });
         }
     },
@@ -41,7 +53,7 @@ const Notifier = React.createClass({
         return (<Snackbar
             open={open}
             message={message}
-            action={(action) ? action.name : undefined}
+            action={action.name}
             autoHideDuration={duration}
             onRequestClose={this.requestClose}
         />);
