@@ -21,7 +21,8 @@ export default function createFetchSaga(options) {
 
     return function* fetchSaga(...params) {
         try {
-            const payload = yield call(apiCall, ...getAPIParams(paramSelector, params));
+            const APIParams = getAPIParams(paramSelector, params);
+            const payload = yield call(apiCall, ...APIParams);
             yield put({
                 type: responseKey,
                 payload: payloadTransform(payload.data, payload.response),

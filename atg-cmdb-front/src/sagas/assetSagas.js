@@ -1,6 +1,7 @@
 import { takeLatest } from 'redux-saga';
-import { call, put, fork } from 'redux-saga/effects';
+import { fork } from 'redux-saga/effects';
 import * as API from '../api';
+import createFetchSaga from './helpers/createFetchSaga';
 import {
     FETCH_ASSET_LIST_REQUEST,
     FETCH_ASSET_LIST_RESPONSE,
@@ -10,37 +11,27 @@ import {
     PATCH_ASSET_RESPONSE,
 } from '../constants';
 
-function* fetchAssetList() {
-    const response = yield call(API.fetchAssetList);
-    yield put({
-        type: FETCH_ASSET_LIST_RESPONSE,
-        payload: response.data,
-    });
-}
+const fetchAssetList = createFetchSaga({
+    apiCall: API.fetchAssetList,
+    responseKey: FETCH_ASSET_LIST_RESPONSE,
+});
 
-function* fetchAsset(action) {
-    const response = yield call(API.fetchAsset, action.payload.id);
-    yield put({
-        type: FETCH_ASSET_RESPONSE,
-        payload: response.data,
-    });
-}
+const fetchAsset = createFetchSaga({
+    apiCall: API.fetchAsset,
+    responseKey: FETCH_ASSET_RESPONSE,
+    paramSelector(action) {
+        return action.payload.id;
+    },
+});
 
-function* patchAsset({ payload: { id, data, options } }) {
-    try {
-        const response = yield call(API.patchAsset, id, data, options);
-        yield put({
-            type: PATCH_ASSET_RESPONSE,
-            payload: response.data,
-        });
-    } catch (error) {
-        yield put({
-            type: PATCH_ASSET_RESPONSE,
-            error: true,
-            payload: { status: error },
-        });
-    }
-}
+const patchAsset = createFetchSaga({
+    apiCall: API.patchAsset,
+    responseKey: PATCH_ASSET_RESPONSE,
+    paramSelector(action) {
+        const { payload: { id, data, options } } = action;
+        return [id, data, options];
+    },
+});
 
 function* patchAssetResponse(action) {
     if (!action.error) {
