@@ -9,7 +9,7 @@ import SearchResultDialog from './SearchResultDialog';
 const searchStyles = {
     wrapper: {
         position: 'relative',
-        marginRight: 16,
+        margin: 0,
     },
     icon: {
         position: 'absolute',
@@ -20,8 +20,7 @@ const searchStyles = {
     input: {
         fontSize: 14,
         padding: 10,
-        boxShadow: '0 2px 10px rgba(1, 1, 1, 0.4)',
-        borderRadius: '4px',
+        borderRadius: '3px',
         minWidth: 200,
         fontFamily: 'Roboto, sans-serif',
         border: '1px solid transparent',

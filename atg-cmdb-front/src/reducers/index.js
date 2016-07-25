@@ -8,6 +8,7 @@ import metaOpen from './meta';
 import searchResults from './search';
 import info from './info';
 import releaseNotes from './releaseNotes';
+import authenticated from './auth';
 
 export default combineReducers({
     ...group,
@@ -16,6 +17,7 @@ export default combineReducers({
     ...asset,
     menuOpen,
     metaOpen,
+    authenticated,
     ...searchResults,
     ...info,
     ...releaseNotes,

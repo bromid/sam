@@ -3,12 +3,10 @@ import { connect } from 'react-redux';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { blue800 } from 'material-ui/styles/colors';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import AppBar from 'material-ui/AppBar';
 import MainMenu from './MainMenu';
 import matchMedia from './matchMediaHOC';
 import * as menuActions from '../actions/menuActions';
-import SearchField from './SearchField';
-import * as searchActions from '../actions/searchActions';
+import TopBar from './TopBar';
 
 const theme = {
     spacing: {
@@ -32,18 +30,7 @@ const theme = {
 };
 
 function App(props) {
-    const {
-        mdPlus, mainMenuOpen, openMenu, closeMenu, setMenuOpen,
-        children, fetchSearch, searchResults, searchResultsIsPending,
-    } = props;
-
-    const searchField = (
-        <SearchField
-            fetchSearch={fetchSearch}
-            searchResults={searchResults}
-            searchResultsIsPending={searchResultsIsPending}
-        />
-    );
+    const { mdPlus, mainMenuOpen, openMenu, closeMenu, setMenuOpen, children } = props;
 
     const mdPlusStyle = {
         marginLeft: 200,
@@ -65,13 +52,7 @@ function App(props) {
                     closeMenu={closeMenu}
                 />
                 <div style={mdPlus ? mdPlusStyle : null}>
-                    <AppBar
-                        title="Simple Asset Management"
-                        showMenuIconButton={!mdPlus}
-                        onLeftIconButtonTouchTap={openMenu}
-                        style={{ height: 100, padding: 20 }}
-                        iconElementRight={searchField}
-                    />
+                    <TopBar mdPlus={mdPlus} openMenu={openMenu} />
                     <div style={pageStyle}>
                         {children}
                     </div>
@@ -81,18 +62,13 @@ function App(props) {
     );
 }
 
-function mapStateToProps(state, { mdPlus }) {
-    return {
-        mainMenuOpen: state.menuOpen || mdPlus,
-        searchResults: state.searchResults,
-        searchResultsIsPending: state.searchResultsIsPending,
-    };
-}
+const mapStateToProps = (state, { mdPlus }) => ({
+    mainMenuOpen: state.menuOpen || mdPlus,
+});
 
-export default matchMedia(connect(
-    mapStateToProps,
-    {
-        ...menuActions,
-        ...searchActions,
-    }
-)(App));
+const Actions = {
+    setMenuOpen: menuActions.setMenuOpen,
+    openMenu: menuActions.openMenu,
+    closeMenu: menuActions.closeMenu(),
+};
+export default matchMedia(connect(mapStateToProps, Actions)(App));
