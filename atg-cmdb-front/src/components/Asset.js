@@ -8,6 +8,9 @@ import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
 
+const isLoadingNew = (id, asset, loading) =>
+    loading && (isEmpty(asset) || id !== asset.id);
+
 function patchNotification(result, error, isPending) {
     if (isPending) return {};
     if (!isEmpty(error)) {
@@ -29,27 +32,6 @@ function patchNotification(result, error, isPending) {
 
 const AssetContainer = React.createClass({
 
-    getInitialState() {
-        return { initiated: false };
-    },
-
-    componentDidMount() {
-        const { id, fetchAsset } = this.props;
-        fetchAsset(id);
-    },
-
-    componentWillReceiveProps(newProps) {
-        const { id, patchResult, fetchAsset } = this.props;
-        const { id: newId, patchResult: newPatchResult } = newProps;
-
-        const isDifferentEtag = newPatchResult.etag !== patchResult.etag;
-        const isUpdatedEtag = !isEmpty(newPatchResult) && isDifferentEtag;
-        if (newId !== id || isUpdatedEtag) {
-            this.setState({ initiated: true });
-            fetchAsset(newId);
-        }
-    },
-
     updateName(name) {
         const { id, patchAsset, asset: { meta } } = this.props;
         patchAsset(id, { name }, {
@@ -66,14 +48,14 @@ const AssetContainer = React.createClass({
 
     render() {
         const {
-            isLoading,
+            id, asset, isLoading,
             metaOpen, toggleMeta,
             patchResult, patchError, patchIsPending,
-            asset: {
-                name, description = '', group, attributes, meta,
-            },
         } = this.props;
-        if (isLoading && !this.state.initiated) return <LoadingIndicator />;
+
+        if (isLoadingNew(id, asset, isLoading)) return <LoadingIndicator />;
+
+        const { name, description = '', group, attributes, meta } = asset;
 
         const tabs = [
             {
@@ -120,9 +102,12 @@ function mapStateToProps(state, props) {
         patchResult: assetPatchResult,
         patchError: assetPatchResultError,
         patchIsPending: assetPatchResultIsPending,
-        isLoading: assetIsPending || assetIsPending === null,
+        isLoading: assetIsPending,
     };
 }
 
-const Actions = { ...assetActions, ...metaActions };
+const Actions = {
+    patchAsset: assetActions.patchAsset,
+    toggleMeta: metaActions.toggleMeta,
+};
 export default connect(mapStateToProps, Actions)(AssetContainer);

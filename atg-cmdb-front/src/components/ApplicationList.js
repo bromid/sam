@@ -15,28 +15,25 @@ export const ApplicationList = ({ applications, header }) => {
     return (
         <List>
             {header}
-            {applications.map(application => (
+            {applications.map((application) => (
                 <Application key={application.id} application={application} />
             ))}
         </List>
     );
 };
 
-const ApplicationsContainer = React.createClass({
-    render() {
-        const { isLoading, applications } = this.props;
-        if (isLoading) return <LoadingIndicator />;
-        return (
-            <ApplicationList applications={applications} header={<h2>Applications</h2>} />
-        );
-    },
-});
+const ApplicationListContainer = ({ isLoading, applications }) => {
+    if (isLoading) return <LoadingIndicator />;
+    return (
+        <ApplicationList applications={applications} header={<h2>Applications</h2>} />
+    );
+};
 
-function mapStateToProps(state) {
+const mapStateToProps = (state) => {
     const { applicationList, applicationListIsPending } = state;
     return {
         applications: applicationList.items,
         isLoading: applicationListIsPending,
     };
-}
-export default connect(mapStateToProps)(ApplicationsContainer);
+};
+export default connect(mapStateToProps)(ApplicationListContainer);

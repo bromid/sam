@@ -12,27 +12,68 @@ import Assets from './AssetList';
 import Asset from './Asset';
 import ReleaseNotes from './ReleaseNotes';
 import * as ApplicationActions from '../actions/applicationActions';
+import * as AssetActions from '../actions/assetActions';
+
+const fetchApplicationList = ({ dispatch }) =>
+    () => dispatch(ApplicationActions.fetchApplicationList());
 
 const fetchApplication = ({ dispatch }) =>
     ({ params }) => dispatch(ApplicationActions.fetchApplication(params.id));
 
-const fetchApplicationList = ({ dispatch }) =>
-    () => dispatch(ApplicationActions.fetchApplicationList());
+const fetchAssetList = ({ dispatch }) =>
+    () => dispatch(AssetActions.fetchAssetList());
+
+const fetchAsset = ({ dispatch }) =>
+    ({ params }) => dispatch(AssetActions.fetchAsset(params.id));
 
 const Root = ({ store }) => (
     <Provider store={store}>
         <Router history={browserHistory}>
             <Route path="/" component={App} >
-                <Route path="group" component={Groups} />
-                <Route path="group/:id" component={Group} />
-                <Route path="application" component={Applications} onEnter={fetchApplicationList(store)} />
-                <Route path="application/:id" component={Application} onEnter={fetchApplication(store)} />
-                <Route path="server" component={Servers} />
-                <Route path="server/:environment" component={Servers} />
-                <Route path="server/:environment/:hostname" component={Server} />
-                <Route path="asset" component={Assets} />
-                <Route path="asset/:id" component={Asset} />
-                <Route path="release-notes" component={ReleaseNotes} />
+                <Route
+                    path="group"
+                    component={Groups}
+                />
+                <Route
+                    path="group/:id"
+                    component={Group}
+                />
+                <Route
+                    path="application"
+                    component={Applications}
+                    onEnter={fetchApplicationList(store)}
+                />
+                <Route
+                    path="application/:id"
+                    component={Application}
+                    onEnter={fetchApplication(store)}
+                />
+                <Route
+                    path="server"
+                    component={Servers}
+                />
+                <Route
+                    path="server/:environment"
+                    component={Servers}
+                />
+                <Route
+                    path="server/:environment/:hostname"
+                    component={Server}
+                />
+                <Route
+                    path="asset"
+                    component={Assets}
+                    onEnter={fetchAssetList(store)}
+                />
+                <Route
+                    path="asset/:id"
+                    component={Asset}
+                    onEnter={fetchAsset(store)}
+                />
+                <Route
+                    path="release-notes"
+                    component={ReleaseNotes}
+                />
             </Route>
         </Router>
     </Provider>

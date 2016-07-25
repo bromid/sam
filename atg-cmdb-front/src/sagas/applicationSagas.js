@@ -51,6 +51,12 @@ function* fetchApplicationDeployments(applicationId) {
     });
 }
 
+function* patchApplicationResponse(action) {
+    if (!action.error) {
+        yield fork(fetchApplication, action.payload.id);
+    }
+}
+
 /** Watch-sagas start **/
 
 export function* watchFetchApplicationList() {
@@ -58,29 +64,24 @@ export function* watchFetchApplicationList() {
 }
 
 export function* watchFetchApplication() {
-    while (true) {
+    while (true) { // eslint-disable-line no-constant-condition
         const action = yield take(FETCH_APPLICATION_REQUEST);
         yield fork(fetchApplication, action.payload);
         yield fork(fetchApplicationDeployments, action.payload);
     }
 }
 
-export function* watchPatchApplicationRequeset() {
+export function* watchPatchApplicationRequest() {
     yield* takeLatest(PATCH_APPLICATION_REQUEST, patchApplication);
 }
 
 export function* watchPatchApplicationResponse() {
-    while (true) {
-        const action = yield take(PATCH_APPLICATION_RESPONSE);
-
-        if (!action.error) {
-            yield fork(fetchApplication, action.payload.id);
-        }
-    }
+    yield* takeLatest(PATCH_APPLICATION_RESPONSE, patchApplicationResponse);
 }
+
 export default function* applicationSagas() {
     yield fork(watchFetchApplication);
     yield fork(watchFetchApplicationList);
     yield fork(watchPatchApplicationResponse);
-    yield fork(watchPatchApplicationRequeset);
+    yield fork(watchPatchApplicationRequest);
 }

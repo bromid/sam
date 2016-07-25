@@ -4,16 +4,14 @@ import { borderStyle, flexWrapperStyle } from '../../style';
 import PersistableField from '../PersistableField';
 import EditIconButton from './EditIconButton';
 
-function Description({ description, edit }) {
-    return (
-        <div style={{ flex: 1 }}>
-            <EditIconButton edit={edit} style={{ float: 'right', right: -10, top: -10 }} />
-            <ReactMarkdown skipHtml={true} source={description} />
-        </div>
-    );
-}
+const Description = ({ description, edit }) => (
+    <div style={{ flex: 1 }}>
+        <EditIconButton edit={edit} style={{ float: 'right', right: -10, top: -10 }} />
+        <ReactMarkdown skipHtml={true} source={description} />
+    </div>
+);
 
-export default function PersistableDescription(props) {
+const PersistableDescription = (props) => {
     const { description, editActive, edit, cancel, save, change } = props;
     const descriptionWrapperStyle = {
         ...borderStyle,
@@ -39,4 +37,5 @@ export default function PersistableDescription(props) {
             }
         </div>
     );
-}
+};
+export default PersistableDescription;

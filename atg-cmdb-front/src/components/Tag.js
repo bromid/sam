@@ -21,7 +21,7 @@ export function Tags({ tags, onDelete, getName = getTagName }) {
 
     return (
         <div style={{ ...flexWrapperStyle, alignItems: 'baseline' }}>
-            {tags.map(tag => (
+            {tags.map((tag) => (
                 <Tag
                     key={getName(tag)}
                     name={getName(tag)}

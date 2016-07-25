@@ -1,15 +1,19 @@
-import * as Constants from '../constants';
+import {
+    FETCH_APPLICATION_LIST_REQUEST,
+    FETCH_APPLICATION_REQUEST,
+    PATCH_APPLICATION_REQUEST,
+} from '../constants';
 
 export const fetchApplicationList = () => ({
-    type: Constants.FETCH_APPLICATION_LIST_REQUEST,
+    type: FETCH_APPLICATION_LIST_REQUEST,
 });
 
 export const fetchApplication = (applicationId) => ({
-    type: Constants.FETCH_APPLICATION_REQUEST,
+    type: FETCH_APPLICATION_REQUEST,
     payload: applicationId,
 });
 
 export const patchApplication = (id, data, options) => ({
-    type: Constants.PATCH_APPLICATION_REQUEST,
+    type: PATCH_APPLICATION_REQUEST,
     payload: { id, data, options },
 });

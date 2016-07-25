@@ -16,16 +16,16 @@ const flexChildStyle = {
     padding: '0 16px',
 };
 
-const collectionSize = collection => {
+const collectionSize = (collection) => {
     if (!collection) return ' (0)';
     return ` (${size(collection)})`;
 };
 
-export const serverName = server => (
+export const serverName = (server) => (
     `${server.hostname}@${server.environment}`
 );
 
-export const serverLink = server => (
+export const serverLink = (server) => (
     `/server/${server.environment}/${server.hostname}`
 );
 
@@ -76,7 +76,7 @@ const DeploymentList = ({ deployments }) => {
     if (!deployments) return <p>No deployments</p>;
     return (
         <List>
-            {deployments.map(deployment => (
+            {deployments.map((deployment) => (
                 <Deployment key={deployment.applicationLink.id} deployment={deployment} />
             ))}
         </List>

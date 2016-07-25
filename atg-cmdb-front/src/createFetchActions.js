@@ -14,12 +14,12 @@ export default function createFetchActions(options) {
 
     const requestPayload = () => ({ type: requestKey });
 
-    const receivePayload = payload => ({
+    const receivePayload = (payload) => ({
         type: receiveKey,
         payload: payloadTransform(payload.data, payload.response),
     });
 
-    const receivePayloadError = error => ({
+    const receivePayloadError = (error) => ({
         type: receiveKey,
         error: true,
         payload: {
@@ -33,8 +33,8 @@ export default function createFetchActions(options) {
 
             dispatch(requestPayload());
             return apiCall(...param)
-                .then(response => dispatch(receivePayload(response)))
-                .catch(error => dispatch(receivePayloadError(error)));
+                .then((response) => dispatch(receivePayload(response)))
+                .catch((error) => dispatch(receivePayloadError(error)));
         };
     };
 }

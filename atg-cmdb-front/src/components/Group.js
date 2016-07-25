@@ -30,12 +30,12 @@ const patchNotification = (result, error, isPending) => {
     return {};
 };
 
-const collectionSize = collection => {
+const collectionSize = (collection) => {
     if (!collection) return ' (0)';
     return ` (${size(collection)})`;
 };
 
-const Group = props => {
+const Group = (props) => {
     const {
         group: {
             name, description = '', applications, assets,

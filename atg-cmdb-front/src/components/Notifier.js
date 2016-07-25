@@ -3,7 +3,7 @@ import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
 import Snackbar from 'material-ui/Snackbar';
 
-const getNotification = param => {
+const getNotification = (param) => {
     const notification = isFunction(param) ? param() : param;
     return {
         message: '',
