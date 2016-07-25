@@ -56,7 +56,7 @@ function ResultsTable({ header, tableHeaders, rows }) {
 
 function GroupsTable({ groups, handleCloseModal }) {
     const tableHeaders = ['Name', 'Description', 'Tags'];
-    const rows = groups.items && groups.items.map(group => [
+    const rows = groups.items && groups.items.map((group) => [
         <Link onClick={handleCloseModal} to={`/group/${group.id}`}>
             {group.name}
         </Link>,
@@ -68,7 +68,7 @@ function GroupsTable({ groups, handleCloseModal }) {
 
 function ApplicationsTable({ applications, handleCloseModal }) {
     const tableHeaders = ['Name', 'Description'];
-    const rows = applications.items && applications.items.map(application => [
+    const rows = applications.items && applications.items.map((application) => [
         <Link onClick={handleCloseModal} to={`/application/${application.id}`}>
             {application.name}
         </Link>,
@@ -79,7 +79,7 @@ function ApplicationsTable({ applications, handleCloseModal }) {
 
 function ServersTable({ servers, handleCloseModal }) {
     const tableHeaders = ['Host', 'FQDN', 'Description'];
-    const rows = servers.items && servers.items.map(server => [
+    const rows = servers.items && servers.items.map((server) => [
         <Link
             onClick={handleCloseModal}
             to={`/server/${server.environment}/${server.hostname}`}
@@ -94,7 +94,7 @@ function ServersTable({ servers, handleCloseModal }) {
 
 function AssetsTable({ assets, handleCloseModal }) {
     const tableHeaders = ['Name', 'Description'];
-    const rows = assets.items && assets.items.map(asset => [
+    const rows = assets.items && assets.items.map((asset) => [
         <Link onClick={handleCloseModal} to={`/asset/${asset.id}`}>
             {asset.name}
         </Link>,

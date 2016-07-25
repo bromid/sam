@@ -16,7 +16,7 @@ export const AssetList = ({ assets, header }) => {
     return (
         <List>
             {header}
-            {assets.map(asset => (
+            {assets.map((asset) => (
                 <Asset key={asset.id} asset={asset} />
             ))}
         </List>

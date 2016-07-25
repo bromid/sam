@@ -15,7 +15,7 @@ export const ApplicationList = ({ applications, header }) => {
     return (
         <List>
             {header}
-            {applications.map(application => (
+            {applications.map((application) => (
                 <Application key={application.id} application={application} />
             ))}
         </List>
@@ -29,7 +29,7 @@ const ApplicationListContainer = ({ isLoading, applications }) => {
     );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
     const { applicationList, applicationListIsPending } = state;
     return {
         applications: applicationList.items,

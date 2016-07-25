@@ -16,7 +16,7 @@ export const DeploymentList = ({ deployments, header }) => {
     return (
         <List>
             {header}
-            {deployments.map(deployment => (
+            {deployments.map((deployment) => (
                 <Deployment key={serverName(deployment)} deployment={deployment} />
             ))}
         </List>
@@ -30,7 +30,7 @@ const DeploymentListContainer = ({ isLoading, deployments }) => {
     );
 };
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
     const { applicationDeployments, applicationDeploymentsIsPending } = state;
     return {
         deployments: applicationDeployments.items,

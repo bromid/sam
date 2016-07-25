@@ -9,7 +9,7 @@ import * as Actions from '../actions/groupActions';
 import LoadingIndicator from './LoadingIndicator';
 import { TagFilter } from './Tag';
 
-const toArray = item => (
+const toArray = (item) => (
     isArray(item) ? item : [item]
 );
 
@@ -32,8 +32,9 @@ const CountBadge = ({ children, title, primary, secondary }) => {
 
 const Group = ({ group, nestedLevel = 0 }) => {
     const nestedItems = group.groups ?
-        group.groups.map(item => <Group group={item} key={item.id} />)
-        : undefined;
+        group.groups.map((item) =>
+            <Group group={item} key={item.id} />
+        ) : undefined;
 
     const appCount = group.applications ? group.applications.length : null;
     const assetCount = group.assets ? group.assets.length : null;
@@ -63,7 +64,7 @@ export const GroupList = ({ groups, header }) => {
     return (
         <List>
             {header}
-            {groups.map(group =>
+            {groups.map((group) =>
                 <Group group={group} key={group.id} />
             )}
         </List>

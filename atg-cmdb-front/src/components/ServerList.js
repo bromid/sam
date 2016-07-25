@@ -17,7 +17,7 @@ export const Servers = ({ servers, header }) => {
     return (
         <List>
             {header}
-            {servers.map(server => (
+            {servers.map((server) => (
                 <Server key={serverName(server)} server={server} />
             ))}
         </List>
