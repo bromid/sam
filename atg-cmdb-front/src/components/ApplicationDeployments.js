@@ -23,23 +23,18 @@ export const DeploymentList = ({ deployments, header }) => {
     );
 };
 
-const ApplicationDeploymentsContainer = React.createClass({
-    render() {
-        const { isLoading, deployments } = this.props;
+const DeploymentListContainer = ({ isLoading, deployments }) => {
+    if (isLoading) return <LoadingIndicator />;
+    return (
+        <DeploymentList deployments={deployments} />
+    );
+};
 
-        if (isLoading) return <LoadingIndicator />;
-        return (
-            <DeploymentList deployments={deployments} />
-        );
-    },
-});
-
-function mapStateToProps(state) {
+const mapStateToProps = state => {
     const { applicationDeployments, applicationDeploymentsIsPending } = state;
     return {
         deployments: applicationDeployments.items,
         isLoading: applicationDeploymentsIsPending,
     };
-}
-
-export default connect(mapStateToProps)(ApplicationDeploymentsContainer);
+};
+export default connect(mapStateToProps)(DeploymentListContainer);

@@ -9,6 +9,9 @@ import Attributes from './Attributes';
 import ItemView from './ItemView';
 import ApplicationDeployments from './ApplicationDeployments';
 
+const isLoadingNew = (id, application, loading) =>
+  loading && (isEmpty(application) || id !== application.id);
+
 function patchNotification(result, error, isPending) {
     if (isPending) return {};
     if (!isEmpty(error)) {
@@ -29,6 +32,7 @@ function patchNotification(result, error, isPending) {
 }
 
 const ApplicationContainer = React.createClass({
+
     updateDescription(description) {
         const { id, patchApplication, application: { meta } } = this.props;
         patchApplication(id, { description }, {
@@ -45,18 +49,14 @@ const ApplicationContainer = React.createClass({
 
     render() {
         const {
-            isLoading,
-            metaOpen,
-            toggleMeta,
-            patchResult,
-            patchError,
-            patchIsPending,
-            application,
+            id, application, isLoading,
+            metaOpen, toggleMeta,
+            patchResult, patchError, patchIsPending,
         } = this.props;
 
-        if (isLoading && isEmpty(application)) return <LoadingIndicator />;
+        if (isLoadingNew(id, application, isLoading)) return <LoadingIndicator />;
 
-        const { id, name, description = '', group, attributes, meta } = application;
+        const { name, description = '', group, attributes, meta } = application;
 
         const tabs = [
             {
