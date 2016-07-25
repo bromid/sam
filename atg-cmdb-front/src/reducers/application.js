@@ -15,7 +15,7 @@ const applicationPatchResult = createFetchReducers({
 
 const applicationDeployments = createFetchReducers({
     resourceName: 'applicationDeployments',
-    requestKey: Constants.FETCH_APPLICATION_DEPLOYMENTS_REQUEST,
+    requestKey: Constants.FETCH_APPLICATION_REQUEST,
     receiveKey: Constants.FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
 });
 

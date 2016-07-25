@@ -1,31 +1,15 @@
-import createFetchActions from '../createFetchActions';
 import * as Constants from '../constants';
-import * as API from '../api';
 
-export const fetchApplicationList = createFetchActions({
-    apiCall: API.fetchApplicationList,
-    requestKey: Constants.FETCH_APPLICATION_LIST_REQUEST,
-    receiveKey: Constants.FETCH_APPLICATION_LIST_RESPONSE,
+export const fetchApplicationList = () => ({
+    type: Constants.FETCH_APPLICATION_LIST_REQUEST,
 });
 
-export const fetchApplication = createFetchActions({
-    apiCall: API.fetchApplication,
-    requestKey: Constants.FETCH_APPLICATION_REQUEST,
-    receiveKey: Constants.FETCH_APPLICATION_RESPONSE,
+export const fetchApplication = (applicationId) => ({
+    type: Constants.FETCH_APPLICATION_REQUEST,
+    payload: applicationId,
 });
 
-export const fetchApplicationDeployments = createFetchActions({
-    apiCall: API.fetchApplicationDeployments,
-    requestKey: Constants.FETCH_APPLICATION_DEPLOYMENTS_REQUEST,
-    receiveKey: Constants.FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
-});
-
-export const patchApplication = createFetchActions({
-    apiCall: API.patchApplication,
-    requestKey: Constants.PATCH_APPLICATION_REQUEST,
-    receiveKey: Constants.PATCH_APPLICATION_RESPONSE,
-    payloadTransform: (data, response) => ({
-        ...data,
-        etag: response.headers.get('etag'),
-    }),
+export const patchApplication = (id, data, options) => ({
+    type: Constants.PATCH_APPLICATION_REQUEST,
+    payload: { id, data, options },
 });

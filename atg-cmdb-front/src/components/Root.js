@@ -11,6 +11,13 @@ import Server from './Server';
 import Assets from './AssetList';
 import Asset from './Asset';
 import ReleaseNotes from './ReleaseNotes';
+import * as ApplicationActions from '../actions/applicationActions';
+
+const fetchApplication = ({ dispatch }) =>
+    ({ params }) => dispatch(ApplicationActions.fetchApplication(params.id));
+
+const fetchApplicationList = ({ dispatch }) =>
+    () => dispatch(ApplicationActions.fetchApplicationList());
 
 const Root = ({ store }) => (
     <Provider store={store}>
@@ -18,8 +25,8 @@ const Root = ({ store }) => (
             <Route path="/" component={App} >
                 <Route path="group" component={Groups} />
                 <Route path="group/:id" component={Group} />
-                <Route path="application" component={Applications} />
-                <Route path="application/:id" component={Application} />
+                <Route path="application" component={Applications} onEnter={fetchApplicationList(store)} />
+                <Route path="application/:id" component={Application} onEnter={fetchApplication(store)} />
                 <Route path="server" component={Servers} />
                 <Route path="server/:environment" component={Servers} />
                 <Route path="server/:environment/:hostname" component={Server} />

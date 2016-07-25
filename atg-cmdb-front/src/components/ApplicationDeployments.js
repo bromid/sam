@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
-import * as applicationActions from '../actions/applicationActions';
 import LoadingIndicator from './LoadingIndicator';
 import { serverName, serverLink } from './Server';
 
@@ -25,12 +24,6 @@ export const DeploymentList = ({ deployments, header }) => {
 };
 
 const ApplicationDeploymentsContainer = React.createClass({
-
-    componentDidMount() {
-        const { id, fetchApplicationDeployments } = this.props;
-        fetchApplicationDeployments(id);
-    },
-
     render() {
         const { isLoading, deployments } = this.props;
 
@@ -45,9 +38,8 @@ function mapStateToProps(state) {
     const { applicationDeployments, applicationDeploymentsIsPending } = state;
     return {
         deployments: applicationDeployments.items,
-        isLoading: applicationDeploymentsIsPending || applicationDeploymentsIsPending === null,
+        isLoading: applicationDeploymentsIsPending,
     };
 }
 
-const Actions = { ...applicationActions };
-export default connect(mapStateToProps, Actions)(ApplicationDeploymentsContainer);
+export default connect(mapStateToProps)(ApplicationDeploymentsContainer);
