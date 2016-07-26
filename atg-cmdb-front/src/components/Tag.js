@@ -54,8 +54,7 @@ export function TagFilter({ dataSource = [], activeFilter = [], addFilter, remov
                 dataSource={dataSource}
                 dataSourceConfig={{ text: 'name', value: 'name' }}
                 onNewRequest={addFilter}
-                floatingLabelText={<span>Filter Groups</span>}
-                hintText="Enter filter"
+                hintText="Filter..."
             />
             <Tags tags={activeFilter} onDelete={removeFilter} />
         </div>

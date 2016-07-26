@@ -35,39 +35,33 @@ const addParams = (url, params) => {
     return `${url}?${query}`;
 };
 
-function fetchJson(url, params) {
-    return fetch(addParams(url, params), APPLICATION_JSON)
+const fetchJson = (url, params) => (
+    fetch(addParams(url, params), APPLICATION_JSON)
         .then((response) => verifySuccessful(response))
         .then((response) =>
             response.json().then((data) => ({
                 data,
                 response,
             }))
-        );
-}
+        )
+);
 
-function fetchHtml(url, params) {
-    return fetch(addParams(url, params), TEXT_HTML)
+const fetchHtml = (url, params) => (
+    fetch(addParams(url, params), TEXT_HTML)
         .then((response) => verifySuccessful(response))
         .then((response) =>
             response.text().then((data) => ({
                 data,
                 response,
             }))
-        );
-}
+        )
+);
 
-function patchJson(url, apiParams, authenticated) {
-    const { obj, options: { hash, params } = {} } = apiParams;
-    const headers = { ...APPLICATION_JSON.headers };
-    if (hash) {
-        headers['If-Match'] = `"${hash}"`;
-    }
-
-    if (authenticated) {
-        const credential = btoa(`${authenticated.uid}:secret`);
-        headers.Authorization = `Basic ${credential}`;
-    }
+const patchJson = (url, obj, { hash, params } = {}) => {
+    const headers = (hash) ? {
+        ...APPLICATION_JSON.headers,
+        'If-Match': `"${hash}"`,
+    } : APPLICATION_JSON.headers;
 
     const options = {
         headers,
@@ -82,7 +76,28 @@ function patchJson(url, apiParams, authenticated) {
                 response,
             }))
         );
-}
+};
+
+const putJson = (url, obj, { hash, params } = {}) => {
+    const headers = (hash) ? {
+        ...APPLICATION_JSON.headers,
+        'If-Match': `"${hash}"`,
+    } : APPLICATION_JSON.headers;
+
+    const options = {
+        headers,
+        method: 'PUT',
+        body: JSON.stringify(obj),
+    };
+    return fetch(addParams(url, params), options)
+        .then((response) => verifySuccessful(response))
+        .then((response) =>
+            response.json().then((data) => ({
+                data,
+                response,
+            }))
+        );
+};
 
 export const fetchGroupList = (queryParams) =>
     fetchJson('/services/group', queryParams);
@@ -96,6 +111,9 @@ export const fetchGroupTags = () =>
 export const patchGroup = (params, auth) =>
     patchJson(`/services/group/${params.id}`, params, auth);
 
+export const createGroup = (group, options) =>
+    putJson(`/services/group/${group.id}`, group, options);
+
 export const fetchApplicationList = () =>
     fetchJson('/services/application');
 
@@ -108,6 +126,9 @@ export const fetchApplicationDeployments = (applicationId) =>
 export const patchApplication = (params, auth) =>
     patchJson(`/services/application/${params.id}`, params, auth);
 
+export const createApplication = (application, options) =>
+    putJson(`/services/application/${application.id}`, application, options);
+
 export const fetchServerList = (params) => {
     if (params.environment) return fetchJson(`/services/server/${params.environment}`);
     return fetchJson('/services/server');
@@ -119,6 +140,9 @@ export const fetchServer = (params) =>
 export const patchServer = (params, auth) =>
     patchJson(`/services/server/${params.environment}/${params.hostname}`, params, auth);
 
+export const createServer = (server, options) =>
+    putJson(`/services/server/${server.environment}/${server.hostname}`, server, options);
+
 export const fetchAssetList = () =>
     fetchJson('/services/asset');
 
@@ -127,6 +151,9 @@ export const fetchAsset = (assetId) =>
 
 export const patchAsset = (params, auth) =>
     patchJson(`/services/asset/${params.id}`, params, auth);
+
+export const createAsset = (asset, options) =>
+    putJson(`/services/asset/${asset.id}`, asset, options);
 
 export const fetchSearch = (searchQuery) =>
     fetchJson(`/services/search?q=${searchQuery}`);

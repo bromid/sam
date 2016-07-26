@@ -3,9 +3,11 @@ import { Link, withRouter } from 'react-router';
 import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import Badge from 'material-ui/Badge';
+import RaisedButton from 'material-ui/RaisedButton';
+import { flexWrapperStyle } from '../style';
+import { toArray } from '../helpers';
 import LoadingIndicator from './LoadingIndicator';
 import { TagFilter } from './Tag';
-import { toArray } from '../helpers';
 import { fromGroup } from '../reducers';
 
 const CountBadge = ({ children, title, primary, secondary }) => {
@@ -36,7 +38,7 @@ const Group = ({ group, nestedLevel = 0 }) => {
 
     const text = (
         <Link to={`/group/${group.id}`}>
-            {group.name} ({group.id})
+            {group.name}
             {appCount && <CountBadge title="Applications" primary={true}>{appCount}</CountBadge>}
             {assetCount && <CountBadge title="Assets" secondary={true}>{assetCount}</CountBadge>}
         </Link>
@@ -49,7 +51,6 @@ const Group = ({ group, nestedLevel = 0 }) => {
             primaryTogglesNestedList={true}
             nestedItems={nestedItems}
             nestedLevel={nestedLevel}
-            innerDivStyle={{ borderBottom: '1px solid lightgray' }}
         />
     );
 };
@@ -71,12 +72,22 @@ const Groups = ({ groups, groupTags = [], addFilter, removeFilter, activeFilter,
     return (
         <div>
             <h2>Groups</h2>
-            <TagFilter
-                dataSource={groupTags}
-                addFilter={addFilter}
-                removeFilter={removeFilter}
-                activeFilter={activeFilter}
-            />
+            <div style={{ ...flexWrapperStyle, alignItems: 'baseline' }}>
+                <div style={{ flex: 1 }}>
+                    <TagFilter
+                        dataSource={groupTags}
+                        addFilter={addFilter}
+                        removeFilter={removeFilter}
+                        activeFilter={activeFilter}
+                    />
+                </div>
+                <Link to="/group/new">
+                    <RaisedButton
+                        label="Add group"
+                        style={{ borderRadius: 3 }}
+                    />
+                </Link>
+            </div>
             <GroupList
                 groups={groups}
                 isLoading={isLoading}
