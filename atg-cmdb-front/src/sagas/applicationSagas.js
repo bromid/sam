@@ -1,6 +1,7 @@
 import { takeLatest } from 'redux-saga';
-import { take, call, put, fork } from 'redux-saga/effects';
+import { take, fork } from 'redux-saga/effects';
 import * as API from '../api';
+import createFetchSaga from './helpers/createFetchSaga';
 import {
     FETCH_APPLICATION_LIST_REQUEST,
     FETCH_APPLICATION_LIST_RESPONSE,
@@ -11,45 +12,30 @@ import {
     FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
 } from '../constants';
 
-function* fetchApplicationList() {
-    const response = yield call(API.fetchApplicationList);
-    yield put({
-        type: FETCH_APPLICATION_LIST_RESPONSE,
-        payload: response.data,
-    });
-}
+const fetchApplicationList = createFetchSaga({
+    apiCall: API.fetchApplicationList,
+    responseKey: FETCH_APPLICATION_LIST_RESPONSE,
+});
 
-function* fetchApplication(applicationId) {
-    const response = yield call(API.fetchApplication, applicationId);
-    yield put({
-        type: FETCH_APPLICATION_RESPONSE,
-        payload: response.data,
-    });
-}
+const fetchApplication = createFetchSaga({
+    apiCall: API.fetchApplication,
+    responseKey: FETCH_APPLICATION_RESPONSE,
+});
 
-function* patchApplication({ payload: { id, data, options } }) {
-    try {
-        const response = yield call(API.patchApplication, id, data, options);
-        yield put({
-            type: PATCH_APPLICATION_RESPONSE,
-            payload: response.data,
-        });
-    } catch (error) {
-        yield put({
-            type: PATCH_APPLICATION_RESPONSE,
-            error: true,
-            payload: { status: error },
-        });
-    }
-}
+const patchApplication = createFetchSaga({
+    apiCall: API.patchApplication,
+    paramSelector(action) {
+        const { payload: { id, data, options } } = action;
+        return [id, data, options];
+    },
+    responseKey: PATCH_APPLICATION_RESPONSE,
+});
 
-function* fetchApplicationDeployments(applicationId) {
-    const response = yield call(API.fetchApplicationDeployments, applicationId);
-    yield put({
-        type: FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
-        payload: response.data,
-    });
-}
+const fetchApplicationDeployments = createFetchSaga({
+    apiCall: API.fetchApplicationDeployments,
+    responseKey: FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
+});
+
 
 function* patchApplicationResponse(action) {
     if (!action.error) {
