@@ -54,7 +54,7 @@ function ResultsTable({ header, tableHeaders, rows }) {
     );
 }
 
-function GroupsTable({ groups, handleCloseModal }) {
+function GroupsTable({ groups = {}, handleCloseModal }) {
     const tableHeaders = ['Name', 'Description', 'Tags'];
     const rows = groups.items && groups.items.map((group) => [
         <Link onClick={handleCloseModal} to={`/group/${group.id}`}>
@@ -66,7 +66,7 @@ function GroupsTable({ groups, handleCloseModal }) {
     return <ResultsTable header="Groups" tableHeaders={tableHeaders} rows={rows} />;
 }
 
-function ApplicationsTable({ applications, handleCloseModal }) {
+function ApplicationsTable({ applications = {}, handleCloseModal }) {
     const tableHeaders = ['Name', 'Description'];
     const rows = applications.items && applications.items.map((application) => [
         <Link onClick={handleCloseModal} to={`/application/${application.id}`}>
@@ -77,7 +77,7 @@ function ApplicationsTable({ applications, handleCloseModal }) {
     return <ResultsTable header="Applications" tableHeaders={tableHeaders} rows={rows} />;
 }
 
-function ServersTable({ servers, handleCloseModal }) {
+function ServersTable({ servers = {}, handleCloseModal }) {
     const tableHeaders = ['Host', 'FQDN', 'Description'];
     const rows = servers.items && servers.items.map((server) => [
         <Link
@@ -92,7 +92,7 @@ function ServersTable({ servers, handleCloseModal }) {
     return <ResultsTable header="Servers" tableHeaders={tableHeaders} rows={rows} />;
 }
 
-function AssetsTable({ assets, handleCloseModal }) {
+function AssetsTable({ assets = {}, handleCloseModal }) {
     const tableHeaders = ['Name', 'Description'];
     const rows = assets.items && assets.items.map((asset) => [
         <Link onClick={handleCloseModal} to={`/asset/${asset.id}`}>
@@ -103,7 +103,7 @@ function AssetsTable({ assets, handleCloseModal }) {
     return <ResultsTable header="Assets" tableHeaders={tableHeaders} rows={rows} />;
 }
 
-function SearchResults({ searchResults, isLoading, handleCloseModal }) {
+function SearchResults({ searchResults = {}, isLoading, handleCloseModal }) {
     const { groups, applications, servers, assets } = searchResults;
     if (isLoading) return <LoadingIndicator />;
     return (
@@ -117,8 +117,7 @@ function SearchResults({ searchResults, isLoading, handleCloseModal }) {
 }
 
 export default function SearchResultDialog(props) {
-    const { searchResults, searchResultsIsLoading, modalOpen, handleCloseModal } = props;
-    const isLoading = searchResultsIsLoading || isEmpty(searchResults);
+    const { isLoading, searchResults, modalOpen, handleCloseModal } = props;
 
     const actions = [
         <RaisedButton

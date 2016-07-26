@@ -10,7 +10,7 @@ export const fetchApplicationList = () => ({
 
 export const fetchApplication = (applicationId) => ({
     type: FETCH_APPLICATION_REQUEST,
-    payload: applicationId,
+    payload: { id: applicationId },
 });
 
 export const patchApplication = (id, data, options) => ({

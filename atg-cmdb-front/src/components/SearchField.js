@@ -122,7 +122,7 @@ const SearchField = React.createClass({
                 </form>
                 <SearchResultDialog
                     searchResults={searchResults}
-                    searchResultsIsLoading={searchResultsIsLoading}
+                    isLoading={searchResultsIsLoading}
                     modalOpen={modalOpen}
                     handleCloseModal={this.handleCloseModal}
                 />
@@ -130,5 +130,4 @@ const SearchField = React.createClass({
         );
     },
 });
-
 export default SearchField;

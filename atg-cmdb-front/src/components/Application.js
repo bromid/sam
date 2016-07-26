@@ -9,9 +9,6 @@ import Attributes from './Attributes';
 import ItemView from './ItemView';
 import ApplicationDeployments from './ApplicationDeployments';
 
-const isLoadingNew = (id, application, loading) =>
-  loading && (isEmpty(application) || id !== application.id);
-
 function patchNotification(result, error, isPending) {
     if (isPending) return {};
     if (!isEmpty(error)) {
@@ -34,14 +31,14 @@ function patchNotification(result, error, isPending) {
 const ApplicationContainer = React.createClass({
 
     updateDescription(description) {
-        const { id, patchApplication, application: { meta } } = this.props;
+        const { patchApplication, application: { id, meta } } = this.props;
         patchApplication(id, { description }, {
             hash: meta.hash,
         });
     },
 
     updateName(name) {
-        const { id, patchApplication, application: { meta } } = this.props;
+        const { patchApplication, application: { id, meta } } = this.props;
         patchApplication(id, { name }, {
             hash: meta.hash,
         });
@@ -49,14 +46,14 @@ const ApplicationContainer = React.createClass({
 
     render() {
         const {
-            id, application, isLoading,
+            application, isLoading,
             metaOpen, toggleMeta,
             patchResult, patchError, patchIsPending,
         } = this.props;
 
-        if (isLoadingNew(id, application, isLoading)) return <LoadingIndicator />;
+        if (isLoading && isEmpty(application)) return <LoadingIndicator />;
 
-        const { name, description = '', group, attributes, meta } = application;
+        const { id, name, description = '', group, attributes, meta } = application;
 
         const tabs = [
             {
@@ -87,20 +84,19 @@ const ApplicationContainer = React.createClass({
                 metaOpen={metaOpen}
                 toggleMeta={toggleMeta}
                 notification={() => patchNotification(patchResult, patchError, patchIsPending)}
+                isLoading={isLoading}
             />
         );
     },
 });
 
-function mapStateToProps(state, props) {
+const mapStateToProps = (state) => {
     const {
         metaOpen,
         application, applicationError, applicationIsPending,
         applicationPatchResult, applicationPatchResultError, applicationPatchResultIsPending,
     } = state;
-    const { id } = props.params;
     return {
-        id,
         metaOpen,
         application,
         fetchError: applicationError,

@@ -10,7 +10,7 @@ import { flexWrapperStyle } from '../style';
 const TopBarContainer = (props) => {
     const {
         authenticated, login, logout, openMenu, mdPlus,
-        fetchSearch, searchResults, searchResultsIsPending,
+        fetchSearch, searchResults, searchResultsIsLoading,
     } = props;
 
     const onLogout = (event) => {
@@ -36,7 +36,7 @@ const TopBarContainer = (props) => {
                 <SearchField
                     fetchSearch={fetchSearch}
                     searchResults={searchResults}
-                    searchResultsIsPending={searchResultsIsPending}
+                    searchResultsIsLoading={searchResultsIsLoading}
                 />
             </div>
             {(!authenticated) &&
@@ -64,7 +64,7 @@ const TopBarContainer = (props) => {
 const mapStateToProps = (state) => ({
     authenticated: state.authenticated,
     searchResults: state.searchResults,
-    searchResultsIsPending: state.searchResultsIsPending,
+    searchResultsIsLoading: state.searchResultsIsPending,
 });
 
 const Actions = {
