@@ -8,7 +8,7 @@ import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
 
-function patchNotification(result, error, isPending) {
+const patchNotification = (result, error, isPending) => {
     if (isPending) return {};
     if (!isEmpty(error)) {
         return {
@@ -25,7 +25,7 @@ function patchNotification(result, error, isPending) {
         };
     }
     return {};
-}
+};
 
 const AssetContainer = React.createClass({
 
@@ -96,7 +96,7 @@ const mapStateToProps = (state) => {
         patchIsPending: assetPatchResultIsPending,
         isLoading: assetIsPending,
     };
-}
+};
 
 const Actions = {
     patchAsset: assetActions.patchAsset,

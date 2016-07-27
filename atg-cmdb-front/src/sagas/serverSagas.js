@@ -14,26 +14,16 @@ import {
 const fetchServerList = createFetchSaga({
     apiCall: API.fetchServerList,
     responseKey: FETCH_SERVER_LIST_RESPONSE,
-    paramSelector(action) {
-        return action.payload;
-    },
 });
 
 const fetchServer = createFetchSaga({
     apiCall: API.fetchServer,
     responseKey: FETCH_SERVER_RESPONSE,
-    paramSelector(action) {
-        return action.payload;
-    },
 });
 
 const patchServer = createFetchSaga({
     apiCall: API.patchServer,
     responseKey: PATCH_SERVER_RESPONSE,
-    paramSelector(action) {
-        const { payload: { params, data, options } } = action;
-        return [params, data, options];
-    },
 });
 
 function* patchServerResponse(action) {

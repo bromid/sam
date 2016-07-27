@@ -5,8 +5,6 @@ const keyRequired = (key) => { throw new Error(`${key} must be specified!`); };
 
 const getAPIParams = (paramSelector, params) => {
     const paramsAsArray = [].concat(params);
-    if (!paramSelector) return paramsAsArray;
-
     return [].concat(paramSelector(...paramsAsArray));
 };
 
@@ -16,7 +14,7 @@ export default function createFetchSaga(options) {
         responseKey = keyRequired('responseKey'),
         payloadTransform = identity,
         errorTransform = identity,
-        paramSelector,
+        paramSelector = (action) => action.payload,
     } = options;
 
     return function* fetchSaga(...params) {

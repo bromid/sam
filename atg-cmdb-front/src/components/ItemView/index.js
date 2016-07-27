@@ -104,7 +104,7 @@ const ItemView = React.createClass({
 
     render() {
         const {
-            isLoading = false, notification, tabs,
+            isLoading, notification, tabs,
             tags, onTagDelete,
             meta, metaOpen, toggleMeta,
         } = this.props;

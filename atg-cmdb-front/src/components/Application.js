@@ -9,7 +9,7 @@ import Attributes from './Attributes';
 import ItemView from './ItemView';
 import ApplicationDeployments from './ApplicationDeployments';
 
-function patchNotification(result, error, isPending) {
+const patchNotification = (result, error, isPending) => {
     if (isPending) return {};
     if (!isEmpty(error)) {
         return {
@@ -26,22 +26,18 @@ function patchNotification(result, error, isPending) {
         };
     }
     return {};
-}
+};
 
 const ApplicationContainer = React.createClass({
 
     updateDescription(description) {
         const { patchApplication, application: { id, meta } } = this.props;
-        patchApplication(id, { description }, {
-            hash: meta.hash,
-        });
+        patchApplication(id, { description }, { hash: meta.hash });
     },
 
     updateName(name) {
         const { patchApplication, application: { id, meta } } = this.props;
-        patchApplication(id, { name }, {
-            hash: meta.hash,
-        });
+        patchApplication(id, { name }, { hash: meta.hash });
     },
 
     render() {
@@ -105,7 +101,7 @@ const mapStateToProps = (state) => {
         patchIsPending: applicationPatchResultIsPending,
         isLoading: applicationIsPending,
     };
-}
+};
 
 const Actions = {
     patchApplication: applicationActions.patchApplication,

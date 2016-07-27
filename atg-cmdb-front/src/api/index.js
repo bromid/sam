@@ -33,7 +33,7 @@ const addParams = (url, params) => {
     if (!isObject(params)) return url;
 
     const query = Object.keys(params)
-        .filter((name) => params[name])
+        .filter((name) => (params[name] !== undefined))
         .map((name) => `${name}=${params[name]}`)
         .join('&');
     return `${url}?${query}`;

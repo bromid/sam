@@ -27,10 +27,6 @@ const fetchAsset = createFetchSaga({
 const patchAsset = createFetchSaga({
     apiCall: API.patchAsset,
     responseKey: PATCH_ASSET_RESPONSE,
-    paramSelector(action) {
-        const { payload: { id, data, options } } = action;
-        return [id, data, options];
-    },
 });
 
 function* patchAssetResponse(action) {

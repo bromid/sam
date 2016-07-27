@@ -10,9 +10,6 @@ import {
 const fetchSearch = createFetchSaga({
     apiCall: API.fetchSearch,
     responseKey: FETCH_SEARCH_RESPONSE,
-    paramSelector(action) {
-        return action.payload;
-    },
 });
 
 /** Watch-sagas start **/

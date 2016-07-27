@@ -28,10 +28,6 @@ const fetchApplication = createFetchSaga({
 const patchApplication = createFetchSaga({
     apiCall: API.patchApplication,
     responseKey: PATCH_APPLICATION_RESPONSE,
-    paramSelector(action) {
-        const { payload: { id, data, options } } = action;
-        return [id, data, options];
-    },
 });
 
 const fetchApplicationDeployments = createFetchSaga({

@@ -90,16 +90,12 @@ const GroupContainer = React.createClass({
 
     updateName(name) {
         const { patchGroup, group: { id, meta } } = this.props;
-        patchGroup(id, { name }, {
-            hash: meta.hash,
-        });
+        patchGroup(id, { name }, { hash: meta.hash });
     },
 
     updateDescription(description) {
         const { patchGroup, group: { id, meta } } = this.props;
-        patchGroup(id, { description }, {
-            hash: meta.hash,
-        });
+        patchGroup(id, { description }, { hash: meta.hash });
     },
 
     render() {

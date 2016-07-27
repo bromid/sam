@@ -13,7 +13,7 @@ export const fetchApplication = (applicationId) => ({
     payload: { id: applicationId },
 });
 
-export const patchApplication = (id, data, options) => ({
+export const patchApplication = (applicationId, application, options) => ({
     type: PATCH_APPLICATION_REQUEST,
-    payload: { id, data, options },
+    payload: [applicationId, application, options],
 });

@@ -16,9 +16,6 @@ import {
 const fetchGroupList = createFetchSaga({
     apiCall: API.fetchGroupList,
     responseKey: FETCH_GROUP_LIST_RESPONSE,
-    paramSelector(action) {
-        return action.payload;
-    },
 });
 
 const fetchGroup = createFetchSaga({
@@ -37,10 +34,6 @@ const fetchGroupTags = createFetchSaga({
 const patchGroup = createFetchSaga({
     apiCall: API.patchGroup,
     responseKey: PATCH_GROUP_RESPONSE,
-    paramSelector(action) {
-        const { payload: { id, data, options } } = action;
-        return [id, data, options];
-    },
 });
 
 function* patchGroupResponse(action) {
