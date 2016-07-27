@@ -4,6 +4,7 @@ import AutoComplete from 'material-ui/AutoComplete';
 import isObject from 'lodash/isObject';
 import isFunction from 'lodash/isFunction';
 import { flexWrapperStyle } from '../style';
+import { toArray } from '../helpers';
 
 const tagStyle = {
     margin: '0.5em 0.5em 0 0',
@@ -17,7 +18,7 @@ function getTagName(tag) {
 export function Tags({ tags, onDelete, getName = getTagName }) {
     if (!tags) return null;
 
-    tags = [].concat(tags); // eslint-disable-line no-param-reassign
+    tags = toArray(tags); // eslint-disable-line no-param-reassign
 
     return (
         <div style={{ ...flexWrapperStyle, alignItems: 'baseline' }}>

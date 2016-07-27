@@ -3,13 +3,9 @@ import { Link, withRouter } from 'react-router';
 import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import Badge from 'material-ui/Badge';
-import isArray from 'lodash/isArray';
 import LoadingIndicator from './LoadingIndicator';
 import { TagFilter } from './Tag';
-
-const toArray = (item) => (
-    isArray(item) ? item : [item]
-);
+import { toArray } from '../helpers';
 
 const CountBadge = ({ children, title, primary, secondary }) => {
     const style = { padding: '12px' };
