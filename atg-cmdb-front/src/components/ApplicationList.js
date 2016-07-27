@@ -24,9 +24,7 @@ export const ApplicationList = ({ applications, header }) => {
 
 const ApplicationListContainer = ({ isLoading, applications }) => {
     if (isLoading) return <LoadingIndicator />;
-    return (
-        <ApplicationList applications={applications} header={<h2>Applications</h2>} />
-    );
+    return <ApplicationList applications={applications} header={<h2>Applications</h2>} />;
 };
 
 const mapStateToProps = (state) => {

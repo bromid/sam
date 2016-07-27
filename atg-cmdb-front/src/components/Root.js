@@ -13,74 +13,109 @@ import Asset from './Asset';
 import ReleaseNotes from './ReleaseNotes';
 import * as ApplicationActions from '../actions/applicationActions';
 import * as AssetActions from '../actions/assetActions';
+import * as GroupActions from '../actions/groupActions';
+import * as ServerActions from '../actions/serverActions';
+import * as InfoActions from '../actions/infoActions';
 
-const fetchApplicationList = ({ dispatch }) =>
-    () => dispatch(ApplicationActions.fetchApplicationList());
+const Root = ({ store }) => {
+    const initApp = () =>
+        store.dispatch(InfoActions.fetchInfo());
 
-const fetchApplication = ({ dispatch }) =>
-    ({ params }) => dispatch(ApplicationActions.fetchApplication(params.id));
+    const fetchGroupList = ({ location: { query } }) => {
+        store.dispatch(GroupActions.fetchGroupList(query.tags));
+        store.dispatch(GroupActions.fetchGroupTags());
+    };
 
-const fetchAssetList = ({ dispatch }) =>
-    () => dispatch(AssetActions.fetchAssetList());
+    const fetchGroup = ({ params }) =>
+        store.dispatch(GroupActions.fetchGroup(params.id));
 
-const fetchAsset = ({ dispatch }) =>
-    ({ params }) => dispatch(AssetActions.fetchAsset(params.id));
+    const fetchApplicationList = () =>
+        store.dispatch(ApplicationActions.fetchApplicationList());
 
-const Root = ({ store }) => (
-    <Provider store={store}>
-        <Router history={browserHistory}>
-            <Route path="/" component={App} >
+    const fetchApplication = ({ params }) =>
+        store.dispatch(ApplicationActions.fetchApplication(params.id));
+
+    const fetchServerList = ({ params }) =>
+        store.dispatch(ServerActions.fetchServerList(params.environment));
+
+    const fetchServer = ({ params }) =>
+        store.dispatch(ServerActions.fetchServer(params.hostname, params.environment));
+
+    const fetchAssetList = () =>
+        store.dispatch(AssetActions.fetchAssetList());
+
+    const fetchAsset = ({ params }) =>
+        store.dispatch(AssetActions.fetchAsset(params.id));
+
+    const fetchReleaseNotes = () =>
+        store.dispatch(InfoActions.fetchReleaseNotes());
+
+    return (
+        <Provider store={store}>
+            <Router history={browserHistory}>
                 <Route
-                    path="group"
-                    component={Groups}
-                />
-                <Route
-                    path="group/:id"
-                    component={Group}
-                />
-                <Route
-                    path="application"
-                    component={Applications}
-                    onEnter={fetchApplicationList(store)}
-                />
-                <Route
-                    path="application/:id"
-                    component={Application}
-                    onEnter={fetchApplication(store)}
-                />
-                <Route
-                    path="server"
-                    component={Servers}
-                />
-                <Route
-                    path="server/:environment"
-                    component={Servers}
-                />
-                <Route
-                    path="server/:environment/:hostname"
-                    component={Server}
-                />
-                <Route
-                    path="asset"
-                    component={Assets}
-                    onEnter={fetchAssetList(store)}
-                />
-                <Route
-                    path="asset/:id"
-                    component={Asset}
-                    onEnter={fetchAsset(store)}
-                />
-                <Route
-                    path="release-notes"
-                    component={ReleaseNotes}
-                />
-            </Route>
-        </Router>
-    </Provider>
-);
+                    path="/"
+                    component={App}
+                    onEnter={initApp}
+                >
+                    <Route
+                        path="group"
+                        component={Groups}
+                        onEnter={fetchGroupList}
+                        onChange={(state, nextState) => fetchGroupList(nextState)}
+                    />
+                    <Route
+                        path="group/:id"
+                        component={Group}
+                        onEnter={fetchGroup}
+                    />
+                    <Route
+                        path="application"
+                        component={Applications}
+                        onEnter={fetchApplicationList}
+                    />
+                    <Route
+                        path="application/:id"
+                        component={Application}
+                        onEnter={fetchApplication}
+                    />
+                    <Route
+                        path="server"
+                        component={Servers}
+                        onEnter={fetchServerList}
+                    />
+                    <Route
+                        path="server/:environment"
+                        component={Servers}
+                        onEnter={fetchServerList}
+                    />
+                    <Route
+                        path="server/:environment/:hostname"
+                        component={Server}
+                        onEnter={fetchServer}
+                    />
+                    <Route
+                        path="asset"
+                        component={Assets}
+                        onEnter={fetchAssetList}
+                    />
+                    <Route
+                        path="asset/:id"
+                        component={Asset}
+                        onEnter={fetchAsset}
+                    />
+                    <Route
+                        path="release-notes"
+                        component={ReleaseNotes}
+                        onEnter={fetchReleaseNotes}
+                    />
+                </Route>
+            </Router>
+        </Provider>
+    );
+};
 
 Root.propTypes = {
     store: PropTypes.object.isRequired,
 };
-
 export default Root;

@@ -1,25 +1,20 @@
-import createFetchActions from '../createFetchActions';
-import * as Constants from '../constants';
-import * as API from '../api';
+import {
+    FETCH_SERVER_LIST_REQUEST,
+    FETCH_SERVER_REQUEST,
+    PATCH_SERVER_REQUEST,
+} from '../constants';
 
-export const fetchServerList = createFetchActions({
-    apiCall: API.fetchServerList,
-    requestKey: Constants.FETCH_SERVER_LIST_REQUEST,
-    receiveKey: Constants.FETCH_SERVER_LIST_RESPONSE,
+export const fetchServerList = (environment) => ({
+    type: FETCH_SERVER_LIST_REQUEST,
+    payload: { environment },
 });
 
-export const fetchServer = createFetchActions({
-    apiCall: API.fetchServer,
-    requestKey: Constants.FETCH_SERVER_REQUEST,
-    receiveKey: Constants.FETCH_SERVER_RESPONSE,
+export const fetchServer = (hostname, environment) => ({
+    type: FETCH_SERVER_REQUEST,
+    payload: { hostname, environment },
 });
 
-export const patchServer = createFetchActions({
-    apiCall: API.patchServer,
-    requestKey: Constants.PATCH_SERVER_REQUEST,
-    receiveKey: Constants.PATCH_SERVER_RESPONSE,
-    payloadTransform: (data, response) => ({
-        ...data,
-        etag: response.headers.get('etag'),
-    }),
+export const patchServer = (hostname, environment, server, options) => ({
+    type: PATCH_SERVER_REQUEST,
+    payload: [{ hostname, environment }, server, options],
 });

@@ -8,10 +8,7 @@ import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
 
-const isLoadingNew = (id, asset, loading) =>
-    loading && (isEmpty(asset) || id !== asset.id);
-
-function patchNotification(result, error, isPending) {
+const patchNotification = (result, error, isPending) => {
     if (isPending) return {};
     if (!isEmpty(error)) {
         return {
@@ -28,32 +25,28 @@ function patchNotification(result, error, isPending) {
         };
     }
     return {};
-}
+};
 
 const AssetContainer = React.createClass({
 
     updateName(name) {
-        const { id, patchAsset, asset: { meta } } = this.props;
-        patchAsset(id, { name }, {
-            hash: meta.hash,
-        });
+        const { patchAsset, asset: { id, meta } } = this.props;
+        patchAsset(id, { name }, { hash: meta.hash });
     },
 
     updateDescription(description) {
-        const { id, patchAsset, asset: { meta } } = this.props;
-        patchAsset(id, { description }, {
-            hash: meta.hash,
-        });
+        const { patchAsset, asset: { id, meta } } = this.props;
+        patchAsset(id, { description }, { hash: meta.hash });
     },
 
     render() {
         const {
-            id, asset, isLoading,
+            asset, isLoading,
             metaOpen, toggleMeta,
             patchResult, patchError, patchIsPending,
         } = this.props;
 
-        if (isLoadingNew(id, asset, isLoading)) return <LoadingIndicator />;
+        if (isLoading && isEmpty(asset)) return <LoadingIndicator />;
 
         const { name, description = '', group, attributes, meta } = asset;
 
@@ -82,20 +75,19 @@ const AssetContainer = React.createClass({
                 toggleMeta={toggleMeta}
                 tabs={tabs}
                 notification={() => patchNotification(patchResult, patchError, patchIsPending)}
+                isLoading={isLoading}
             />
         );
     },
 });
 
-function mapStateToProps(state, props) {
+const mapStateToProps = (state) => {
     const {
         metaOpen,
         asset, assetError, assetIsPending,
         assetPatchResult, assetPatchResultError, assetPatchResultIsPending,
     } = state;
-    const { id } = props.params;
     return {
-        id,
         metaOpen,
         asset,
         fetchError: assetError,
@@ -104,7 +96,7 @@ function mapStateToProps(state, props) {
         patchIsPending: assetPatchResultIsPending,
         isLoading: assetIsPending,
     };
-}
+};
 
 const Actions = {
     patchAsset: assetActions.patchAsset,

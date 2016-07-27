@@ -85,53 +85,22 @@ const DeploymentList = ({ deployments }) => {
 
 const ServerContainer = React.createClass({
 
-    getInitialState() {
-        return { initiated: false };
-    },
-
-    componentDidMount() {
-        const { environment, hostname, fetchServer } = this.props;
-        fetchServer({ environment, hostname });
-    },
-
-    componentWillReceiveProps(newProps) {
-        const { environment, hostname, patchResult, fetchServer } = this.props;
-        const {
-            environment: newEnvironment,
-            hostname: newHostname,
-            patchResult: newPatchResult,
-        } = newProps;
-
-        const isDifferentEtag = newPatchResult.etag !== patchResult.etag;
-        const isUpdatedEtag = !isEmpty(newPatchResult) && isDifferentEtag;
-        if (newEnvironment !== environment || newHostname !== hostname || isUpdatedEtag) {
-            this.setState({ initiated: true });
-            fetchServer({
-                environment: newEnvironment,
-                hostname: newHostname,
-            });
-        }
-    },
-
     updateDescription(description) {
-        const { environment, hostname, patchServer, server: { meta } } = this.props;
-        patchServer({ environment, hostname }, { description }, {
-            hash: meta.hash,
-        });
+        const { patchServer, server: { hostname, environment, meta } } = this.props;
+        patchServer(hostname, environment, { description }, { hash: meta.hash });
     },
 
     render() {
         const {
-            isLoading,
+            isLoading, server,
             metaOpen, toggleMeta,
             patchResult, patchError, patchIsPending,
-            server: {
-                hostname, environment, description = '',
-                meta, network, os, deployments, attributes,
-            },
         } = this.props;
-        if (isLoading && !this.state.initiated) return <LoadingIndicator />;
-        if (!hostname) return <p>No result</p>;
+
+        if (isLoading && isEmpty(server)) return <LoadingIndicator />;
+        if (!server.hostname) return <p>No result</p>;
+
+        const { description = '', meta, network, os, deployments, attributes } = server;
 
         const tabs = [
             {
@@ -154,7 +123,7 @@ const ServerContainer = React.createClass({
         ];
         return (
             <ItemView
-                headline={`${hostname}@${environment}`}
+                headline={serverName(server)}
                 description={description}
                 updateDescription={this.updateDescription}
                 meta={meta}
@@ -162,30 +131,31 @@ const ServerContainer = React.createClass({
                 toggleMeta={toggleMeta}
                 tabs={tabs}
                 notification={() => patchNotification(patchResult, patchError, patchIsPending)}
+                isLoading={isLoading}
             />
         );
     },
 });
 
-function mapStateToProps(state, props) {
+const mapStateToProps = (state) => {
     const {
         metaOpen,
         server, serverError, serverIsPending,
         serverPatchResult, serverPatchResultError, serverPatchResultIsPending,
     } = state;
-    const { environment, hostname } = props.params;
     return {
-        environment,
-        hostname,
         metaOpen,
         server,
         fetchError: serverError,
         patchResult: serverPatchResult,
         patchError: serverPatchResultError,
         patchIsPending: serverPatchResultIsPending,
-        isLoading: serverIsPending || serverIsPending === null,
+        isLoading: serverIsPending,
     };
-}
+};
 
-const Actions = { ...serverActions, ...metaActions };
+const Actions = {
+    patchServer: serverActions.patchServer,
+    toggleMeta: metaActions.toggleMeta,
+};
 export default connect(mapStateToProps, Actions)(ServerContainer);

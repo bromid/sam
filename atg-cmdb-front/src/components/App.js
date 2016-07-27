@@ -69,6 +69,6 @@ const mapStateToProps = (state, { mdPlus }) => ({
 const Actions = {
     setMenuOpen: menuActions.setMenuOpen,
     openMenu: menuActions.openMenu,
-    closeMenu: menuActions.closeMenu(),
+    closeMenu: menuActions.closeMenu,
 };
 export default matchMedia(connect(mapStateToProps, Actions)(App));

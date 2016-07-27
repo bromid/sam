@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import isFunction from 'lodash/isFunction';
 import { Tabs, Tab } from 'material-ui/Tabs';
+import LoadingIndicator from '../LoadingIndicator';
 import { containerStyle, flexWrapperStyle } from '../../style';
 import Notifier from '../Notifier';
 import Meta from '../Meta';
@@ -21,6 +22,7 @@ const ItemView = React.createClass({
         tags: PropTypes.array,
         onTagDelete: PropTypes.func,
         notification: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
+        isLoading: PropTypes.bool,
     },
 
     getInitialState() {
@@ -102,7 +104,7 @@ const ItemView = React.createClass({
 
     render() {
         const {
-            notification, tabs,
+            isLoading, notification, tabs,
             tags, onTagDelete,
             meta, metaOpen, toggleMeta,
         } = this.props;
@@ -114,6 +116,7 @@ const ItemView = React.createClass({
 
         return (
             <div>
+                {isLoading && <LoadingIndicator />}
                 <PersistableHeadline
                     headline={headline}
                     editActive={headlineEditActive}

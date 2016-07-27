@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
-import * as Actions from '../actions/assetActions';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
 
@@ -23,18 +22,10 @@ export const AssetList = ({ assets, header }) => {
     );
 };
 
-const AssetListContainer = React.createClass({
-
-    componentDidMount() {
-        this.props.fetchAssetList();
-    },
-
-    render() {
-        const { assets, isLoading } = this.props;
-        if (isLoading) return <LoadingIndicator />;
-        return <AssetList assets={assets} header={<h2>Assets</h2>} />;
-    },
-});
+const AssetListContainer = ({ assets, isLoading }) => {
+    if (isLoading) return <LoadingIndicator />;
+    return <AssetList assets={assets} header={<h2>Assets</h2>} />;
+};
 
 function mapStateToProps(state) {
     const { assetList, assetListIsPending } = state;
@@ -43,4 +34,4 @@ function mapStateToProps(state) {
         isLoading: assetListIsPending || assetListIsPending === null,
     };
 }
-export default connect(mapStateToProps, Actions)(AssetListContainer);
+export default connect(mapStateToProps)(AssetListContainer);

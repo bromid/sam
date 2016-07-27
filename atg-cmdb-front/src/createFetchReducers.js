@@ -7,7 +7,7 @@ export default function createFetchReducers(options) {
         receiveKey = keyRequired('receiveKey'),
     } = options;
 
-    function resourceIsPending(state = null, action) {
+    function resourceIsPending(state = false, action) {
         switch (action.type) {
             case requestKey:
                 return true;

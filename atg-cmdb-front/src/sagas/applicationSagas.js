@@ -1,5 +1,5 @@
 import { takeLatest } from 'redux-saga';
-import { take, fork } from 'redux-saga/effects';
+import { fork } from 'redux-saga/effects';
 import * as API from '../api';
 import createFetchSaga from './helpers/createFetchSaga';
 import {
@@ -20,27 +20,33 @@ const fetchApplicationList = createFetchSaga({
 const fetchApplication = createFetchSaga({
     apiCall: API.fetchApplication,
     responseKey: FETCH_APPLICATION_RESPONSE,
+    paramSelector(action) {
+        return action.payload.id;
+    },
 });
 
 const patchApplication = createFetchSaga({
     apiCall: API.patchApplication,
-    paramSelector(action) {
-        const { payload: { id, data, options } } = action;
-        return [id, data, options];
-    },
     responseKey: PATCH_APPLICATION_RESPONSE,
 });
 
 const fetchApplicationDeployments = createFetchSaga({
     apiCall: API.fetchApplicationDeployments,
     responseKey: FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
+    paramSelector(action) {
+        return action.payload.id;
+    },
 });
-
 
 function* patchApplicationResponse(action) {
     if (!action.error) {
-        yield fork(fetchApplication, action.payload.id);
+        yield fork(fetchApplication, action);
     }
+}
+
+function* fetchApplicationFork(action) {
+    yield fork(fetchApplication, action);
+    yield fork(fetchApplicationDeployments, action);
 }
 
 /** Watch-sagas start **/
@@ -50,11 +56,7 @@ export function* watchFetchApplicationList() {
 }
 
 export function* watchFetchApplication() {
-    while (true) { // eslint-disable-line no-constant-condition
-        const action = yield take(FETCH_APPLICATION_REQUEST);
-        yield fork(fetchApplication, action.payload);
-        yield fork(fetchApplicationDeployments, action.payload);
-    }
+    yield* takeLatest(FETCH_APPLICATION_REQUEST, fetchApplicationFork);
 }
 
 export function* watchPatchApplicationRequest() {

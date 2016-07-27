@@ -33,9 +33,9 @@ const addParams = (url, params) => {
     if (!isObject(params)) return url;
 
     const query = Object.keys(params)
+        .filter((name) => (params[name] !== undefined))
         .map((name) => `${name}=${params[name]}`)
         .join('&');
-
     return `${url}?${query}`;
 };
 
@@ -106,8 +106,10 @@ export const fetchApplicationDeployments = (applicationId) =>
 export const patchApplication = (applicationId, application, options) =>
     patchJson(`/services/application/${applicationId}`, application, options);
 
-export const fetchServerList = () =>
-    fetchJson('/services/server');
+export const fetchServerList = (params) => {
+    if (params.environment) return fetchJson(`/services/server/${params.environment}`);
+    return fetchJson('/services/server');
+};
 
 export const fetchServer = (params) =>
     fetchJson(`/services/server/${params.environment}/${params.hostname}`);

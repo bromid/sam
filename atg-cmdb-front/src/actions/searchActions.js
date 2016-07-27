@@ -1,9 +1,6 @@
-import createFetchActions from '../createFetchActions';
-import * as Constants from '../constants';
-import * as API from '../api';
+import { FETCH_SEARCH_REQUEST } from '../constants';
 
-export const fetchSearch = createFetchActions({
-    apiCall: API.fetchSearch,
-    requestKey: Constants.FETCH_SEARCH_REQUEST,
-    receiveKey: Constants.FETCH_SEARCH_RESPONSE,
+export const fetchSearch = (searchString) => ({
+    type: FETCH_SEARCH_REQUEST,
+    payload: searchString,
 });

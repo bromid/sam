@@ -4,8 +4,6 @@ import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import Badge from 'material-ui/Badge';
 import isArray from 'lodash/isArray';
-import isEqual from 'lodash/isEqual';
-import * as Actions from '../actions/groupActions';
 import LoadingIndicator from './LoadingIndicator';
 import { TagFilter } from './Tag';
 
@@ -91,21 +89,6 @@ const Groups = ({ groups, groupTags = [], addFilter, removeFilter, activeFilter,
 };
 
 const GroupsContainer = React.createClass({
-    getInitialState() {
-        return {};
-    },
-
-    componentDidMount() {
-        this.fetchGroupList();
-    },
-
-    componentWillReceiveProps(nextProps) {
-        const { activeFilter } = this.props;
-
-        if (!isEqual(nextProps.activeFilter, activeFilter, { deep: true })) {
-            this.fetchGroupList(nextProps);
-        }
-    },
 
     setFilter(filterQuery) {
         const { router, location } = this.props;
@@ -133,14 +116,6 @@ const GroupsContainer = React.createClass({
         this.setFilter(updatedFilter.length ? { tags: updatedFilter } : null);
     },
 
-    fetchGroupList(props = this.props) {
-        const { activeFilter, fetchGroupList, fetchGroupTags } = props;
-
-        const tags = activeFilter ? { tags: activeFilter.join(',') } : null;
-        fetchGroupList(tags);
-        fetchGroupTags();
-    },
-
     render() {
         const { isLoading, groups, groupTags, activeFilter } = this.props;
 
@@ -157,7 +132,7 @@ const GroupsContainer = React.createClass({
     },
 });
 
-function mapStateToProps(state, { location: { query } }) {
+const mapStateToProps = (state, { location: { query } }) => {
     const { groupList, groupListIsPending, groupTags } = state;
     return {
         groups: groupList.items,
@@ -165,5 +140,5 @@ function mapStateToProps(state, { location: { query } }) {
         activeFilter: query.tags && query.tags.split(','),
         isLoading: groupListIsPending || groupListIsPending === null,
     };
-}
-export default withRouter(connect(mapStateToProps, Actions)(GroupsContainer));
+};
+export default withRouter(connect(mapStateToProps)(GroupsContainer));

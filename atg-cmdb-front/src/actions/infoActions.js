@@ -1,15 +1,12 @@
-import createFetchActions from '../createFetchActions';
-import * as Constants from '../constants';
-import * as API from '../api';
+import {
+    FETCH_INFO_REQUEST,
+    FETCH_RELEASE_NOTES_REQUEST,
+} from '../constants';
 
-export const fetchInfo = createFetchActions({
-    apiCall: API.fetchInfo,
-    requestKey: Constants.FETCH_INFO_REQUEST,
-    receiveKey: Constants.FETCH_INFO_RESPONSE,
+export const fetchInfo = () => ({
+    type: FETCH_INFO_REQUEST,
 });
 
-export const fetchReleaseNotes = createFetchActions({
-    apiCall: API.fetchReleaseNotes,
-    requestKey: Constants.FETCH_RELEASE_NOTES_REQUEST,
-    receiveKey: Constants.FETCH_RELEASE_NOTES_RESPONSE,
+export const fetchReleaseNotes = () => ({
+    type: FETCH_RELEASE_NOTES_REQUEST,
 });

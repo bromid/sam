@@ -48,5 +48,4 @@ function MainMenu({ mdPlus, isOpen, setMenuOpen, closeMenu }) {
         </Drawer>
     );
 }
-
 export default MainMenu;
