@@ -1,12 +1,8 @@
 import identity from 'lodash/identity';
 import { call, put } from 'redux-saga/effects';
+import { toArray } from '../../helpers';
 
 const keyRequired = (key) => { throw new Error(`${key} must be specified!`); };
-
-const getAPIParams = (paramSelector, params) => {
-    const paramsAsArray = [].concat(params);
-    return [].concat(paramSelector(...paramsAsArray));
-};
 
 export default function createFetchSaga(options) {
     const {
@@ -19,7 +15,7 @@ export default function createFetchSaga(options) {
 
     return function* fetchSaga(...params) {
         try {
-            const APIParams = getAPIParams(paramSelector, params);
+            const APIParams = toArray(paramSelector(...params));
             const payload = yield call(apiCall, ...APIParams);
             yield put({
                 type: responseKey,
