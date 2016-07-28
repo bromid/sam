@@ -274,7 +274,12 @@ public class SearchIntegrationTest {
       testApplications.get(2).id, testApplications.get(2),
       testApplications.get(3).id, testApplications.get(3)
     );
-    TestHelper.assertEquals(expectedMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+    TestHelper.assertEquals(
+      expectedMap,
+      actualApplications,
+      ApplicationSearchResult::getId,
+      SearchIntegrationTest::verifyApplicationSearchResult
+    );
   }
 
   @Test
@@ -297,7 +302,12 @@ public class SearchIntegrationTest {
       testApplications.get(3).id, testApplications.get(3),
       testApplications.get(4).id, testApplications.get(4)
     );
-    TestHelper.assertEquals(expectedMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+    TestHelper.assertEquals(
+      expectedMap,
+      actualApplications,
+      ApplicationSearchResult::getId,
+      SearchIntegrationTest::verifyApplicationSearchResult
+    );
   }
 
   @Test
@@ -366,21 +376,36 @@ public class SearchIntegrationTest {
       testServers.get(4)
     );
     final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
-    TestHelper.assertEquals(expectedServersMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
+    TestHelper.assertEquals(
+      expectedServersMap,
+      actualServers,
+      ServerSearchResult::getFqdn,
+      SearchIntegrationTest::verifyServerSearchResult
+    );
 
     final Map<String, Group> expectedGroupsMap = ImmutableMap.of(
       testGroups.get(0).id, testGroups.get(0),
       testGroups.get(2).id, testGroups.get(2)
     );
     final Collection<GroupSearchResult> actualGroups = searchResult.groups.items;
-    TestHelper.assertEquals(expectedGroupsMap, actualGroups, GroupSearchResult::getId, SearchIntegrationTest::verifyGroupSearchResult);
+    TestHelper.assertEquals(
+      expectedGroupsMap,
+      actualGroups,
+      GroupSearchResult::getId,
+      SearchIntegrationTest::verifyGroupSearchResult
+    );
 
     final Map<String, Application> expectedApplicationsMap = ImmutableMap.of(
       testApplications.get(0).id, testApplications.get(0),
       testApplications.get(5).id, testApplications.get(5)
     );
     final Collection<ApplicationSearchResult> actualApplications = searchResult.applications.items;
-    TestHelper.assertEquals(expectedApplicationsMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+    TestHelper.assertEquals(
+      expectedApplicationsMap,
+      actualApplications,
+      ApplicationSearchResult::getId,
+      SearchIntegrationTest::verifyApplicationSearchResult
+    );
 
     final Map<String, Asset> expectedAssetsMap = ImmutableMap.of(
       testAssets.get(1).id, testAssets.get(1),
@@ -388,7 +413,12 @@ public class SearchIntegrationTest {
       testAssets.get(6).id, testAssets.get(6)
     );
     final Collection<AssetSearchResult> actualAssets = searchResult.assets.items;
-    TestHelper.assertEquals(expectedAssetsMap, actualAssets, AssetSearchResult::getId, SearchIntegrationTest::verifyAssetSearchResult);
+    TestHelper.assertEquals(
+      expectedAssetsMap,
+      actualAssets,
+      AssetSearchResult::getId,
+      SearchIntegrationTest::verifyAssetSearchResult
+    );
   }
 
   @Test
@@ -409,20 +439,35 @@ public class SearchIntegrationTest {
       testServers.get(5)
     );
     final Collection<ServerSearchResult> actualServers = searchResult.servers.items;
-    TestHelper.assertEquals(expectedServersMap, actualServers, ServerSearchResult::getFqdn, SearchIntegrationTest::verifyServerSearchResult);
+    TestHelper.assertEquals(
+      expectedServersMap,
+      actualServers,
+      ServerSearchResult::getFqdn,
+      SearchIntegrationTest::verifyServerSearchResult
+    );
 
     final Map<String, Group> expectedGroupsMap = ImmutableMap.of(
       testGroups.get(0).id, testGroups.get(0)
     );
     final Collection<GroupSearchResult> actualGroups = searchResult.groups.items;
-    TestHelper.assertEquals(expectedGroupsMap, actualGroups, GroupSearchResult::getId, SearchIntegrationTest::verifyGroupSearchResult);
+    TestHelper.assertEquals(
+      expectedGroupsMap,
+      actualGroups,
+      GroupSearchResult::getId,
+      SearchIntegrationTest::verifyGroupSearchResult
+    );
 
     final Map<String, Application> expectedApplicationsMap = ImmutableMap.of(
       testApplications.get(0).id, testApplications.get(0),
       testApplications.get(5).id, testApplications.get(5)
     );
     final Collection<ApplicationSearchResult> actualApplications = searchResult.applications.items;
-    TestHelper.assertEquals(expectedApplicationsMap, actualApplications, ApplicationSearchResult::getId, SearchIntegrationTest::verifyApplicationSearchResult);
+    TestHelper.assertEquals(
+      expectedApplicationsMap,
+      actualApplications,
+      ApplicationSearchResult::getId,
+      SearchIntegrationTest::verifyApplicationSearchResult
+    );
 
     final Map<String, Asset> expectedAssetsMap = ImmutableMap.of(
       testAssets.get(1).id, testAssets.get(1),
@@ -430,7 +475,12 @@ public class SearchIntegrationTest {
       testAssets.get(6).id, testAssets.get(6)
     );
     final Collection<AssetSearchResult> actualAssets = searchResult.assets.items;
-    TestHelper.assertEquals(expectedAssetsMap, actualAssets, AssetSearchResult::getId, SearchIntegrationTest::verifyAssetSearchResult);
+    TestHelper.assertEquals(
+      expectedAssetsMap,
+      actualAssets,
+      AssetSearchResult::getId,
+      SearchIntegrationTest::verifyAssetSearchResult
+    );
   }
 
   private ArrayList<Server> addServerTestset() {

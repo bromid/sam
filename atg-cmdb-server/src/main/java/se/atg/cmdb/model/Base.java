@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
+import javax.validation.groups.Default;
 
 import org.bson.Document;
 
@@ -11,7 +12,7 @@ import se.atg.cmdb.helpers.Mapper;
 
 public abstract class Base {
 
-  @Size(min = 10, max = 500)
+  @Size(min = 1, max = 1000)
   public String description;
   @Null(groups = Validation.class)
   public Meta meta;
@@ -30,6 +31,6 @@ public abstract class Base {
     base.attributes = Mapper.mapAttributes(bson);
   }
 
-  public interface Validation {
+  public interface Validation extends Default {
   }
 }

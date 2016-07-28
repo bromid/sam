@@ -30,8 +30,10 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 
 import io.dropwizard.jersey.validation.Validators;
+import se.atg.cmdb.helpers.JsonHelper.UpdateMetaResult;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.User;
+import se.atg.cmdb.model.View;
 
 public abstract class RestHelper {
 
@@ -112,6 +114,38 @@ public abstract class RestHelper {
     return new PaginatedCollection<T>(uriBuilder, Optional.ofNullable(limit), Optional.ofNullable(start), list);
   }
 
+  public static Document createAndAddMeta(
+      Object object,
+      MongoCollection<Document> collection,
+      ObjectMapper objectMapper,
+      SecurityContext securityContext
+    ) {
+
+    final User user = RestHelper.getUser(securityContext);
+    final Document updated = JsonHelper.addMetaForCreate(object, user.name, objectMapper);
+    collection.insertOne(updated);
+    return updated;
+  }
+
+  public static Document replaceAndUpdateMeta(
+      Document existing,
+      Object updateObject,
+      MongoCollection<Document> collection,
+      ObjectMapper objectMapper,
+      SecurityContext securityContext,
+      Request request
+    ) {
+
+    final Optional<String> hash = verifyHash(existing, request);
+
+    final User user = getUser(securityContext);
+    final String updatedJson = JsonHelper.objectToJson(updateObject, objectMapper, View.Db.class);
+    final UpdateMetaResult result = JsonHelper.updateMetaForUpdate(updatedJson, Mapper.getMeta(existing), hash, user.name);
+
+    MongoHelper.updateDocument(existing, result.document, hash, collection);
+    return result.document;
+  }
+
   public static Document mergeAndUpdateMeta(
       Document existing,
       Object updateObject,
@@ -128,7 +162,7 @@ public abstract class RestHelper {
     final User user = getUser(securityContext);
     JsonHelper.updateMetaForUpdate(existing, hash, user.name);
 
-    MongoHelper.updateDocument(existing, hash, collection);
+    MongoHelper.updateDocument(existing, existing, hash, collection);
     return existing;
   }
 

@@ -249,7 +249,7 @@ public class GroupIntegrationTest {
     final Group group1 = new Group() {{
       name = "Group 1";
     }};
-    final Response response = testEndpoint.path("group")
+    final Response response = testEndpoint.path("group").path("group-id")
         .request(MediaType.APPLICATION_JSON_TYPE)
         .put(Entity.json(group1));
       TestHelper.assertValidationError("id may not be null", response);
@@ -261,7 +261,7 @@ public class GroupIntegrationTest {
     final Group group1 = new Group() {{
       id = "group1";
     }};
-    final Response response = testEndpoint.path("group")
+    final Response response = testEndpoint.path("group").path(group1.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(group1));
     TestHelper.assertValidationError("name may not be null", response);
@@ -275,7 +275,7 @@ public class GroupIntegrationTest {
       name = "Group 1";
       applications = Lists.newArrayList(new ApplicationLink("id", "name"));
     }};
-    final Response response = testEndpoint.path("group")
+    final Response response = testEndpoint.path("group").path(group1.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(group1));
     TestHelper.assertValidationError("applications must be null", response);
@@ -289,7 +289,7 @@ public class GroupIntegrationTest {
       name = "Group 1";
       assets = Lists.newArrayList(new AssetLink("id", "name"));
     }};
-    final Response response = testEndpoint.path("group")
+    final Response response = testEndpoint.path("group").path(group1.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(group1));
     TestHelper.assertValidationError("assets must be null", response);
@@ -409,7 +409,7 @@ public class GroupIntegrationTest {
 
   private GroupResponse createGroup(Group group) {
 
-    final Response response = testEndpoint.path("group")
+    final Response response = testEndpoint.path("group").path(group.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(group));
     TestHelper.assertSuccessful(response);

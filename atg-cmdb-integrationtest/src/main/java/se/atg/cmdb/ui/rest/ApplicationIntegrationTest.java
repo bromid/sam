@@ -120,7 +120,12 @@ public class ApplicationIntegrationTest {
     Assert.assertNull(response.limit);
 
     Assert.assertEquals(2, response.items.size());
-    TestHelper.assertEquals(Arrays.asList(application1, application2), response.items, Application::getId, ApplicationIntegrationTest::verifyApplication);
+    TestHelper.assertEquals(
+      Arrays.asList(application1, application2),
+      response.items,
+      Application::getId,
+      ApplicationIntegrationTest::verifyApplication
+    );
   }
 
   @Test
@@ -215,7 +220,7 @@ public class ApplicationIntegrationTest {
     final Application application1 = new Application() {{
       name = "My Application #1";
     }};
-    final Response response = testEndpoint.path("application")
+    final Response response = testEndpoint.path("application").path("app-id")
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(application1));
     TestHelper.assertValidationError("id may not be null", response);
@@ -227,7 +232,7 @@ public class ApplicationIntegrationTest {
     final Application application1 = new Application() {{
       id = "my-application1";
     }};
-    final Response response = testEndpoint.path("application")
+    final Response response = testEndpoint.path("application").path(application1.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(application1));
     TestHelper.assertValidationError("name may not be null", response);
@@ -301,7 +306,7 @@ public class ApplicationIntegrationTest {
 
   private ApplicationResponse createApplication(final Application application) {
 
-    final Response response = testEndpoint.path("application")
+    final Response response = testEndpoint.path("application").path(application.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(application));
     TestHelper.assertSuccessful(response);

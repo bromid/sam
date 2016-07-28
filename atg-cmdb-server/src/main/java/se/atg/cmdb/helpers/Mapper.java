@@ -34,7 +34,13 @@ public abstract class Mapper {
       .collect(Collectors.toList());
   }
 
-  public static <T,R> List<R> mapList(Document bson, String field, Map<T, Document> map, Function<Document,T> keyMapper, BiFunction<Document,Document,R> mapper) {
+  public static <T,R> List<R> mapList(
+      Document bson,
+      String field,
+      Map<T, Document> map,
+      Function<Document,T> keyMapper,
+      BiFunction<Document,Document,R> mapper
+    ) {
 
     final List<Document> list = (List<Document>) bson.get(field);
     if (list == null) {
@@ -94,7 +100,7 @@ public abstract class Mapper {
     return mapper.apply((T) object);
   }
 
-  public static void upsertList(Document bson, Document update, String field, BiFunction<Document,Document,Boolean> equals) {
+  public static void upsertList(Document bson, Document update, String field, Function<Document,Boolean> equals) {
 
     final List<Document> existingList = (List<Document>) bson.get(field);
     if (existingList == null) {
@@ -102,7 +108,7 @@ public abstract class Mapper {
     } else {
       final Iterator<Document> iterator = existingList.iterator();
       while (iterator.hasNext()) {
-        if (equals.apply(iterator.next(), update)) {
+        if (equals.apply(iterator.next())) {
           iterator.remove();
           break;
         }

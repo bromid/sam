@@ -20,15 +20,18 @@ import io.swagger.annotations.ApiModel;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.ui.rest.Defaults;
 
-@ApiModel(description = "A group belongs to a tree of other groups and has applications and assets. It can also be tagged to be easier to find than browsing the group-tree.")
+@ApiModel(description =
+  "A group belongs to a tree of other groups and has applications and assets. " +
+  "It can also be tagged to be easier to find than browsing the group-tree."
+)
 @JsonPropertyOrder({ "id", "name", "description", "groups", "applications", "tags", "meta" })
 public class Group extends Base {
 
   @NotNull(groups = Create.class)
-  @Size(min = 1, max = 50)
+  @Size(min = 2, max = 50)
   public String id;
   @NotNull(groups = Create.class)
-  @Size(min = 1, max = 50)
+  @Size(min = 3, max = 50)
   public String name;
   public List<Group> groups;
   @Null(groups = Update.class)

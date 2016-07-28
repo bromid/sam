@@ -73,7 +73,12 @@ public final class CreateTestdata {
       .append("id", "webbappar")
       .append("name", "Alla webbappar")
       .append("meta", defaultMeta())
-      .append("groups", Lists.newArrayList(new Document("id", "tillsammans"), new Document("id", "atg-se"), new Document("id", "travsport"), new Document("id", "galoppsport")))
+      .append("groups", Lists.newArrayList(
+        new Document("id", "tillsammans"),
+        new Document("id", "atg-se"),
+        new Document("id", "travsport"),
+        new Document("id", "galoppsport")
+      ))
       .append("tags", Lists.newArrayList("webapp")));
 
     groups.insertOne(new Document()
@@ -102,7 +107,11 @@ public final class CreateTestdata {
       .append("name", "Atg.se")
       .append("meta", defaultMeta())
       .append("description", "www.atg.se")
-      .append("groups", Lists.newArrayList(new Document("id", "atg-web"), new Document("id", "atg-service"), new Document("id", "atg-virtual-racing")))
+      .append("groups", Lists.newArrayList(
+        new Document("id", "atg-web"),
+        new Document("id", "atg-service"),
+        new Document("id", "atg-virtual-racing")
+      ))
       .append("tags", Lists.newArrayList("webapp")));
     groups.insertOne(new Document()
       .append("id", "atg-virtual-racing")
@@ -140,7 +149,10 @@ public final class CreateTestdata {
       .append("id", "org-it")
       .append("name", "ATG IT")
       .append("meta", defaultMeta())
-      .append("groups", Lists.newArrayList(new Document("id", "org-it-spel"), new Document("id", "org-it-sport"), new Document("id", "org-it-prod")))
+      .append("groups", Lists.newArrayList(
+        new Document("id", "org-it-spel"),
+        new Document("id", "org-it-sport"),
+        new Document("id", "org-it-prod")))
       .append("tags", Lists.newArrayList("webapp")));
     groups.insertOne(new Document()
       .append("id", "org-it-spel")
@@ -161,7 +173,10 @@ public final class CreateTestdata {
       .append("id", "org-netman")
       .append("name", "Netman")
       .append("meta", defaultMeta())
-      .append("groups", Lists.newArrayList(new Document("id", "netman-infrastructure-tracks"), new Document("id", "netman-infrastructure-hh")))
+      .append("groups", Lists.newArrayList(
+        new Document("id", "netman-infrastructure-tracks"),
+        new Document("id", "netman-infrastructure-hh")
+      ))
       .append("tags", Lists.newArrayList("netman")));
     groups.insertOne(new Document()
       .append("id", "netman-infrastructure-tracks")

@@ -159,7 +159,7 @@ public class AssetIntegrationTest {
     final Asset asset1 = new Asset() {{
       name = "My Asset #1";
     }};
-    final Response response = testEndpoint.path("asset")
+    final Response response = testEndpoint.path("asset").path("asset-id")
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(asset1));
     TestHelper.assertValidationError("id may not be null", response);
@@ -171,7 +171,7 @@ public class AssetIntegrationTest {
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
     }};
-    final Response response = testEndpoint.path("asset")
+    final Response response = testEndpoint.path("asset").path(asset1.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(asset1));
     TestHelper.assertValidationError("name may not be null", response);
@@ -187,7 +187,7 @@ public class AssetIntegrationTest {
         type = "Linux";
       }};
     }};
-    final Response response = testEndpoint.path("asset")
+    final Response response = testEndpoint.path("asset").path(asset1.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(asset1));
     TestHelper.assertValidationError("os.name may not be null", response);
@@ -261,7 +261,7 @@ public class AssetIntegrationTest {
 
   private AssetResponse createAsset(Asset asset) {
 
-    final Response response = testEndpoint.path("asset")
+    final Response response = testEndpoint.path("asset").path(asset.id)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(asset));
     TestHelper.assertSuccessful(response);

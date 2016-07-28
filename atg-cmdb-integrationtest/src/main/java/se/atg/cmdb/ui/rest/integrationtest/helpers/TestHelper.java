@@ -24,13 +24,23 @@ public abstract class TestHelper {
     assertEquals(expected, actual, keyMapper, Assert::assertEquals);
   }
 
-  public static <K,V> void assertEquals(Collection<V> expected, Collection<V> actual, Function<? super V,K> keyMapper, BiConsumer<V,V> assertion) {
+  public static <K,V> void assertEquals(
+      Collection<V> expected,
+      Collection<V> actual,
+      Function<? super V,K> keyMapper,
+      BiConsumer<V,V> assertion
+    ) {
 
     final Map<K, V> expectedMap = expected.stream().collect(Collectors.toMap(keyMapper, Function.identity()));
     assertEquals(expectedMap, actual, keyMapper, assertion);
   }
 
-  public static <K,V,T> void assertEquals(Map<K,V> expectedMap, Collection<T> actualCollection, Function<? super T,K> keyMapper, BiConsumer<V,T> assertion) {
+  public static <K,V,T> void assertEquals(
+      Map<K,V> expectedMap,
+      Collection<T> actualCollection,
+      Function<? super T,K> keyMapper,
+      BiConsumer<V,T> assertion
+    ) {
 
     Assert.assertEquals(expectedMap.size(), actualCollection.size());
     actualCollection.forEach(actual -> {

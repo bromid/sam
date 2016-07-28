@@ -103,8 +103,4 @@ public class Deployment extends Base {
   public int hashCode() {
     return HashCodeBuilder.reflectionHashCode(this);
   }
-
-  public static boolean sameApplicationId(Document first, Document second) {
-    return first.getString("applicationId").equals(second.getString("applicationId"));
-  }
 }
