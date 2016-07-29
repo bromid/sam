@@ -18,6 +18,10 @@ const configureStore = () => {
         applyMiddleware(...middlewares)
     );
 
+    if ((process.env.NODE_ENV !== 'production')) {
+        window.store = store;
+    }
+
     sagaMiddleware.run(rootSaga);
 
     return store;

@@ -11,7 +11,7 @@ import releaseNotes from './releaseNotes';
 import authenticated from './auth';
 
 export default combineReducers({
-    ...group,
+    group,
     ...application,
     ...server,
     ...asset,

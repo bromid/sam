@@ -10,6 +10,7 @@ import ItemView from './ItemView';
 import { GroupList } from './GroupList';
 import { AssetList } from './AssetList';
 import { ApplicationList } from './ApplicationList';
+import * as fromGroup from '../reducers/group';
 
 const patchNotification = (result, error, isPending) => {
     if (isPending) return {};
@@ -125,17 +126,16 @@ const GroupContainer = React.createClass({
 const mapStateToProps = (state) => {
     const {
         metaOpen,
-        group, groupError, groupIsPending,
-        groupPatchResult, groupPatchResultError, groupPatchResultIsPending,
+        group,
     } = state;
     return {
         metaOpen,
-        group,
-        fetchError: groupError,
-        patchResult: groupPatchResult,
-        patchError: groupPatchResultError,
-        patchIsPending: groupPatchResultIsPending,
-        isLoading: groupIsPending,
+        group: fromGroup.getCurrent(group),
+        fetchError: fromGroup.getCurrentError(group),
+        patchResult: fromGroup.getPatchResult(group),
+        patchError: fromGroup.getPatchResultError(group),
+        patchIsPending: fromGroup.getPatchResultIsPending(group),
+        isLoading: fromGroup.getCurrentIsPending(group),
     };
 };
 

@@ -1,10 +1,12 @@
+import { combineReducers } from 'redux';
 const keyRequired = (key) => { throw new Error(`${key} must be specified!`); };
 
 export default function createFetchReducers(options) {
     const {
-        resourceName = keyRequired('resourceName'),
+        resourceName = options.flatReducers && keyRequired('resourceName'),
         requestKey = keyRequired('requestKey'),
         receiveKey = keyRequired('receiveKey'),
+        flatReducers = true,
     } = options;
 
     function resourceIsPending(state = false, action) {
@@ -38,9 +40,23 @@ export default function createFetchReducers(options) {
         }
     }
 
-    return {
-        [resourceName]: resource,
-        [`${resourceName}Error`]: error,
-        [`${resourceName}IsPending`]: resourceIsPending,
-    };
+    if (flatReducers) {
+        return {
+            [resourceName]: resource,
+            [`${resourceName}Error`]: error,
+            [`${resourceName}IsPending`]: resourceIsPending,
+        };
+    }
+
+    return [
+        combineReducers({
+            data: resource,
+            isPending: resourceIsPending,
+            error,
+        }), {
+            getData: (state) => state.data,
+            getIsPending: (state) => state.isPending,
+            getError: (state) => state.error,
+        },
+    ];
 }
