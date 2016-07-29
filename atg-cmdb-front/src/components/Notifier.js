@@ -19,37 +19,30 @@ const Notifier = React.createClass({
     },
 
     getInitialState() {
-        const notification = getNotification(this.props.notification);
         return {
-            ...notification,
+            notification: getNotification({}),
             open: false,
         };
     },
 
     componentWillReceiveProps({ notification }) {
         const newNotification = getNotification(notification);
-        const newMessage = newNotification.message;
+        const lastId = this.state.notification.id;
 
-        if (!isEmpty(newMessage) && newMessage !== this.state.message) {
+        if (!isEmpty(newNotification.message) && newNotification.id !== lastId) {
             this.setState({
-                ...newNotification,
+                notification: newNotification,
                 open: true,
-            });
-        } else {
-            this.setState({
-                message: newNotification.message,
             });
         }
     },
 
     requestClose() {
-        this.setState({
-            open: false,
-        });
+        this.setState({ open: false });
     },
 
     render() {
-        const { open, duration, message, action } = this.state;
+        const { open, notification: { duration, message, action } } = this.state;
         return (<Snackbar
             open={open}
             message={message}
@@ -59,5 +52,4 @@ const Notifier = React.createClass({
         />);
     },
 });
-
 export default Notifier;

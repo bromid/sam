@@ -1,13 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import { blue800 } from 'material-ui/styles/colors';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import MainMenu from './MainMenu';
 import matchMedia from './matchMediaHOC';
 import * as menuActions from '../actions/menuActions';
 import { getIsMenuOpen } from '../reducers';
 import TopBar from './TopBar';
+import Notifier from './Notifier';
 
 const theme = {
     spacing: {
@@ -31,7 +32,10 @@ const theme = {
 };
 
 function App(props) {
-    const { mdPlus, mainMenuOpen, openMenu, closeMenu, setMenuOpen, children } = props;
+    const {
+        mdPlus, notification, children,
+        mainMenuOpen, openMenu, closeMenu, setMenuOpen,
+    } = props;
 
     const mdPlusStyle = {
         marginLeft: 200,
@@ -58,6 +62,7 @@ function App(props) {
                         {children}
                     </div>
                 </div>
+                <Notifier notification={notification} />
             </div>
         </MuiThemeProvider>
     );

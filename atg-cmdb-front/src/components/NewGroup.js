@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import pickBy from 'lodash/pickBy';
+import isEmpty from 'lodash/isEmpty';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import * as groupActions from '../actions/groupActions';
@@ -16,7 +17,6 @@ const NewGroupContainer = React.createClass({
             nameErrorText: '',
             description: '',
             descriptionErrorText: '',
-            refs: new Map(),
         };
     },
 
@@ -39,13 +39,13 @@ const NewGroupContainer = React.createClass({
     },
 
     onCreate() {
-        const { id, name, description, refs } = this.state;
+        const { id, name, description } = this.state;
         const group = { id, name, description };
 
         const errors = groupValidators.group(group);
 
         if (errors.hasError) {
-            refs.get(errors.first).focus();
+            this.refs.get(errors.first).focus();
             this.setState(errors.text);
         } else {
             const groupNoEmptyFields = pickBy(group, (x) => x);
@@ -54,7 +54,10 @@ const NewGroupContainer = React.createClass({
     },
 
     addField(id, ref) {
-        this.state.refs.set(id, ref);
+        if (isEmpty(this.refs)) {
+            this.refs = new Map();
+        }
+        this.refs.set(id, ref);
     },
 
     render() {

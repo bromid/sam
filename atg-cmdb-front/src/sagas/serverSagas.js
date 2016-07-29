@@ -1,7 +1,9 @@
 import { takeLatest } from 'redux-saga';
-import { fork } from 'redux-saga/effects';
+import { fork, put } from 'redux-saga/effects';
 import * as API from '../api';
+import { serverName } from '../components/Server';
 import createFetchSaga from './helpers/createFetchSaga';
+import { showNotification, showErrorNotification } from '../actions/notificationActions';
 import {
     FETCH_SERVER_LIST_REQUEST,
     FETCH_SERVER_LIST_RESPONSE,
@@ -29,6 +31,9 @@ const patchServer = createFetchSaga({
 function* patchServerResponse(action) {
     if (!action.error) {
         yield fork(fetchServer, action);
+        yield put(showNotification(`Updated server ${serverName(action.payload)}`));
+    } else {
+        yield put(showErrorNotification('Failed to update server', action.payload));
     }
 }
 

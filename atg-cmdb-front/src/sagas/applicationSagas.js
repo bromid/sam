@@ -1,7 +1,8 @@
 import { takeLatest } from 'redux-saga';
-import { fork } from 'redux-saga/effects';
+import { fork, put } from 'redux-saga/effects';
 import * as API from '../api';
 import createFetchSaga from './helpers/createFetchSaga';
+import { showNotification, showErrorNotification } from '../actions/notificationActions';
 import {
     FETCH_APPLICATION_LIST_REQUEST,
     FETCH_APPLICATION_LIST_RESPONSE,
@@ -41,6 +42,10 @@ const fetchApplicationDeployments = createFetchSaga({
 function* patchApplicationResponse(action) {
     if (!action.error) {
         yield fork(fetchApplication, action);
+        const { name } = action.payload;
+        yield put(showNotification(`Updated application ${name}`));
+    } else {
+        yield put(showErrorNotification('Failed to update application', action.payload));
     }
 }
 

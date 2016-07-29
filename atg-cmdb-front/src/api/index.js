@@ -78,14 +78,12 @@ const patchJson = (url, obj, { hash, params } = {}) => {
         );
 };
 
-const putJson = (url, obj, { hash, params } = {}) => {
-    const headers = (hash) ? {
-        ...APPLICATION_JSON.headers,
-        'If-Match': `"${hash}"`,
-    } : APPLICATION_JSON.headers;
-
+const createJson = (url, obj, { params } = {}) => {
     const options = {
-        headers,
+        headers: {
+            ...APPLICATION_JSON.headers,
+            'If-None-Match': '*',
+        },
         method: 'PUT',
         body: JSON.stringify(obj),
     };
@@ -112,7 +110,7 @@ export const patchGroup = (params, auth) =>
     patchJson(`/services/group/${params.id}`, params, auth);
 
 export const createGroup = (group, options) =>
-    putJson(`/services/group/${group.id}`, group, options);
+    createJson(`/services/group/${group.id}`, group, options);
 
 export const fetchApplicationList = () =>
     fetchJson('/services/application');
@@ -127,7 +125,7 @@ export const patchApplication = (params, auth) =>
     patchJson(`/services/application/${params.id}`, params, auth);
 
 export const createApplication = (application, options) =>
-    putJson(`/services/application/${application.id}`, application, options);
+    createJson(`/services/application/${application.id}`, application, options);
 
 export const fetchServerList = (params) => {
     if (params.environment) return fetchJson(`/services/server/${params.environment}`);
@@ -141,7 +139,7 @@ export const patchServer = (params, auth) =>
     patchJson(`/services/server/${params.environment}/${params.hostname}`, params, auth);
 
 export const createServer = (server, options) =>
-    putJson(`/services/server/${server.environment}/${server.hostname}`, server, options);
+    createJson(`/services/server/${server.environment}/${server.hostname}`, server, options);
 
 export const fetchAssetList = () =>
     fetchJson('/services/asset');
@@ -153,7 +151,7 @@ export const patchAsset = (params, auth) =>
     patchJson(`/services/asset/${params.id}`, params, auth);
 
 export const createAsset = (asset, options) =>
-    putJson(`/services/asset/${asset.id}`, asset, options);
+    createJson(`/services/asset/${asset.id}`, asset, options);
 
 export const fetchSearch = (searchQuery) =>
     fetchJson(`/services/search?q=${searchQuery}`);

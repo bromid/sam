@@ -67,7 +67,12 @@ export const GroupList = ({ groups, header }) => {
     );
 };
 
-const Groups = ({ groups, groupTags = [], addFilter, removeFilter, activeFilter, isLoading }) => {
+const Groups = (props) => {
+    const {
+        authenticated, groups, groupTags = [],
+        addFilter, removeFilter, activeFilter, isLoading,
+    } = props;
+
     if (isLoading) return <LoadingIndicator />;
     return (
         <div>
@@ -81,12 +86,14 @@ const Groups = ({ groups, groupTags = [], addFilter, removeFilter, activeFilter,
                         activeFilter={activeFilter}
                     />
                 </div>
-                <Link to="/group/new">
-                    <RaisedButton
-                        label="Add group"
-                        style={{ borderRadius: 3 }}
-                    />
-                </Link>
+                {authenticated &&
+                    <Link to="/group/new">
+                        <RaisedButton
+                            label="Add group"
+                            style={{ borderRadius: 3 }}
+                        />
+                    </Link>
+                }
             </div>
             <GroupList
                 groups={groups}
@@ -125,11 +132,12 @@ const GroupsContainer = React.createClass({
     },
 
     render() {
-        const { isLoading, groups, groupTags, activeFilter } = this.props;
+        const { isLoading, authenticated, groups, groupTags, activeFilter } = this.props;
 
         return (
             <Groups
                 isLoading={isLoading}
+                authenticated={authenticated}
                 groups={groups}
                 groupTags={groupTags}
                 activeFilter={activeFilter}

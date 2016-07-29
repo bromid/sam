@@ -1,9 +1,12 @@
 import React from 'react';
+import isFunction from 'lodash/isFunction';
 import TextField from 'material-ui/TextField';
 import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
 
-export default function TextFieldForm({ id, value, change, save, cancel, multiLine = false }) {
+const PersistableField = (props) => {
+    const { id, value, errorText, change, save, cancel, fieldRef, multiLine = false } = props;
+
     const formStyleSingleLine = {
         flex: 1,
         display: 'flex',
@@ -18,15 +21,23 @@ export default function TextFieldForm({ id, value, change, save, cancel, multiLi
         alignItems: 'stretch',
     };
 
+    const saveFieldRef = (ref) => {
+        if (isFunction(fieldRef)) {
+            fieldRef(ref);
+        }
+    };
+
     return (
         <form style={(multiLine) ? formStyleMultiLine : formStyleSingleLine} onSubmit={save}>
             <TextField
                 id={id}
+                value={value}
+                errorText={errorText}
                 style={{ flex: 1 }}
                 fullWidth={true}
                 multiLine={multiLine}
-                value={value}
                 onChange={change}
+                ref={saveFieldRef}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <FlatButton
@@ -43,4 +54,5 @@ export default function TextFieldForm({ id, value, change, save, cancel, multiLi
             </div>
         </form>
     );
-}
+};
+export default PersistableField;

@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import size from 'lodash/size';
 import isEmpty from 'lodash/isEmpty';
 import * as serverActions from '../actions/serverActions';
-import * as metaActions from '../actions/metaActions';
 import { List, ListItem } from 'material-ui/List';
 import { flexWrapperStyle } from '../style';
 import LoadingIndicator from './LoadingIndicator';
@@ -29,25 +28,6 @@ export const serverName = (server) => (
 export const serverLink = (server) => (
     `/server/${server.environment}/${server.hostname}`
 );
-
-const patchNotification = (result, error, isPending) => {
-    if (isPending) return {};
-    if (!isEmpty(error)) {
-        return {
-            message: 'Failed to update server!',
-            duration: 4000,
-            action: {
-                name: 'info',
-            },
-        };
-    }
-    if (!isEmpty(result)) {
-        return {
-            message: `Updated server ${result.hostname}@${result.environment}`,
-        };
-    }
-    return {};
-};
 
 const Os = ({ os }) => (
     <div style={flexChildStyle}>
@@ -92,11 +72,7 @@ const ServerContainer = React.createClass({
     },
 
     render() {
-        const {
-            isLoading, server,
-            metaOpen, toggleMeta,
-            patchResult, patchError, patchIsPending,
-        } = this.props;
+        const { isLoading, server } = this.props;
 
         if (isLoading && isEmpty(server)) return <LoadingIndicator />;
         if (!server.hostname) return <p>No result</p>;
@@ -128,10 +104,7 @@ const ServerContainer = React.createClass({
                 description={description}
                 updateDescription={this.updateDescription}
                 meta={meta}
-                metaOpen={metaOpen}
-                toggleMeta={toggleMeta}
                 tabs={tabs}
-                notification={() => patchNotification(patchResult, patchError, patchIsPending)}
                 isLoading={isLoading}
             />
         );
@@ -139,7 +112,6 @@ const ServerContainer = React.createClass({
 });
 
 const mapStateToProps = (state) => ({
-    metaOpen: getIsMetaOpen(state),
     server: fromServer.getCurrent(state),
     fetchError: fromServer.getCurrentError(state),
     patchResult: fromServer.getPatchResult(state),
@@ -151,6 +123,5 @@ const mapStateToProps = (state) => ({
 
 const Actions = {
     patchServer: serverActions.patchServer,
-    toggleMeta: metaActions.toggleMeta,
 };
 export default connect(mapStateToProps, Actions)(ServerContainer);
