@@ -6,6 +6,7 @@ import Badge from 'material-ui/Badge';
 import LoadingIndicator from './LoadingIndicator';
 import { TagFilter } from './Tag';
 import { toArray } from '../helpers';
+import * as fromGroup from '../reducers/group';
 
 const CountBadge = ({ children, title, primary, secondary }) => {
     const style = { padding: '12px' };
@@ -129,12 +130,12 @@ const GroupsContainer = React.createClass({
 });
 
 const mapStateToProps = (state, { location: { query } }) => {
-    const { groupList, groupListIsPending, groupTags } = state;
+    const { group } = state;
     return {
-        groups: groupList.items,
-        groupTags: groupTags.items,
+        groups: fromGroup.getList(group),
+        groupTags: fromGroup.getTags(group),
         activeFilter: query.tags && query.tags.split(','),
-        isLoading: groupListIsPending || groupListIsPending === null,
+        isLoading: fromGroup.getListIsPending(group),
     };
 };
 export default withRouter(connect(mapStateToProps)(GroupsContainer));
