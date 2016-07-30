@@ -1,11 +1,12 @@
 import React from 'react';
+import { withRouter } from 'react-router';
 import ReactMarkdown from 'react-markdown';
 import { borderStyle, flexWrapperStyle } from '../../style';
 import PersistableField from '../PersistableField';
 import EditIconButton from './EditIconButton';
 
-const Description = ({ value, edit }) => (
-    <div style={{ flex: 1 }}>
+const Description = ({ value, edit, addHandler }) => (
+    <div style={{ flex: 1 }} ref={addHandler}>
         <EditIconButton edit={edit} style={{ float: 'right', right: -10, top: -10 }} />
         <ReactMarkdown skipHtml={true} source={value} />
     </div>
@@ -13,12 +14,35 @@ const Description = ({ value, edit }) => (
 
 const PersistableDescription = React.createClass({
 
+    componentWillUnmount() {
+        if (this.linkWrapper) {
+            this.linkWrapper.removeEventListener('click', this.handleClick);
+        }
+    },
+
     onSave(event) {
         const { errorText = '', save } = this.props;
         if (errorText.length > 1) {
             this.fieldRef.focus();
         }
         save(event);
+    },
+
+    addLinkWrapperHandler(ref) {
+        if (ref) {
+            ref.addEventListener('click', this.handleClick, false);
+        }
+        this.linkWrapper = ref;
+    },
+
+    handleClick(event) {
+        const target = event.target;
+        const linkClick = target.tagName === 'A';
+        const clickModifier = event.ctrlKey || event.altKey || event.shiftKey;
+        if (!clickModifier && linkClick && target.origin === window.location.origin) {
+            event.preventDefault();
+            this.props.router.push(target.pathname + target.search + target.hash);
+        }
     },
 
     render() {
@@ -45,10 +69,10 @@ const PersistableDescription = React.createClass({
                         fieldRef={(ref) => (this.fieldRef = ref)}
                         multiLine={true}
                     /> :
-                    <Description value={value} edit={edit} />
+                    <Description value={value} edit={edit} addHandler={this.addLinkWrapperHandler} />
                 }
             </div>
         );
     },
 });
-export default PersistableDescription;
+export default withRouter(PersistableDescription);
