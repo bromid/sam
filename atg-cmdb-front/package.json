@@ -5,7 +5,7 @@
   "scripts": {
     "start": "babel-node devServer.js",
     "prebuild": "rm -rf dist",
-    "build": "webpack",
+    "build": "webpack --config webpack.prod.config.babel.js -p",
     "postbuild": "cp index.html dist/static/",
     "lint": "eslint ."
   },
