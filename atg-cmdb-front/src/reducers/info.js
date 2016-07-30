@@ -1,8 +1,10 @@
 import * as Constants from '../constants';
-import createFetchReducers from '../createFetchReducers';
+import createFetchReducer from './helpers/createFetchReducer';
 
-export default createFetchReducers({
-    resourceName: 'info',
+const [info, fromInfo] = createFetchReducer({
     requestKey: Constants.FETCH_INFO_REQUEST,
     receiveKey: Constants.FETCH_INFO_RESPONSE,
 });
+
+export { fromInfo };
+export default info;

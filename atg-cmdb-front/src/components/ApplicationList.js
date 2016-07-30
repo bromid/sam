@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
+import { fromApplication } from '../reducers';
 
 const Application = ({ application: { id, name, description } }) => (
     <Link to={`/application/${id}`}>
@@ -27,11 +28,8 @@ const ApplicationListContainer = ({ isLoading, applications }) => {
     return <ApplicationList applications={applications} header={<h2>Applications</h2>} />;
 };
 
-const mapStateToProps = (state) => {
-    const { applicationList, applicationListIsPending } = state;
-    return {
-        applications: applicationList.items,
-        isLoading: applicationListIsPending,
-    };
-};
+const mapStateToProps = (state) => ({
+    applications: fromApplication.getList(state),
+    isLoading: fromApplication.getListIsPending(state),
+});
 export default connect(mapStateToProps)(ApplicationListContainer);

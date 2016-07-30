@@ -7,6 +7,7 @@ import * as metaActions from '../actions/metaActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
+import { fromAsset, getIsMetaOpen } from '../reducers';
 
 const patchNotification = (result, error, isPending) => {
     if (isPending) return {};
@@ -81,22 +82,15 @@ const AssetContainer = React.createClass({
     },
 });
 
-const mapStateToProps = (state) => {
-    const {
-        metaOpen,
-        asset, assetError, assetIsPending,
-        assetPatchResult, assetPatchResultError, assetPatchResultIsPending,
-    } = state;
-    return {
-        metaOpen,
-        asset,
-        fetchError: assetError,
-        patchResult: assetPatchResult,
-        patchError: assetPatchResultError,
-        patchIsPending: assetPatchResultIsPending,
-        isLoading: assetIsPending,
-    };
-};
+const mapStateToProps = (state) => ({
+    metaOpen: getIsMetaOpen(state),
+    asset: fromAsset.getCurrent(state),
+    fetchError: fromAsset.getCurrentError(state),
+    patchResult: fromAsset.getPatchResult(state),
+    patchError: fromAsset.getPatchResultError(state),
+    patchIsPending: fromAsset.getPatchResultIsPending(state),
+    isLoading: fromAsset.getCurrentIsPending(state),
+});
 
 const Actions = {
     patchAsset: assetActions.patchAsset,

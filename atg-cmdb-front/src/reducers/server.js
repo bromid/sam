@@ -1,26 +1,12 @@
-import * as Constants from '../constants';
-import createFetchReducers from '../createFetchReducers';
+import { combineReducers } from 'redux';
+import createCRUDReducers from './helpers/createCRUDReducers';
 
-const server = createFetchReducers({
-    resourceName: 'server',
-    requestKey: Constants.FETCH_SERVER_REQUEST,
-    receiveKey: Constants.FETCH_SERVER_RESPONSE,
-});
+const { CRUDReducers, CRUDSelectors } = createCRUDReducers('SERVER');
 
-const serverPatchResult = createFetchReducers({
-    resourceName: 'serverPatchResult',
-    requestKey: Constants.PATCH_SERVER_REQUEST,
-    receiveKey: Constants.PATCH_SERVER_RESPONSE,
-});
-
-const serverList = createFetchReducers({
-    resourceName: 'serverList',
-    requestKey: Constants.FETCH_SERVER_LIST_REQUEST,
-    receiveKey: Constants.FETCH_SERVER_LIST_RESPONSE,
-});
-
-export default {
-    ...server,
-    ...serverPatchResult,
-    ...serverList,
+export const fromServer = {
+    ...CRUDSelectors,
 };
+
+export default combineReducers({
+    ...CRUDReducers,
+});

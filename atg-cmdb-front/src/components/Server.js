@@ -10,6 +10,7 @@ import { flexWrapperStyle } from '../style';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
+import { fromServer, getIsMetaOpen } from '../reducers';
 
 const flexChildStyle = {
     minWidth: 250,
@@ -137,22 +138,16 @@ const ServerContainer = React.createClass({
     },
 });
 
-const mapStateToProps = (state) => {
-    const {
-        metaOpen,
-        server, serverError, serverIsPending,
-        serverPatchResult, serverPatchResultError, serverPatchResultIsPending,
-    } = state;
-    return {
-        metaOpen,
-        server,
-        fetchError: serverError,
-        patchResult: serverPatchResult,
-        patchError: serverPatchResultError,
-        patchIsPending: serverPatchResultIsPending,
-        isLoading: serverIsPending,
-    };
-};
+const mapStateToProps = (state) => ({
+    metaOpen: getIsMetaOpen(state),
+    server: fromServer.getCurrent(state),
+    fetchError: fromServer.getCurrentError(state),
+    patchResult: fromServer.getPatchResult(state),
+    patchError: fromServer.getPatchResultError(state),
+    patchIsPending: fromServer.getPatchResultIsPending(state),
+    isLoading: fromServer.getCurrentIsPending(state),
+});
+
 
 const Actions = {
     patchServer: serverActions.patchServer,

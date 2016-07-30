@@ -6,6 +6,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import MainMenu from './MainMenu';
 import matchMedia from './matchMediaHOC';
 import * as menuActions from '../actions/menuActions';
+import { getIsMenuOpen } from '../reducers';
 import TopBar from './TopBar';
 
 const theme = {
@@ -63,7 +64,7 @@ function App(props) {
 }
 
 const mapStateToProps = (state, { mdPlus }) => ({
-    mainMenuOpen: state.menuOpen || mdPlus,
+    mainMenuOpen: getIsMenuOpen(state) || mdPlus,
 });
 
 const Actions = {

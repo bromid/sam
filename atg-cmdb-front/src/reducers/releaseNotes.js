@@ -1,8 +1,10 @@
 import * as Constants from '../constants';
-import createFetchReducers from '../createFetchReducers';
+import createFetchReducer from './helpers/createFetchReducer';
 
-export default createFetchReducers({
-    resourceName: 'releaseNotes',
+const [releaseNotes, fromReleaseNotes] = createFetchReducer({
     requestKey: Constants.FETCH_RELEASE_NOTES_REQUEST,
     receiveKey: Constants.FETCH_RELEASE_NOTES_RESPONSE,
 });
+
+export { fromReleaseNotes };
+export default releaseNotes;

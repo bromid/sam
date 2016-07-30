@@ -1,33 +1,23 @@
+import { combineReducers } from 'redux';
 import * as Constants from '../constants';
-import createFetchReducers from '../createFetchReducers';
+import createFetchReducer from './helpers/createFetchReducer';
+import createCRUDReducers from './helpers/createCRUDReducers';
 
-const application = createFetchReducers({
-    resourceName: 'application',
-    requestKey: Constants.FETCH_APPLICATION_REQUEST,
-    receiveKey: Constants.FETCH_APPLICATION_RESPONSE,
-});
+const { CRUDReducers, CRUDSelectors } = createCRUDReducers('APPLICATION');
 
-const applicationPatchResult = createFetchReducers({
-    resourceName: 'applicationPatchResult',
-    requestKey: Constants.PATCH_APPLICATION_REQUEST,
-    receiveKey: Constants.PATCH_APPLICATION_RESPONSE,
-});
-
-const applicationDeployments = createFetchReducers({
-    resourceName: 'applicationDeployments',
+const [deployments, fromDeployments] = createFetchReducer({
     requestKey: Constants.FETCH_APPLICATION_REQUEST,
     receiveKey: Constants.FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
 });
 
-const applicationList = createFetchReducers({
-    resourceName: 'applicationList',
-    requestKey: Constants.FETCH_APPLICATION_LIST_REQUEST,
-    receiveKey: Constants.FETCH_APPLICATION_LIST_RESPONSE,
-});
-
-export default {
-    ...application,
-    ...applicationPatchResult,
-    ...applicationDeployments,
-    ...applicationList,
+export const fromApplication = {
+    ...CRUDSelectors,
+    getDeployments: (state) => fromDeployments.getData(state.deployments).items,
+    getDeploymentsIsPending: (state) => fromDeployments.getIsPending(state.deployments),
+    getDeploymentsError: (state) => fromDeployments.getError(state.deployments),
 };
+
+export default combineReducers({
+    ...CRUDReducers,
+    deployments,
+});

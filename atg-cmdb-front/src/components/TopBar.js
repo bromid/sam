@@ -6,6 +6,7 @@ import SearchField from './SearchField';
 import * as searchActions from '../actions/searchActions';
 import * as authActions from '../actions/authActions';
 import { flexWrapperStyle } from '../style';
+import { fromSearchResults, getAuthenticated } from '../reducers';
 
 const TopBarContainer = (props) => {
     const {
@@ -62,9 +63,9 @@ const TopBarContainer = (props) => {
 };
 
 const mapStateToProps = (state) => ({
-    authenticated: state.authenticated,
-    searchResults: state.searchResults,
-    searchResultsIsLoading: state.searchResultsIsPending,
+    authenticated: getAuthenticated(state),
+    searchResults: fromSearchResults.getData(state),
+    searchResultsIsLoading: fromSearchResults.getIsPending(state),
 });
 
 const Actions = {

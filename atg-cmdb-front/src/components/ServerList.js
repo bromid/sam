@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
 import { serverName, serverLink } from './Server';
+import { fromServer } from '../reducers';
 
 const Server = ({ server }) => (
     <Link to={serverLink(server)}>
@@ -28,8 +29,8 @@ const ServerListContainer = ({ servers, isLoading }) => {
     return <Servers servers={servers} header={<h2>Servers</h2>} />;
 };
 
-const mapStateToProps = ({ serverList, serverListIsPending }) => ({
-    servers: serverList.items,
-    isLoading: serverListIsPending,
+const mapStateToProps = (state) => ({
+    servers: fromServer.getList(state),
+    isLoading: fromServer.getListIsPending(state),
 });
 export default connect(mapStateToProps)(ServerListContainer);
