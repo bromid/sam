@@ -1,4 +1,5 @@
 import path from 'path';
+import webpack from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 const Paths = {
@@ -10,10 +11,10 @@ const Paths = {
 };
 
 export default {
-    devtool: 'eval',
+    devtool: 'cheap-source-map',
     entry: Paths.APP_ENTRY,
     output: {
-        path: path.join(__dirname, 'dist/static'),
+        path: Paths.DIST,
         filename: 'bundle.js',
         publicPath: Paths.PUBLIC,
     },
@@ -24,7 +25,23 @@ export default {
                 to: 'icons',
             },
         ]),
+        new webpack.DefinePlugin({ 'process.env.NODE_ENV': '"production"' }),
     ],
+    stats: {
+        hash: false,
+        version: true,
+        timings: true,
+        assets: true,
+        chunks: false,
+        modules: false,
+        reasons: false,
+        children: false,
+        source: false,
+        errors: true,
+        errorDetails: true,
+        warnings: false,
+        publicPath: false,
+    },
     module: {
         loaders: [
             {
