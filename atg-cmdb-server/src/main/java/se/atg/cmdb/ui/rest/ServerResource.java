@@ -73,7 +73,6 @@ public class ServerResource {
 
   @GET
   @Path("services/server")
-  @RolesAllowed(Roles.READ)
   @ApiOperation("Fetch all servers")
   public PaginatedCollection<Server> getServers() {
     return findServers(ALL);
@@ -81,7 +80,6 @@ public class ServerResource {
 
   @GET
   @Path("services/server/{environment}")
-  @RolesAllowed(Roles.READ)
   @ApiOperation("Fetch all servers in an environment")
   public PaginatedCollection<Server> getServersInEnvironment(
     @ApiParam("Test environment") @PathParam("environment") String environment
@@ -93,7 +91,6 @@ public class ServerResource {
 
   @GET
   @Path("services/server/{environment}/{hostname}")
-  @RolesAllowed(Roles.READ)
   @ApiOperation(value = "Fetch a server", response = Server.class)
   public Response getServer(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
@@ -111,7 +108,6 @@ public class ServerResource {
 
   @GET
   @Path("services/server/{environment}/{hostname}/deployment")
-  @RolesAllowed(Roles.READ)
   @ApiOperation(value = "Fetch all deployed applications on the server", response = Server.class)
   public PaginatedCollection<Deployment> getServerDeployments(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
@@ -127,7 +123,6 @@ public class ServerResource {
 
   @GET
   @Path("services/server/{environment}/{hostname}/deployment/{applicationId}")
-  @RolesAllowed(Roles.READ)
   @ApiOperation(value = "Get a deployed application on the server", response = Deployment.class)
   public Deployment getServerDeployment(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,

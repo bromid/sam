@@ -68,7 +68,6 @@ public class ApplicationResource {
   }
 
   @GET
-  @RolesAllowed(Roles.READ)
   @Path("services/application")
   @ApiOperation("Fetch all applications")
   public PaginatedCollection<Application> getApplications() {
@@ -76,7 +75,6 @@ public class ApplicationResource {
   }
 
   @GET
-  @RolesAllowed(Roles.READ)
   @Path("services/application/{id}")
   @ApiOperation(value = "Fetch application", response = Application.class)
   public Response getApplication(
@@ -90,7 +88,6 @@ public class ApplicationResource {
   }
 
   @GET
-  @RolesAllowed(Roles.READ)
   @Path("services/application/{id}/deployment")
   @ApiOperation(value = "Fetch deployed instances of the application")
   public PaginatedCollection<ServerDeployment> getApplicationDeployments(
@@ -102,8 +99,8 @@ public class ApplicationResource {
   }
 
   @PUT
-  @Path("services/application")
   @RolesAllowed(Roles.EDIT)
+  @Path("services/application")
   @ApiOperation(value = "Create a new application", code = 201, response = ApplicationLink.class)
   public Response createApplication(
     @ApiParam("Application") Application application,

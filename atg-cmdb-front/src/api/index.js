@@ -1,11 +1,10 @@
 import fetch from 'isomorphic-fetch';
 import isObject from 'lodash/isObject';
-
-const credentials = btoa('web-gui:secret');
+import { store } from '../components/Root';
+import { getAuthenticated } from '../reducers';
 
 const APPLICATION_JSON = {
     headers: {
-        Authorization: `Basic ${credentials}`,
         Accept: 'application/json',
         'Content-Type': 'application/json',
     },
@@ -13,7 +12,6 @@ const APPLICATION_JSON = {
 
 const TEXT_HTML = {
     headers: {
-        Authorization: `Basic ${credentials}`,
         Accept: 'text/html',
     },
 };
@@ -62,10 +60,16 @@ function fetchHtml(url, params) {
 }
 
 function patchJson(url, obj, { hash, params } = {}) {
-    const headers = (hash) ? {
-        ...APPLICATION_JSON.headers,
-        'If-Match': `"${hash}"`,
-    } : APPLICATION_JSON.headers;
+    const headers = { ...APPLICATION_JSON.headers };
+    if (hash) {
+        headers['If-Match'] = `"${hash}"`;
+    }
+
+    const authenticated = getAuthenticated(store.getState());
+    if (authenticated) {
+        const credential = btoa(`${authenticated.uid}:secret`);
+        headers.Authorization = `Basic ${credential}`;
+    }
 
     const options = {
         headers,
