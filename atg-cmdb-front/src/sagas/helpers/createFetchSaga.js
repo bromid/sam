@@ -22,6 +22,10 @@ export default function createFetchSaga(options) {
                 payload: payloadTransform(payload.data, payload.response),
             });
         } catch (error) {
+            if (process.env.NODE_ENV !== 'production') {
+                console.error(error.stack); // eslint-disable-line no-console
+            }
+
             yield put({
                 type: responseKey,
                 error: true,

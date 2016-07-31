@@ -8,6 +8,7 @@ import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
 import ApplicationDeployments from './ApplicationDeployments';
+import { fromApplication, getIsMetaOpen } from '../reducers';
 
 const patchNotification = (result, error, isPending) => {
     if (isPending) return {};
@@ -86,22 +87,15 @@ const ApplicationContainer = React.createClass({
     },
 });
 
-const mapStateToProps = (state) => {
-    const {
-        metaOpen,
-        application, applicationError, applicationIsPending,
-        applicationPatchResult, applicationPatchResultError, applicationPatchResultIsPending,
-    } = state;
-    return {
-        metaOpen,
-        application,
-        fetchError: applicationError,
-        patchResult: applicationPatchResult,
-        patchError: applicationPatchResultError,
-        patchIsPending: applicationPatchResultIsPending,
-        isLoading: applicationIsPending,
-    };
-};
+const mapStateToProps = (state) => ({
+    metaOpen: getIsMetaOpen(state),
+    application: fromApplication.getCurrent(state),
+    fetchError: fromApplication.getCurrentError(state),
+    patchResult: fromApplication.getPatchResult(state),
+    patchError: fromApplication.getPatchResultError(state),
+    patchIsPending: fromApplication.getPatchResultIsPending(state),
+    isLoading: fromApplication.getCurrentIsPending(state),
+});
 
 const Actions = {
     patchApplication: applicationActions.patchApplication,

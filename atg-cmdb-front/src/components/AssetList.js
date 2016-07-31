@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
+import { fromAsset } from '../reducers';
 
 const Asset = ({ asset: { id, name, description } }) => (
     <Link to={`/asset/${id}`}>
@@ -28,10 +29,9 @@ const AssetListContainer = ({ assets, isLoading }) => {
 };
 
 function mapStateToProps(state) {
-    const { assetList, assetListIsPending } = state;
     return {
-        assets: assetList.items,
-        isLoading: assetListIsPending || assetListIsPending === null,
+        assets: fromAsset.getList(state),
+        isLoading: fromAsset.getListIsPending(state),
     };
 }
 export default connect(mapStateToProps)(AssetListContainer);

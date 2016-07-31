@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
 import { serverName, serverLink } from './Server';
+import { fromApplication } from '../reducers';
 
 const Deployment = ({ deployment }) => (
     <Link to={serverLink(deployment)}>
@@ -30,11 +31,8 @@ const DeploymentListContainer = ({ isLoading, deployments }) => {
     );
 };
 
-const mapStateToProps = (state) => {
-    const { applicationDeployments, applicationDeploymentsIsPending } = state;
-    return {
-        deployments: applicationDeployments.items,
-        isLoading: applicationDeploymentsIsPending,
-    };
-};
+const mapStateToProps = (state) => ({
+    deployments: fromApplication.getDeployments(state),
+    isLoading: fromApplication.getDeploymentsIsPending(state),
+});
 export default connect(mapStateToProps)(DeploymentListContainer);

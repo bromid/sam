@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import LoadingIndicator from './LoadingIndicator';
+import { fromInfo } from '../reducers';
 
 const InfoContainer = ({ info, isLoading }) => {
     const style = {
@@ -20,8 +21,8 @@ const InfoContainer = ({ info, isLoading }) => {
     );
 };
 
-const mapStateToProps = ({ info, infoIsPending }) => ({
-    info,
-    isLoading: infoIsPending,
+const mapStateToProps = (state) => ({
+    info: fromInfo.getData(state),
+    isLoading: fromInfo.getIsPending(state),
 });
 export default connect(mapStateToProps)(InfoContainer);
