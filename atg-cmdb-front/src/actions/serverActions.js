@@ -14,7 +14,7 @@ export const fetchServer = (hostname, environment) => ({
     payload: { hostname, environment },
 });
 
-export const patchServer = (hostname, environment, server, options) => ({
+export const patchServer = (hostname, environment, obj, options) => ({
     type: PATCH_SERVER_REQUEST,
-    payload: [{ hostname, environment }, server, options],
+    payload: { hostname, environment, obj, options },
 });
