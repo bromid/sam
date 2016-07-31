@@ -1,7 +1,5 @@
 import fetch from 'isomorphic-fetch';
 import isObject from 'lodash/isObject';
-import { store } from '../components/Root';
-import { getAuthenticated } from '../reducers';
 
 const APPLICATION_JSON = {
     headers: {
@@ -59,13 +57,12 @@ function fetchHtml(url, params) {
         );
 }
 
-function patchJson(url, obj, { hash, params } = {}) {
+function patchJson(url, obj, { hash, params } = {}, authenticated) {
     const headers = { ...APPLICATION_JSON.headers };
     if (hash) {
         headers['If-Match'] = `"${hash}"`;
     }
 
-    const authenticated = getAuthenticated(store.getState());
     if (authenticated) {
         const credential = btoa(`${authenticated.uid}:secret`);
         headers.Authorization = `Basic ${credential}`;
@@ -95,8 +92,8 @@ export const fetchGroup = (groupId) =>
 export const fetchGroupTags = () =>
     fetchJson('/services/group/tag');
 
-export const patchGroup = (groupId, group, options) =>
-    patchJson(`/services/group/${groupId}`, group, options);
+export const patchGroup = (groupId, group, options, authenticated) =>
+    patchJson(`/services/group/${groupId}`, group, options, authenticated);
 
 export const fetchApplicationList = () =>
     fetchJson('/services/application');
@@ -107,8 +104,8 @@ export const fetchApplication = (applicationId) =>
 export const fetchApplicationDeployments = (applicationId) =>
     fetchJson(`/services/application/${applicationId}/deployment`);
 
-export const patchApplication = (applicationId, application, options) =>
-    patchJson(`/services/application/${applicationId}`, application, options);
+export const patchApplication = (applicationId, application, options, authenticated) =>
+    patchJson(`/services/application/${applicationId}`, application, options, authenticated);
 
 export const fetchServerList = (params) => {
     if (params.environment) return fetchJson(`/services/server/${params.environment}`);
@@ -118,8 +115,8 @@ export const fetchServerList = (params) => {
 export const fetchServer = (params) =>
     fetchJson(`/services/server/${params.environment}/${params.hostname}`);
 
-export const patchServer = (params, server, options) =>
-    patchJson(`/services/server/${params.environment}/${params.hostname}`, server, options);
+export const patchServer = (params, server, options, authenticated) =>
+    patchJson(`/services/server/${params.environment}/${params.hostname}`, server, options, authenticated);
 
 export const fetchAssetList = () =>
     fetchJson('/services/asset');
@@ -127,8 +124,8 @@ export const fetchAssetList = () =>
 export const fetchAsset = (assetId) =>
     fetchJson(`/services/asset/${assetId}`);
 
-export const patchAsset = (assetId, asset, options) =>
-    patchJson(`/services/asset/${assetId}`, asset, options);
+export const patchAsset = (assetId, asset, options, authenticated) =>
+    patchJson(`/services/asset/${assetId}`, asset, options, authenticated);
 
 export const fetchSearch = (searchQuery) =>
     fetchJson(`/services/search?q=${searchQuery}`);
