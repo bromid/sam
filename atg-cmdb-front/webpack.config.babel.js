@@ -1,5 +1,6 @@
 import path from 'path';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import validate from 'webpack-validator';
 
 const Paths = {
     SRC: path.resolve('src'),
@@ -9,7 +10,7 @@ const Paths = {
     PUBLIC: '/static/',
 };
 
-export default {
+const config = {
     devtool: 'eval',
     entry: Paths.APP_ENTRY,
     output: {
@@ -42,3 +43,4 @@ export default {
         ],
     },
 };
+export default validate(config);
