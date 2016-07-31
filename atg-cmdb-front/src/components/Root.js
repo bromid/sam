@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import { Provider } from 'react-redux';
 import { Router, Route, browserHistory } from 'react-router';
+import configureStore from '../configureStore';
 import App from './App';
 import Groups from './GroupList';
 import Group from './Group';
@@ -17,7 +18,9 @@ import * as GroupActions from '../actions/groupActions';
 import * as ServerActions from '../actions/serverActions';
 import * as InfoActions from '../actions/infoActions';
 
-const Root = ({ store }) => {
+export const store = configureStore();
+
+const Root = () => {
     const initApp = () =>
         store.dispatch(InfoActions.fetchInfo());
 
@@ -113,9 +116,5 @@ const Root = ({ store }) => {
             </Router>
         </Provider>
     );
-};
-
-Root.propTypes = {
-    store: PropTypes.object.isRequired,
 };
 export default Root;
