@@ -1,6 +1,7 @@
 import path from 'path';
 import webpack from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
+import validate from 'webpack-validator';
 
 const Paths = {
     SRC: path.resolve('src'),
@@ -10,7 +11,7 @@ const Paths = {
     PUBLIC: '/static/',
 };
 
-export default {
+const config = {
     devtool: 'cheap-source-map',
     entry: Paths.APP_ENTRY,
     output: {
@@ -59,3 +60,4 @@ export default {
         ],
     },
 };
+export default validate(config);
