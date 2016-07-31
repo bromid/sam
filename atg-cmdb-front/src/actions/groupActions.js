@@ -19,7 +19,7 @@ export const fetchGroupTags = () => ({
     type: FETCH_GROUP_TAG_REQUEST,
 });
 
-export const patchGroup = (groupId, group, options) => ({
+export const patchGroup = (id, obj, options) => ({
     type: PATCH_GROUP_REQUEST,
-    payload: [groupId, group, options],
+    payload: { id, obj, options },
 });

@@ -13,7 +13,7 @@ export const fetchAsset = (assetId) => ({
     payload: { id: assetId },
 });
 
-export const patchAsset = (assetId, asset, options) => ({
+export const patchAsset = (id, obj, options) => ({
     type: PATCH_ASSET_REQUEST,
-    payload: [assetId, asset, options],
+    payload: { id, obj, options },
 });
