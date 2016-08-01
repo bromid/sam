@@ -14,7 +14,10 @@ import io.swagger.annotations.ApiModel;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.ui.rest.Defaults;
 
-@ApiModel(description = "An application is running on a server and is identified by an id. All applications belongs to one or more groups and needs to be versioned")
+@ApiModel(description =
+  "An application is running on a server and is identified by an id. " +
+  "All applications belongs to one or more groups and needs to be versioned"
+)
 @JsonPropertyOrder({ "id", "name", "version", "group", "meta" })
 public class Application extends Base {
 

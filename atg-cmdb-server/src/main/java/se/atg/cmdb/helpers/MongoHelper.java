@@ -14,16 +14,16 @@ import com.mongodb.client.result.UpdateResult;
 
 public abstract class MongoHelper {
 
-  public static void updateDocument(Document document, Optional<String> hash, MongoCollection<Document> collection) {
+  public static void updateDocument(Document existing, Document updated, Optional<String> hash, MongoCollection<Document> collection) {
 
-    Bson filter = Filters.eq("_id", document.get("_id"));
+    Bson filter = Filters.eq("_id", existing.get("_id"));
     if (hash.isPresent()) {
       filter = Filters.and(
         filter,
         Filters.eq("meta.hash", hash.get())
       );
     }
-    final UpdateResult result = collection.replaceOne(filter, document);
+    final UpdateResult result = collection.replaceOne(filter, updated);
     if (result.getMatchedCount() != 1) {
       throw new WebApplicationException("Concurrent modification", 422);
     }

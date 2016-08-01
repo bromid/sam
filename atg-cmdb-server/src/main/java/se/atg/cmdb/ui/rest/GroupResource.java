@@ -40,11 +40,13 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.UnwindOptions;
 
 import io.dropwizard.jersey.PATCH;
+import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.helpers.MongoHelper;
 import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.helpers.TreeHelper;
@@ -52,7 +54,6 @@ import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Tag;
-import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
 @Path("/")
@@ -110,29 +111,47 @@ public class GroupResource {
   }
 
   @PUT
-  @Path("services/group")
+  @Path("services/group/{id}")
   @RolesAllowed(Roles.EDIT)
-  @ApiOperation(value = "Create a new group", code = 201, response = GroupLink.class)
-  public Response createGroup(
+  @ApiOperation(value = "Create or replace a group")
+  @ApiResponses({
+    @ApiResponse(code = 201, message = "A new group was created.", response = GroupLink.class),
+    @ApiResponse(code = 200, message = "The group was successfully replaced.", response = GroupLink.class),
+    @ApiResponse(code = 412, message = "No group exists with the supplied id and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied group is not valid.", response = ErrorMessage.class),
+  })
+  public Response createOrReplaceGroup(
+    @ApiParam("Group id") @PathParam("id") String id,
     @ApiParam("Group") Group group,
     @Context UriInfo uriInfo,
+    @Context Request request,
     @Context SecurityContext securityContext
   ) throws JsonParseException, JsonMappingException, IOException {
-    logger.info("Create group: {}", group);
+    logger.info("Create or replace group: {}, {}", id, group);
 
     RestHelper.validate(group, Group.Create.class);
 
-    final User user = RestHelper.getUser(securityContext);
-    final Document bson = JsonHelper.addMetaForCreate(group, user.name, objectMapper);
-    database.getCollection(Collections.GROUPS).insertOne(bson);
+    final Optional<Document> existing = getGroupForCreateOrUpdate(id);
+    final MongoCollection<Document> collection = database.getCollection(Collections.GROUPS);
 
-    return linkResponse(Status.CREATED, bson, uriInfo);
+    if (!existing.isPresent()) {
+      final Document updated = RestHelper.createAndAddMeta(group, collection, objectMapper, securityContext);
+      return linkResponse(Status.CREATED, updated, uriInfo);
+    }
+
+    final Document updated = RestHelper.replaceAndUpdateMeta(existing.get(), group, collection, objectMapper, securityContext, request);
+    return linkResponse(Status.OK, updated, uriInfo);
   }
 
   @PATCH
   @RolesAllowed(Roles.EDIT)
   @Path("services/group/{id}")
-  @ApiOperation(value = "Update group", response = GroupLink.class)
+  @ApiOperation(value = "Update group")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The group was successfully updated.", response = GroupLink.class),
+    @ApiResponse(code = 412, message = "No group exists with the supplied id and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied group is not valid.", response = ErrorMessage.class),
+  })
   public Response updateGroup(
     @ApiParam("Group id") @PathParam("id") String id,
     @ApiParam("Group") Group group,
@@ -173,10 +192,17 @@ public class GroupResource {
   }
 
   private Document getGroupForUpdate(String id) {
-    return database
-      .getCollection(Collections.GROUPS)
-      .find(Filters.eq("id", id))
-      .first();
+    final Optional<Document> bson = getGroupForCreateOrUpdate(id);
+    return bson.orElseThrow(() -> new WebApplicationException(Status.NOT_FOUND));
+  }
+
+  private Optional<Document> getGroupForCreateOrUpdate(String id) {
+    return Optional.ofNullable(
+      database
+        .getCollection(Collections.GROUPS)
+        .find(Filters.eq("id", id))
+        .first()
+    );
   }
 
   /*

@@ -40,9 +40,12 @@ import com.mongodb.client.model.Sorts;
 import com.mongodb.client.model.UnwindOptions;
 
 import io.dropwizard.jersey.PATCH;
+import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.helpers.Mapper;
@@ -76,6 +79,13 @@ public class ServerResource {
   @ApiOperation("Fetch all servers")
   public PaginatedCollection<Server> getServers() {
     return findServers(ALL);
+  }
+
+  @GET
+  @Path("services/server/environment")
+  @ApiOperation("Fetch all server environments")
+  public PaginatedCollection<String> getServerEnvironments() {
+    return getEnvironments();
   }
 
   @GET
@@ -147,65 +157,79 @@ public class ServerResource {
     return deployment;
   }
 
-  @GET
-  @Path("services/server/environment")
-  @ApiOperation("Fetch all server environments")
-  public PaginatedCollection<String> getServerEnvironments() {
-    return getEnvironments();
-  }
-
   @PUT
-  @Path("services/server/{environment}/{hostname}/deployment")
+  @Path("services/server/{environment}/{hostname}/deployment/{applicationId}")
   @RolesAllowed(Roles.EDIT)
   @ApiOperation(value = "Add a deployed applications to the server", response = ServerLink.class)
   public Response addDeployment(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
     @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam("Application id") @PathParam("applicationId") String applicationId,
     @ApiParam("Deployment") Deployment deployment,
     @Context UriInfo uriInfo,
     @Context Request request,
     @Context SecurityContext securityContext
   ) {
-    logger.info("Add deployment: {}", deployment);
+    logger.info("Add deployment: {}, {}", applicationId, deployment);
+
     RestHelper.validate(deployment);
 
     final Document existing = getServerForUpdate(hostname, environment);
     final Optional<String> hash = RestHelper.verifyHash(existing, request);
 
     final Document update = JsonHelper.entityToBson(deployment, objectMapper);
-    Mapper.upsertList(existing, update, "deployments", Deployment::sameApplicationId);
+    Mapper.upsertList(existing, update, "deployments", (item) -> item.get("applicationId").equals(applicationId));
 
     final User user = RestHelper.getUser(securityContext);
     JsonHelper.updateMetaForUpdate(existing, hash, user.name);
 
-    MongoHelper.updateDocument(existing, hash, database.getCollection(Collections.SERVERS));
+    MongoHelper.updateDocument(existing, existing, hash, database.getCollection(Collections.SERVERS));
     return linkResponse(Status.OK, existing, uriInfo);
   }
 
   @PUT
-  @Path("services/server")
+  @Path("services/server/{environment}/{hostname}")
   @RolesAllowed(Roles.EDIT)
-  @ApiOperation(value = "Create a new server", code = 201, response = ServerLink.class)
-  public Response createServer(
+  @ApiOperation(value = "Create or replace a server")
+  @ApiResponses({
+    @ApiResponse(code = 201, message = "A new server was created.", response = ServerLink.class),
+    @ApiResponse(code = 200, message = "The server was successfully replaced.", response = ServerLink.class),
+    @ApiResponse(code = 412, message = "No server exists with the supplied environment, hostname and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied server is not valid.", response = ErrorMessage.class),
+  })
+  public Response createOrReplaceServer(
+    @ApiParam("Server hostname") @PathParam("hostname") String hostname,
+    @ApiParam("Test environment") @PathParam("environment") String environment,
     @ApiParam("Server") Server server,
     @Context UriInfo uriInfo,
+    @Context Request request,
     @Context SecurityContext securityContext
   ) throws JsonParseException, JsonMappingException, IOException {
-    logger.info("Create server: {}", server);
+    logger.info("Create or replace server: {}, {}, {}", environment, hostname, server);
 
     RestHelper.validate(server, Server.Create.class);
 
-    final User user = RestHelper.getUser(securityContext);
-    final Document bson = JsonHelper.addMetaForCreate(server, user.name, objectMapper);
+    final Optional<Document> existing = getServerForCreateOrUpdate(hostname, environment);
+    final MongoCollection<Document> collection = database.getCollection(Collections.SERVERS);
 
-    database.getCollection(Collections.SERVERS).insertOne(bson);
-    return linkResponse(Status.CREATED, bson, uriInfo);
+    if (!existing.isPresent()) {
+      final Document updated = RestHelper.createAndAddMeta(server, collection, objectMapper, securityContext);
+      return linkResponse(Status.CREATED, updated, uriInfo);
+    }
+
+    final Document updated = RestHelper.replaceAndUpdateMeta(existing.get(), server, collection, objectMapper, securityContext, request);
+    return linkResponse(Status.OK, updated, uriInfo);
   }
 
   @PATCH
   @RolesAllowed(Roles.EDIT)
   @Path("services/server/{environment}/{hostname}")
-  @ApiOperation(value = "Update server", response = ServerLink.class)
+  @ApiOperation(value = "Update server")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The server was successfully updated.", response = ServerLink.class),
+    @ApiResponse(code = 412, message = "No server exists with the supplied environment, hostname and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied server is not valid.", response = ErrorMessage.class),
+  })
   public Response updateServer(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
     @ApiParam("Test environment") @PathParam("environment") String environment,
@@ -256,16 +280,18 @@ public class ServerResource {
   }
 
   private Document getServerForUpdate(String hostname, String environment) {
+    final Optional<Document> bson = getServerForCreateOrUpdate(hostname, environment);
+    return bson.orElseThrow(() -> new WebApplicationException(Status.NOT_FOUND));
+  }
 
-    final Document bson = database.getCollection(Collections.SERVERS)
-      .find(Filters.and(
-        Filters.eq("environment", environment),
-        Filters.eq("hostname", hostname)
-      )).first();
-    if (bson == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
-    }
-    return bson;
+  private Optional<Document> getServerForCreateOrUpdate(String hostname, String environment) {
+    return Optional.ofNullable(
+      database.getCollection(Collections.SERVERS)
+        .find(Filters.and(
+          Filters.eq("hostname", hostname),
+          Filters.eq("environment", environment)
+        )).first()
+    );
   }
 
   private Document findServer(Bson filter) {

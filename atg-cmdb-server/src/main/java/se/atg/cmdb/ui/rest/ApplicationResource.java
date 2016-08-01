@@ -37,18 +37,19 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Projections;
 
 import io.dropwizard.jersey.PATCH;
+import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.helpers.MongoHelper;
 import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.ServerDeployment;
-import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
 @Path("/")
@@ -99,29 +100,47 @@ public class ApplicationResource {
   }
 
   @PUT
+  @Path("services/application/{id}")
   @RolesAllowed(Roles.EDIT)
-  @Path("services/application")
-  @ApiOperation(value = "Create a new application", code = 201, response = ApplicationLink.class)
-  public Response createApplication(
+  @ApiOperation(value = "Create or replace an application")
+  @ApiResponses({
+    @ApiResponse(code = 201, message = "A new application was created.", response = ApplicationLink.class),
+    @ApiResponse(code = 200, message = "The application was successfully replaced.", response = ApplicationLink.class),
+    @ApiResponse(code = 412, message = "No application exists with the supplied id and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied application is not valid.", response = ErrorMessage.class),
+  })
+  public Response createOrReplaceApplication(
+    @ApiParam("Application id") @PathParam("id") String id,
     @ApiParam("Application") Application application,
     @Context UriInfo uriInfo,
+    @Context Request request,
     @Context SecurityContext securityContext
   ) throws JsonParseException, JsonMappingException, IOException {
-    logger.info("Create application: {}", application);
+    logger.info("Create or replace application: {}, {}", id, application);
 
     RestHelper.validate(application, Application.Create.class);
 
-    final User user = RestHelper.getUser(securityContext);
-    final Document bson = JsonHelper.addMetaForCreate(application, user.name, objectMapper);
-    database.getCollection(Collections.APPLICATIONS).insertOne(bson);
+    final Optional<Document> existing = getApplicationForCreateOrReplace(id);
+    final MongoCollection<Document> collection = database.getCollection(Collections.APPLICATIONS);
 
-    return linkResponse(Status.CREATED, bson, uriInfo);
+    if (!existing.isPresent()) {
+      final Document updated = RestHelper.createAndAddMeta(application, collection, objectMapper, securityContext);
+      return linkResponse(Status.CREATED, updated, uriInfo);
+    }
+
+    final Document updated = RestHelper.replaceAndUpdateMeta(existing.get(), application, collection, objectMapper, securityContext, request);
+    return linkResponse(Status.OK, updated, uriInfo);
   }
 
   @PATCH
   @RolesAllowed(Roles.EDIT)
   @Path("services/application/{id}")
-  @ApiOperation(value = "Update application", response = ApplicationLink.class)
+  @ApiOperation(value = "Update application")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The application was successfully updated.", response = ApplicationLink.class),
+    @ApiResponse(code = 412, message = "No application exists with the supplied id and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied application is not valid.", response = ErrorMessage.class),
+  })
   public Response updateApplication(
     @ApiParam("Application id") @PathParam("id") String id,
     @ApiParam("Application") Application application,
@@ -172,13 +191,16 @@ public class ApplicationResource {
   }
 
   private Document getApplicationForUpdate(String id) {
-    final Document bson = database.getCollection(Collections.APPLICATIONS)
-       .find(Filters.eq("id", id))
-       .first();
-    if (bson == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
-    }
-    return bson;
+    final Optional<Document> bson = getApplicationForCreateOrReplace(id);
+    return bson.orElseThrow(() -> new WebApplicationException(Status.NOT_FOUND));
+  }
+
+  private Optional<Document> getApplicationForCreateOrReplace(String id) {
+    return Optional.ofNullable(
+      database.getCollection(Collections.APPLICATIONS)
+        .find(Filters.eq("id", id))
+        .first()
+    );
   }
 
   private Document findApplication(Bson filter) {

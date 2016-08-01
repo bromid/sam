@@ -137,7 +137,7 @@ public class ServerIntegrationTest {
       hostname = "somehost";
       fqdn = "somehost.ci.hh.atg.se";
     }};
-    final Response response = testEndpoint.path("server")
+    final Response response = testEndpoint.path("server").path(server.environment).path(server.hostname)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(server));
     TestHelper.assertValidationError("id must be null", response);
@@ -150,7 +150,7 @@ public class ServerIntegrationTest {
       environment = "ci";
       fqdn = "somehost.ci.hh.atg.se";
     }};
-    final Response response = testEndpoint.path("server")
+    final Response response = testEndpoint.path("server").path(server.environment).path("hostname")
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(server));
     TestHelper.assertValidationError("hostname may not be null", response);
@@ -163,7 +163,7 @@ public class ServerIntegrationTest {
       hostname = "somehost";
       fqdn = "somehost.ci.hh.atg.se";
     }};
-    final Response response = testEndpoint.path("server")
+    final Response response = testEndpoint.path("server").path("environment").path(server.hostname)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(server));
     TestHelper.assertValidationError("environment may not be null", response);
@@ -179,7 +179,7 @@ public class ServerIntegrationTest {
         type = "Windows";
       }};
     }};
-    final Response response = testEndpoint.path("server")
+    final Response response = testEndpoint.path("server").path(server.environment).path(server.hostname)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(server));
     TestHelper.assertValidationError("os.name may not be null", response);
@@ -495,7 +495,7 @@ public class ServerIntegrationTest {
 
   private ServerResponse createServer(final Server server) {
 
-    final Response response = testEndpoint.path("server")
+    final Response response = testEndpoint.path("server").path(server.environment).path(server.hostname)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .put(Entity.json(server));
     TestHelper.assertSuccessful(response);
@@ -574,7 +574,7 @@ public class ServerIntegrationTest {
   private ServerLink addServerDeployment(Link link, Deployment deployment) {
 
     final Response response = client.target(link)
-        .path("deployment")
+        .path("deployment").path(deployment.getApplicationId())
         .request(MediaType.APPLICATION_JSON_TYPE)
         .put(Entity.json(deployment));
       TestHelper.assertSuccessful(response);

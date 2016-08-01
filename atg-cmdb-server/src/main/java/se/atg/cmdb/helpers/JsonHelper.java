@@ -44,17 +44,28 @@ public abstract class JsonHelper {
   public static UpdateMetaResult updateMetaForUpdate(Document bson, Optional<String> hash, String updatedBy) {
 
     final Document updatedMeta = (Document) bson.remove("meta");
+    return updateMetaForUpdate(bson.toJson(), bson, updatedMeta, hash, updatedBy);
+  }
+
+  public static UpdateMetaResult updateMetaForUpdate(String json, Document updatedMeta, Optional<String> hash, String updatedBy) {
+
+    final Document bson = Document.parse(json);
+    return updateMetaForUpdate(json, bson, updatedMeta, hash, updatedBy);
+  }
+
+  public static UpdateMetaResult updateMetaForUpdate(String json, Document bson, Document updatedMeta, Optional<String> hash, String updatedBy ) {
 
     final Date now = Date.from(Instant.now());
     updatedMeta.put("refreshed", now);
     updatedMeta.put("refreshedBy", updatedBy);
 
-    final String newHash = DigestUtils.sha1Hex(bson.toJson());
+    final String newHash = DigestUtils.sha1Hex(json);
     if (hash.isPresent() && hash.get().equals(newHash)) {
       bson.put("meta", updatedMeta);
       return new UpdateMetaResult() {{
         updated = false;
         meta = updatedMeta;
+        document = bson;
       }};
     } else {
       updatedMeta.put("hash", newHash);
@@ -64,6 +75,7 @@ public abstract class JsonHelper {
       return new UpdateMetaResult() {{
         updated = true;
         meta = updatedMeta;
+        document = bson;
       }};
     }
   }
@@ -201,5 +213,6 @@ public abstract class JsonHelper {
   public static class UpdateMetaResult {
     public boolean updated;
     public Document meta;
+    public Document document;
   }
 }

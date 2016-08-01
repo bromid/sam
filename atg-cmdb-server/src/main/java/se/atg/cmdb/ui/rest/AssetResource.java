@@ -36,17 +36,18 @@ import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
 
 import io.dropwizard.jersey.PATCH;
+import io.dropwizard.jersey.errors.ErrorMessage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.helpers.MongoHelper;
 import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.Asset;
 import se.atg.cmdb.model.AssetLink;
 import se.atg.cmdb.model.PaginatedCollection;
-import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
 @Path("/")
@@ -86,29 +87,47 @@ public class AssetResource {
   }
 
   @PUT
-  @Path("services/asset")
+  @Path("services/asset/{id}")
   @RolesAllowed(Roles.EDIT)
-  @ApiOperation(value = "Create a new asset", code = 201, response = AssetLink.class)
-  public Response createAsset(
+  @ApiOperation(value = "Create or replace an asset")
+  @ApiResponses({
+    @ApiResponse(code = 201, message = "A new asset was created.", response = AssetLink.class),
+    @ApiResponse(code = 200, message = "The asset was successfully replaced.", response = AssetLink.class),
+    @ApiResponse(code = 412, message = "No asset exists with the supplied id and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied asset is not valid.", response = ErrorMessage.class),
+  })
+  public Response createOrReplaceAsset(
+    @ApiParam("Asset id") @PathParam("id") String id,
     @ApiParam("Asset") Asset asset,
     @Context UriInfo uriInfo,
+    @Context Request request,
     @Context SecurityContext securityContext
   ) throws JsonParseException, JsonMappingException, IOException {
-    logger.info("Create asset: {}", asset);
+    logger.info("Create or replace asset: {}, {}", id, asset);
 
     RestHelper.validate(asset, Asset.Create.class);
 
-    final User user = RestHelper.getUser(securityContext);
-    final Document bson = JsonHelper.addMetaForCreate(asset, user.name, objectMapper);
-    database.getCollection(Collections.ASSETS).insertOne(bson);
+    final Optional<Document> existing = getAssetForCreateOrReplace(id);
+    final MongoCollection<Document> collection = database.getCollection(Collections.ASSETS);
 
-    return linkResponse(Status.CREATED, bson, uriInfo);
+    if (!existing.isPresent()) {
+      final Document updated = RestHelper.createAndAddMeta(asset, collection, objectMapper, securityContext);
+      return linkResponse(Status.CREATED, updated, uriInfo);
+    }
+
+    final Document updated = RestHelper.replaceAndUpdateMeta(existing.get(), asset, collection, objectMapper, securityContext, request);
+    return linkResponse(Status.OK, updated, uriInfo);
   }
 
   @PATCH
   @RolesAllowed(Roles.EDIT)
   @Path("services/asset/{id}")
-  @ApiOperation(value = "Update asset", response = AssetLink.class)
+  @ApiOperation(value = "Update asset")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The asset was successfully updated.", response = AssetLink.class),
+    @ApiResponse(code = 412, message = "No asset exists with the supplied id and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied asset is not valid.", response = ErrorMessage.class),
+  })
   public Response updateAsset(
     @ApiParam("Asset id") @PathParam("id") String id,
     @ApiParam("Asset") Asset asset,
@@ -159,13 +178,16 @@ public class AssetResource {
   }
 
   private Document getAssetForUpdate(String id) {
-    final Document bson = database.getCollection(Collections.ASSETS)
-      .find(Filters.eq("id", id))
-      .first();
-    if (bson == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
-    }
-    return bson;
+    final Optional<Document> bson = getAssetForCreateOrReplace(id);
+    return bson.orElseThrow(() -> new WebApplicationException(Status.NOT_FOUND));
+  }
+
+  private Optional<Document> getAssetForCreateOrReplace(String id) {
+    return Optional.ofNullable(
+      database.getCollection(Collections.ASSETS)
+        .find(Filters.eq("id", id))
+        .first()
+    );
   }
 
   private Document findAsset(Bson filter) {
