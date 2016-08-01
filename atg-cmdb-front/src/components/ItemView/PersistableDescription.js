@@ -69,7 +69,11 @@ const PersistableDescription = React.createClass({
                         fieldRef={(ref) => (this.fieldRef = ref)}
                         multiLine={true}
                     /> :
-                    <Description value={value} edit={edit} addHandler={this.addLinkWrapperHandler} />
+                    <Description
+                        value={value}
+                        edit={edit}
+                        addHandler={this.addLinkWrapperHandler}
+                    />
                 }
             </div>
         );

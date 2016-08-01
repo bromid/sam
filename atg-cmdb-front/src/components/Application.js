@@ -7,7 +7,7 @@ import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
 import ApplicationDeployments from './ApplicationDeployments';
-import { fromApplication, getIsMetaOpen } from '../reducers';
+import { fromApplication } from '../reducers';
 
 const ApplicationContainer = React.createClass({
 
@@ -61,7 +61,6 @@ const ApplicationContainer = React.createClass({
 });
 
 const mapStateToProps = (state) => ({
-    metaOpen: getIsMetaOpen(state),
     application: fromApplication.getCurrent(state),
     fetchError: fromApplication.getCurrentError(state),
     patchResult: fromApplication.getPatchResult(state),

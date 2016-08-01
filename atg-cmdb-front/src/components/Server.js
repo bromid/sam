@@ -9,7 +9,7 @@ import { flexWrapperStyle } from '../style';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
-import { fromServer, getIsMetaOpen } from '../reducers';
+import { fromServer } from '../reducers';
 
 const flexChildStyle = {
     minWidth: 250,

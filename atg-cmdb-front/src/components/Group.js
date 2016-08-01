@@ -10,7 +10,7 @@ import ItemView from './ItemView';
 import { GroupList } from './GroupList';
 import { AssetList } from './AssetList';
 import { ApplicationList } from './ApplicationList';
-import { fromGroup, getIsMetaOpen } from '../reducers';
+import { fromGroup } from '../reducers';
 
 const collectionSize = (collection) => {
     if (!collection) return ' (0)';
@@ -96,7 +96,6 @@ const GroupContainer = React.createClass({
 });
 
 const mapStateToProps = (state) => ({
-    metaOpen: getIsMetaOpen(state),
     group: fromGroup.getCurrent(state),
     fetchError: fromGroup.getCurrentError(state),
     patchResult: fromGroup.getPatchResult(state),

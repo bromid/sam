@@ -6,7 +6,7 @@ import * as assetActions from '../actions/assetActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
-import { fromAsset, getIsMetaOpen } from '../reducers';
+import { fromAsset } from '../reducers';
 
 const AssetContainer = React.createClass({
 
@@ -22,11 +22,9 @@ const AssetContainer = React.createClass({
 
     render() {
         const { asset, isLoading } = this.props;
-
         if (isLoading && isEmpty(asset)) return <LoadingIndicator />;
 
         const { name, description = '', group, attributes, meta } = asset;
-
         const tabs = [
             {
                 name: 'Details',
@@ -56,7 +54,6 @@ const AssetContainer = React.createClass({
 });
 
 const mapStateToProps = (state) => ({
-    metaOpen: getIsMetaOpen(state),
     asset: fromAsset.getCurrent(state),
     fetchError: fromAsset.getCurrentError(state),
     patchResult: fromAsset.getPatchResult(state),

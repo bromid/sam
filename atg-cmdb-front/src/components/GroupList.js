@@ -8,7 +8,7 @@ import { flexWrapperStyle } from '../style';
 import { toArray } from '../helpers';
 import LoadingIndicator from './LoadingIndicator';
 import { TagFilter } from './Tag';
-import { fromGroup } from '../reducers';
+import { fromGroup, getAuthenticated } from '../reducers';
 
 const CountBadge = ({ children, title, primary, secondary }) => {
     const style = { padding: '12px' };
@@ -153,5 +153,6 @@ const mapStateToProps = (state, { location: { query } }) => ({
     groupTags: fromGroup.getTags(state),
     activeFilter: query.tags && query.tags.split(','),
     isLoading: fromGroup.getListIsPending(state),
+    authenticated: getAuthenticated(state),
 });
 export default withRouter(connect(mapStateToProps)(GroupsContainer));

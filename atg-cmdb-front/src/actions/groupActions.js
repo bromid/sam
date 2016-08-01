@@ -25,7 +25,7 @@ export const patchGroup = (id, obj, options) => ({
     payload: { id, obj, options },
 });
 
-export const createGroup = (group, options) => ({
+export const createGroup = (obj, options) => ({
     type: CREATE_GROUP_REQUEST,
-    payload: [group, options],
+    payload: { id: obj.id, obj, options },
 });
