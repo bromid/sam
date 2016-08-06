@@ -3,6 +3,7 @@ import {
     FETCH_GROUP_REQUEST,
     FETCH_GROUP_TAG_REQUEST,
     PATCH_GROUP_REQUEST,
+    CREATE_GROUP_REQUEST,
 } from '../constants';
 
 export const fetchGroupList = (tags) => ({
@@ -22,4 +23,9 @@ export const fetchGroupTags = () => ({
 export const patchGroup = (id, obj, options) => ({
     type: PATCH_GROUP_REQUEST,
     payload: { id, obj, options },
+});
+
+export const createGroup = (obj, options) => ({
+    type: CREATE_GROUP_REQUEST,
+    payload: { id: obj.id, obj, options },
 });

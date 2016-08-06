@@ -1,124 +1,145 @@
 import React, { PropTypes } from 'react';
+import { connect } from 'react-redux';
 import isFunction from 'lodash/isFunction';
 import { Tabs, Tab } from 'material-ui/Tabs';
-import LoadingIndicator from '../LoadingIndicator';
+import * as metaActions from '../../actions/metaActions';
 import { containerStyle, flexWrapperStyle } from '../../style';
-import Notifier from '../Notifier';
+import LoadingIndicator from '../LoadingIndicator';
 import Meta from '../Meta';
 import { Tags } from '../Tag';
 import PersistableDescription from './PersistableDescription';
 import PersistableHeadline from './PersistableHeadline';
 
-const ItemView = React.createClass({
+const ItemViewContainer = React.createClass({
     propTypes: {
         headline: PropTypes.string.isRequired,
         updateHeadline: PropTypes.func,
+        validateHeadline: PropTypes.func,
         description: PropTypes.string.isRequired,
         updateDescription: PropTypes.func,
+        validateDescription: PropTypes.func,
         meta: PropTypes.object,
-        metaOpen: PropTypes.bool,
-        toggleMeta: PropTypes.func,
         tabs: PropTypes.array,
         tags: PropTypes.array,
         onTagDelete: PropTypes.func,
-        notification: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
         isLoading: PropTypes.bool,
     },
 
     getInitialState() {
-        const { description, updateDescription, headline, updateHeadline } = this.props;
+        const {
+            authenticated,
+            description, updateDescription,
+            headline, updateHeadline,
+        } = this.props;
+
         return {
             selectedTab: 0,
             headline,
-            headlineEditable: isFunction(updateHeadline),
+            headlineErrorText: '',
+            headlineEditable: authenticated && isFunction(updateHeadline),
             headlineEditActive: false,
             description,
-            descriptionEditable: isFunction(updateDescription),
+            descriptionErrorText: '',
+            descriptionEditable: authenticated && isFunction(updateDescription),
             descriptionEditActive: false,
         };
     },
 
     componentWillReceiveProps(newProps) {
-        const { description, updateDescription, headline, updateHeadline } = newProps;
+        const {
+            authenticated,
+            description, updateDescription,
+            headline, updateHeadline,
+        } = newProps;
+
         this.setState({
             headline,
-            headlineEditable: isFunction(updateHeadline),
+            headlineEditable: authenticated && isFunction(updateHeadline),
             description,
-            descriptionEditable: isFunction(updateDescription),
+            descriptionEditable: authenticated && isFunction(updateDescription),
         });
     },
 
     onTabChanged(tab) {
-        this.setState({
-            selectedTab: tab,
-        });
+        this.setState({ selectedTab: tab });
+    },
+
+    validateHeadline(value) {
+        const validate = this.props.validateHeadline;
+        return isFunction(validate) ? validate(value) : '';
     },
 
     editHeadline(edit = true) {
-        this.setState({
-            headlineEditActive: edit,
-        });
+        this.setState({ headlineEditActive: edit });
     },
 
     cancelEditHeadline() {
-        const { headline } = this.props;
-        this.setState({ headline });
+        this.setState({ headline: this.props.headline, headlineErrorText: '' });
         this.editHeadline(false);
+    },
+
+    changeHeadline(event) {
+        const headline = event.target.value;
+        const headlineErrorText = this.validateHeadline(headline);
+        this.setState({ headline, headlineErrorText });
     },
 
     saveHeadline(event) {
         event.preventDefault();
-        this.editHeadline(false);
-        this.props.updateHeadline(this.state.headline);
+        const { headline, headlineErrorText } = this.state;
+        if (headlineErrorText.length < 1) {
+            this.editHeadline(false);
+            this.props.updateHeadline(headline);
+        }
     },
 
-    changeHeadline(event) {
-        this.setState({
-            headline: event.target.value,
-        });
+    validateDescription(value) {
+        const validate = this.props.validateDescription;
+        return isFunction(validate) ? validate(value) : '';
     },
 
     editDescription(edit = true) {
-        this.setState({
-            descriptionEditActive: edit,
-        });
+        this.setState({ descriptionEditActive: edit });
     },
 
     cancelEditDescription() {
-        const { description } = this.props;
-        this.setState({ description });
+        this.setState({ description: this.props.description, descriptionErrorText: '' });
         this.editDescription(false);
+    },
+
+    changeDescription(event) {
+        const description = event.target.value;
+        const descriptionErrorText = this.validateDescription(description);
+        this.setState({ description, descriptionErrorText });
     },
 
     saveDescription(event) {
         event.preventDefault();
-        this.editDescription(false);
-        this.props.updateDescription(this.state.description);
-    },
-
-    changeDescription(event) {
-        this.setState({
-            description: event.target.value,
-        });
+        const { description, descriptionErrorText } = this.state;
+        if (descriptionErrorText.length < 1) {
+            this.editDescription(false);
+            this.props.updateDescription(description);
+        }
     },
 
     render() {
         const {
-            isLoading, notification, tabs,
+            isLoading, tabs,
             tags, onTagDelete,
             meta, metaOpen, toggleMeta,
         } = this.props;
 
         const {
-            headline, headlineEditable, headlineEditActive,
-            description, descriptionEditable, descriptionEditActive,
+            headline, headlineErrorText, headlineEditable, headlineEditActive,
+            description, descriptionErrorText, descriptionEditable, descriptionEditActive,
         } = this.state;
 
         return (
             <div>
                 {isLoading && <LoadingIndicator />}
                 <PersistableHeadline
-                    headline={headline}
+                    value={headline}
+                    errorText={headlineErrorText}
                     editActive={headlineEditActive}
                     edit={(headlineEditable) ? this.editHeadline : null}
                     cancel={this.cancelEditHeadline}
@@ -128,7 +149,8 @@ const ItemView = React.createClass({
                 <Tags tags={tags} onDelete={onTagDelete} />
                 <div style={flexWrapperStyle}>
                     <PersistableDescription
-                        description={description}
+                        value={description}
+                        errorText={descriptionErrorText}
                         editActive={descriptionEditActive}
                         edit={(descriptionEditable) ? this.editDescription : null}
                         cancel={this.cancelEditDescription}
@@ -146,10 +168,16 @@ const ItemView = React.createClass({
                         </Tab>
                     ))}
                 </Tabs>
-                <Notifier notification={notification} />
             </div>
         );
     },
 });
 
-export default ItemView;
+const mapStateToProps = (state) => {
+    const { metaOpen, authenticated } = state;
+    return { metaOpen, authenticated };
+};
+const Actions = {
+    toggleMeta: metaActions.toggleMeta,
+};
+export default connect(mapStateToProps, Actions)(ItemViewContainer);

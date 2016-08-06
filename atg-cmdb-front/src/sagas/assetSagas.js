@@ -1,7 +1,8 @@
 import { takeLatest } from 'redux-saga';
-import { fork } from 'redux-saga/effects';
+import { fork, put } from 'redux-saga/effects';
 import * as API from '../api';
 import createFetchSaga from './helpers/createFetchSaga';
+import { showNotification, showErrorNotification } from '../actions/notificationActions';
 import {
     FETCH_ASSET_LIST_REQUEST,
     FETCH_ASSET_LIST_RESPONSE,
@@ -32,6 +33,10 @@ const patchAsset = createFetchSaga({
 function* patchAssetResponse(action) {
     if (!action.error) {
         yield fork(fetchAsset, action);
+        const { name } = action.payload;
+        yield put(showNotification(`Updated asset ${name}`));
+    } else {
+        yield put(showErrorNotification('Failed to update asset', action.payload));
     }
 }
 

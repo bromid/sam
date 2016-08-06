@@ -10,6 +10,7 @@ import searchResults, { fromSearchResults as _fromSearchResults } from './search
 import info, { fromInfo as _fromInfo } from './info';
 import releaseNotes, { fromReleaseNotes as _fromReleaseNotes } from './releaseNotes';
 import authenticated from './auth';
+import notification from './notification';
 
 export default combineReducers({
     group,
@@ -19,6 +20,7 @@ export default combineReducers({
     menuOpen,
     metaOpen,
     authenticated,
+    notification,
     searchResults,
     info,
     releaseNotes,
@@ -39,3 +41,4 @@ export const fromReleaseNotes = supplyStateSlice(_fromReleaseNotes, 'releaseNote
 export const getIsMenuOpen = (state) => state.menuOpen;
 export const getIsMetaOpen = (state) => state.metaOpen;
 export const getAuthenticated = (state) => state.authenticated;
+export const getNotification = (state) => state.notification;

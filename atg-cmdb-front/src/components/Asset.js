@@ -3,30 +3,10 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
 import * as assetActions from '../actions/assetActions';
-import * as metaActions from '../actions/metaActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
-import { fromAsset, getIsMetaOpen } from '../reducers';
-
-const patchNotification = (result, error, isPending) => {
-    if (isPending) return {};
-    if (!isEmpty(error)) {
-        return {
-            message: 'Failed to update asset!',
-            duration: 4000,
-            action: {
-                name: 'info',
-            },
-        };
-    }
-    if (!isEmpty(result)) {
-        return {
-            message: `Updated asset ${result.name}`,
-        };
-    }
-    return {};
-};
+import { fromAsset } from '../reducers';
 
 const AssetContainer = React.createClass({
 
@@ -41,16 +21,10 @@ const AssetContainer = React.createClass({
     },
 
     render() {
-        const {
-            asset, isLoading,
-            metaOpen, toggleMeta,
-            patchResult, patchError, patchIsPending,
-        } = this.props;
-
+        const { asset, isLoading } = this.props;
         if (isLoading && isEmpty(asset)) return <LoadingIndicator />;
 
         const { name, description = '', group, attributes, meta } = asset;
-
         const tabs = [
             {
                 name: 'Details',
@@ -72,10 +46,7 @@ const AssetContainer = React.createClass({
                 description={description}
                 updateDescription={this.updateDescription}
                 meta={meta}
-                metaOpen={metaOpen}
-                toggleMeta={toggleMeta}
                 tabs={tabs}
-                notification={() => patchNotification(patchResult, patchError, patchIsPending)}
                 isLoading={isLoading}
             />
         );
@@ -83,7 +54,6 @@ const AssetContainer = React.createClass({
 });
 
 const mapStateToProps = (state) => ({
-    metaOpen: getIsMetaOpen(state),
     asset: fromAsset.getCurrent(state),
     fetchError: fromAsset.getCurrentError(state),
     patchResult: fromAsset.getPatchResult(state),
@@ -94,6 +64,5 @@ const mapStateToProps = (state) => ({
 
 const Actions = {
     patchAsset: assetActions.patchAsset,
-    toggleMeta: metaActions.toggleMeta,
 };
 export default connect(mapStateToProps, Actions)(AssetContainer);

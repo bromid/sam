@@ -35,19 +35,38 @@ const addParams = (url, params) => {
     return `${url}?${query}`;
 };
 
-function fetchJson(url, params) {
-    return fetch(addParams(url, params), APPLICATION_JSON)
+const createOptions = (obj, method, headers, authenticated) => {
+    const optionsHeaders = (authenticated) ? {
+        ...headers,
+        Authorization: `Basic ${btoa(`${authenticated.uid}:secret`)}`,
+    } : headers;
+
+    return {
+        headers: optionsHeaders,
+        method,
+        body: JSON.stringify(obj),
+    };
+};
+
+const fetchJson = (url, params, options) => (
+    fetch(addParams(url, params), options)
         .then((response) => verifySuccessful(response))
         .then((response) =>
             response.json().then((data) => ({
                 data,
                 response,
             }))
-        );
-}
+        )
+);
 
-function fetchHtml(url, params) {
-    return fetch(addParams(url, params), TEXT_HTML)
+const getHtml = (url, params, options = {}) => {
+    const { hash } = options;
+    const headers = (hash) ? {
+        ...TEXT_HTML.headers,
+        'If-None-Match': `"${hash}"`,
+    } : TEXT_HTML.headers;
+
+    return fetch(addParams(url, params), { headers })
         .then((response) => verifySuccessful(response))
         .then((response) =>
             response.text().then((data) => ({
@@ -55,84 +74,101 @@ function fetchHtml(url, params) {
                 response,
             }))
         );
-}
+};
 
-function patchJson(url, apiParams, authenticated) {
+const getJson = (url, params, options = {}) => {
+    const { hash } = options;
+    const headers = (hash) ? {
+        ...APPLICATION_JSON.headers,
+        'If-None-Match': `"${hash}"`,
+    } : APPLICATION_JSON.headers;
+
+    return fetchJson(url, params, { headers });
+};
+
+const patchJson = (url, apiParams, authenticated) => {
     const { obj, options: { hash, params } = {} } = apiParams;
-    const headers = { ...APPLICATION_JSON.headers };
-    if (hash) {
-        headers['If-Match'] = `"${hash}"`;
-    }
+    const headers = (hash) ? {
+        ...APPLICATION_JSON.headers,
+        'If-Match': `"${hash}"`,
+    } : APPLICATION_JSON.headers;
 
-    if (authenticated) {
-        const credential = btoa(`${authenticated.uid}:secret`);
-        headers.Authorization = `Basic ${credential}`;
-    }
+    const options = createOptions(obj, 'PATCH', headers, authenticated);
+    return fetchJson(url, params, options);
+};
 
-    const options = {
-        headers,
-        method: 'PATCH',
-        body: JSON.stringify(obj),
+const createJson = (url, apiParams, authenticated) => {
+    const { obj, options: { params } = {} } = apiParams;
+    const headers = {
+        ...APPLICATION_JSON.headers,
+        'If-None-Match': '*',
     };
-    return fetch(addParams(url, params), options)
-        .then((response) => verifySuccessful(response))
-        .then((response) =>
-            response.json().then((data) => ({
-                data,
-                response,
-            }))
-        );
-}
+
+    const options = createOptions(obj, 'PUT', headers, authenticated);
+    return fetchJson(url, params, options);
+};
 
 export const fetchGroupList = (queryParams) =>
-    fetchJson('/services/group', queryParams);
+    getJson('/services/group', queryParams);
 
 export const fetchGroup = (groupId) =>
-    fetchJson(`/services/group/${groupId}`);
+    getJson(`/services/group/${groupId}`);
 
 export const fetchGroupTags = () =>
-    fetchJson('/services/group/tag');
+    getJson('/services/group/tag');
 
 export const patchGroup = (params, auth) =>
     patchJson(`/services/group/${params.id}`, params, auth);
 
+export const createGroup = (params, auth) =>
+    createJson(`/services/group/${params.id}`, params, auth);
+
 export const fetchApplicationList = () =>
-    fetchJson('/services/application');
+    getJson('/services/application');
 
 export const fetchApplication = (applicationId) =>
-    fetchJson(`/services/application/${applicationId}`);
+    getJson(`/services/application/${applicationId}`);
 
 export const fetchApplicationDeployments = (applicationId) =>
-    fetchJson(`/services/application/${applicationId}/deployment`);
+    getJson(`/services/application/${applicationId}/deployment`);
 
 export const patchApplication = (params, auth) =>
     patchJson(`/services/application/${params.id}`, params, auth);
 
+export const createApplication = (params, auth) =>
+    createJson(`/services/application/${params.id}`, auth);
+
 export const fetchServerList = (params) => {
-    if (params.environment) return fetchJson(`/services/server/${params.environment}`);
-    return fetchJson('/services/server');
+    if (params.environment) return getJson(`/services/server/${params.environment}`);
+    return getJson('/services/server');
 };
 
 export const fetchServer = (params) =>
-    fetchJson(`/services/server/${params.environment}/${params.hostname}`);
+    getJson(`/services/server/${params.environment}/${params.hostname}`);
 
 export const patchServer = (params, auth) =>
     patchJson(`/services/server/${params.environment}/${params.hostname}`, params, auth);
 
+export const createServer = (params, auth) =>
+    createJson(`/services/server/${params.environment}/${params.hostname}`, params, auth);
+
 export const fetchAssetList = () =>
-    fetchJson('/services/asset');
+    getJson('/services/asset');
 
 export const fetchAsset = (assetId) =>
-    fetchJson(`/services/asset/${assetId}`);
+    getJson(`/services/asset/${assetId}`);
 
 export const patchAsset = (params, auth) =>
     patchJson(`/services/asset/${params.id}`, params, auth);
 
+export const createAsset = (params, auth) =>
+    createJson(`/services/asset/${params.id}`, params, auth);
+
 export const fetchSearch = (searchQuery) =>
-    fetchJson(`/services/search?q=${searchQuery}`);
+    getJson(`/services/search?q=${searchQuery}`);
 
 export const fetchInfo = () =>
-    fetchJson('/services/info');
+    getJson('/services/info');
 
 export const fetchReleaseNotes = () =>
-    fetchHtml('/services/info/release-notes');
+    getHtml('/services/info/release-notes');

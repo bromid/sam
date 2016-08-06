@@ -5,6 +5,7 @@ import configureStore from '../configureStore';
 import App from './App';
 import Groups from './GroupList';
 import Group from './Group';
+import NewGroup from './NewGroup';
 import Applications from './ApplicationList';
 import Application from './Application';
 import Servers from './ServerList';
@@ -66,6 +67,10 @@ const Root = () => {
                         component={Groups}
                         onEnter={fetchGroupList}
                         onChange={(state, nextState) => fetchGroupList(nextState)}
+                    />
+                    <Router
+                        path="group/new"
+                        component={NewGroup}
                     />
                     <Route
                         path="group/:id"

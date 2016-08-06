@@ -3,33 +3,14 @@ import { connect } from 'react-redux';
 import size from 'lodash/size';
 import isEmpty from 'lodash/isEmpty';
 import * as groupActions from '../actions/groupActions';
-import * as metaActions from '../actions/metaActions';
+import * as groupValidators from '../validators/groupValidators';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
 import { GroupList } from './GroupList';
 import { AssetList } from './AssetList';
 import { ApplicationList } from './ApplicationList';
-import { fromGroup, getIsMetaOpen } from '../reducers';
-
-const patchNotification = (result, error, isPending) => {
-    if (isPending) return {};
-    if (!isEmpty(error)) {
-        return {
-            message: 'Failed to update group!',
-            duration: 4000,
-            action: {
-                name: 'info',
-            },
-        };
-    }
-    if (!isEmpty(result)) {
-        return {
-            message: `Updated group ${result.name}`,
-        };
-    }
-    return {};
-};
+import { fromGroup } from '../reducers';
 
 const collectionSize = (collection) => {
     if (!collection) return ' (0)';
@@ -42,8 +23,7 @@ const Group = (props) => {
             name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
-        notification, updateName, updateDescription,
-        metaOpen, toggleMeta, onTagDelete, isLoading,
+        updateName, updateDescription, onTagDelete, isLoading,
     } = props;
 
     if (!name) return <p>No result</p>;
@@ -69,15 +49,14 @@ const Group = (props) => {
         <ItemView
             headline={name}
             updateHeadline={updateName}
+            validateHeadline={groupValidators.name}
             description={description}
             updateDescription={updateDescription}
+            validateDescription={groupValidators.description}
             tags={tags}
             onTagDelete={onTagDelete}
             meta={meta}
-            metaOpen={metaOpen}
-            toggleMeta={toggleMeta}
             tabs={tabs}
-            notification={notification}
             isLoading={isLoading}
         />
     );
@@ -100,11 +79,7 @@ const GroupContainer = React.createClass({
     },
 
     render() {
-        const {
-            group, isLoading,
-            metaOpen, toggleMeta,
-            patchResult, patchError, patchIsPending,
-        } = this.props;
+        const { group, isLoading } = this.props;
 
         if (isLoading && isEmpty(group)) return <LoadingIndicator />;
 
@@ -113,18 +88,14 @@ const GroupContainer = React.createClass({
                 group={group}
                 isLoading={isLoading}
                 onTagDelete={this.onTagDelete}
-                metaOpen={metaOpen}
-                toggleMeta={toggleMeta}
                 updateName={this.updateName}
                 updateDescription={this.updateDescription}
-                notification={() => patchNotification(patchResult, patchError, patchIsPending)}
             />
         );
     },
 });
 
 const mapStateToProps = (state) => ({
-    metaOpen: getIsMetaOpen(state),
     group: fromGroup.getCurrent(state),
     fetchError: fromGroup.getCurrentError(state),
     patchResult: fromGroup.getPatchResult(state),
@@ -136,6 +107,5 @@ const mapStateToProps = (state) => ({
 
 const Actions = {
     patchGroup: groupActions.patchGroup,
-    toggleMeta: metaActions.toggleMeta,
 };
 export default connect(mapStateToProps, Actions)(GroupContainer);
