@@ -26,6 +26,7 @@ const config = {
                 to: 'icons',
             },
         ]),
+        new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
     ],
     module: {
         loaders: [

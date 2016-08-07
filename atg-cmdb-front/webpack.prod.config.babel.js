@@ -26,6 +26,7 @@ const config = {
                 to: 'icons',
             },
         ]),
+        new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
         new webpack.DefinePlugin({ 'process.env.NODE_ENV': '"production"' }),
     ],
     stats: {
