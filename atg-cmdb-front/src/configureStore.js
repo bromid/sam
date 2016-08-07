@@ -1,4 +1,4 @@
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import createLogger from 'redux-logger';
 import thunk from 'redux-thunk';
 import createSagaMiddleware from 'redux-saga';
@@ -15,7 +15,10 @@ const configureStore = () => {
 
     const store = createStore(
         reducers,
-        applyMiddleware(...middlewares)
+        compose(
+            applyMiddleware(...middlewares),
+            window.devToolsExtension ? window.devToolsExtension() : (f) => f
+        )
     );
 
     if ((process.env.NODE_ENV !== 'production')) {
