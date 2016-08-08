@@ -1,4 +1,5 @@
 import path from 'path';
+import webpack from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import validate from 'webpack-validator';
 
@@ -14,7 +15,7 @@ const config = {
     devtool: 'eval',
     entry: Paths.APP_ENTRY,
     output: {
-        path: path.join(__dirname, 'dist/static'),
+        path: Paths.DIST,
         filename: 'bundle.js',
         publicPath: Paths.PUBLIC,
     },
@@ -25,6 +26,7 @@ const config = {
                 to: 'icons',
             },
         ]),
+        new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
     ],
     module: {
         loaders: [
