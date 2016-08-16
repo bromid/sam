@@ -18,7 +18,8 @@ export const showErrorNotification = (message, error) => ({
         duration: 5000,
         action: {
             name: 'info',
+            onTouchTap: (showDialog) => showDialog(error.message, message),
         },
-        message: `${message}, Error: ${error.message}`,
+        message,
     },
 });

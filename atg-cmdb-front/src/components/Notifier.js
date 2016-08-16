@@ -1,7 +1,9 @@
 import React, { PropTypes } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
+import RaisedButton from 'material-ui/RaisedButton';
 import Snackbar from 'material-ui/Snackbar';
+import AppBarDialog from './AppBarDialog';
 
 const getNotification = (param) => {
     const notification = isFunction(param) ? param() : param;
@@ -21,7 +23,8 @@ const Notifier = React.createClass({
     getInitialState() {
         return {
             notification: getNotification({}),
-            open: false,
+            notificationOpen: false,
+            dialogOpen: false,
         };
     },
 
@@ -32,24 +35,70 @@ const Notifier = React.createClass({
         if (!isEmpty(newNotification.message) && newNotification.id !== lastId) {
             this.setState({
                 notification: newNotification,
-                open: true,
+                notificationOpen: true,
             });
         }
     },
 
-    requestClose() {
-        this.setState({ open: false });
+    showDialog(content, title = 'ERROR') {
+        this.setState({
+            dialogOpen: true,
+            dialogContent: content,
+            dialogTitle: title,
+            notificationOpen: false,
+        });
+    },
+
+    closeDialog() {
+        this.setState({
+            dialogOpen: false,
+        });
+    },
+
+    closeNotification() {
+        this.setState({
+            notificationOpen: false,
+        });
     },
 
     render() {
-        const { open, notification: { duration, message, action } } = this.state;
-        return (<Snackbar
-            open={open}
-            message={message}
-            action={action.name}
-            autoHideDuration={duration}
-            onRequestClose={this.requestClose}
-        />);
+        const {
+            notificationOpen, notification: { duration, message, action },
+            dialogOpen, dialogTitle, dialogContent,
+        } = this.state;
+
+        const actions = [
+            <RaisedButton
+                label="Close"
+                secondary={true}
+                onTouchTap={this.closeDialog}
+            />,
+        ];
+
+        const onNotificationTouchTap = (action.onTouchTap) ? () => {
+            action.onTouchTap(this.showDialog);
+        } : undefined;
+
+        return (
+            <div>
+                <Snackbar
+                    open={notificationOpen}
+                    message={message}
+                    action={action.name}
+                    onActionTouchTap={onNotificationTouchTap}
+                    autoHideDuration={duration}
+                    onRequestClose={this.closeNotification}
+                />
+                <AppBarDialog
+                    title={dialogTitle}
+                    open={dialogOpen}
+                    actions={actions}
+                    onRequestClose={this.closeDialog}
+                    contentStyle={{ minWidth: 500 }}
+                    children={dialogContent}
+                />
+            </div>
+        );
     },
 });
 export default Notifier;
