@@ -1,7 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router';
-import Dialog from 'material-ui/Dialog';
-import AppBar from 'material-ui/AppBar';
 import RaisedButton from 'material-ui/RaisedButton';
 import LoadingIndicator from './LoadingIndicator';
 import {
@@ -11,6 +9,7 @@ import {
 import isEmpty from 'lodash/isEmpty';
 import { container } from '../style';
 import { Tags } from './Tag';
+import AppBarDialog from './AppBarDialog';
 
 function ResultsTable({ header, tableHeaders, rows }) {
     if (isEmpty(rows)) {
@@ -104,10 +103,18 @@ function AssetsTable({ assets = {}, handleCloseModal }) {
 }
 
 function SearchResults({ searchResults = {}, isLoading, handleCloseModal }) {
+    const style = { minHeight: 500 };
+    if (isLoading) {
+        return (
+            <div style={style}>
+                <LoadingIndicator />
+            </div>
+        );
+    }
+
     const { groups, applications, servers, assets } = searchResults;
-    if (isLoading) return <LoadingIndicator />;
     return (
-        <div>
+        <div style={style}>
             <GroupsTable groups={groups} handleCloseModal={handleCloseModal} />
             <ApplicationsTable applications={applications} handleCloseModal={handleCloseModal} />
             <ServersTable servers={servers} handleCloseModal={handleCloseModal} />
@@ -127,38 +134,18 @@ export default function SearchResultDialog(props) {
         />,
     ];
 
-    const titleBar = (
-        <AppBar
-            title="SEARCH RESULT"
-            style={{
-                borderRadius: 2,
-                padding: '0 24px 0 16px',
-            }}
-            titleStyle={{
-                fontSize: 14,
-                fontWeight: 500,
-                height: 48,
-                lineHeight: '48px',
-            }}
-            showMenuIconButton={false}
-        />
-    );
-
     return (
-        <Dialog
-            title={titleBar}
+        <AppBarDialog
+            title={'SEARCH RESULT'}
             open={modalOpen}
             actions={actions}
             onRequestClose={handleCloseModal}
-            autoScrollBodyContent={true}
         >
-            <div style={{ minHeight: 500, marginTop: 20 }}>
-                <SearchResults
-                    isLoading={isLoading}
-                    handleCloseModal={handleCloseModal}
-                    searchResults={searchResults}
-                />
-            </div>
-        </Dialog>
+            <SearchResults
+                isLoading={isLoading}
+                handleCloseModal={handleCloseModal}
+                searchResults={searchResults}
+            />
+        </AppBarDialog>
     );
 }
