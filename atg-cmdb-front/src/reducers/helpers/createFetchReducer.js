@@ -32,7 +32,7 @@ export default function createFetchReducer(options) {
         switch (action.type) {
             case receiveKey:
                 if (!action.error) return {};
-                return action.payload;
+                return { ...action.payload, error: true };
             default:
                 return state;
         }

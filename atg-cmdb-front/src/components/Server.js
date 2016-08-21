@@ -72,7 +72,7 @@ const ServerContainer = React.createClass({
     },
 
     render() {
-        const { isLoading, server } = this.props;
+        const { server, isLoading, patchIsPending, patchError } = this.props;
 
         if (isLoading && isEmpty(server)) return <LoadingIndicator />;
         if (!server.hostname) return <p>No result</p>;
@@ -106,6 +106,8 @@ const ServerContainer = React.createClass({
                 meta={meta}
                 tabs={tabs}
                 isLoading={isLoading}
+                patchIsPending={patchIsPending}
+                patchError={patchError}
             />
         );
     },

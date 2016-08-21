@@ -23,7 +23,7 @@ const Group = (props) => {
             name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
-        updateName, updateDescription, onTagDelete, isLoading,
+        updateName, updateDescription, onTagDelete, isLoading, patchIsPending, patchError,
     } = props;
 
     if (!name) return <p>No result</p>;
@@ -58,6 +58,8 @@ const Group = (props) => {
             meta={meta}
             tabs={tabs}
             isLoading={isLoading}
+            patchIsPending={patchIsPending}
+            patchError={patchError}
         />
     );
 };
@@ -79,7 +81,7 @@ const GroupContainer = React.createClass({
     },
 
     render() {
-        const { group, isLoading } = this.props;
+        const { group, isLoading, patchIsPending, patchError } = this.props;
 
         if (isLoading && isEmpty(group)) return <LoadingIndicator />;
 
@@ -87,6 +89,8 @@ const GroupContainer = React.createClass({
             <Group
                 group={group}
                 isLoading={isLoading}
+                patchIsPending={patchIsPending}
+                patchError={patchError}
                 onTagDelete={this.onTagDelete}
                 updateName={this.updateName}
                 updateDescription={this.updateDescription}

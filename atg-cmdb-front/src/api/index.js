@@ -14,12 +14,14 @@ const TEXT_HTML = {
     },
 };
 
-const verifySuccessful = (response) => {
+const verifySuccessful = (response, params, options) => {
     if (response.status >= 400) {
         const error = new Error(
             `Got status ${response.statusText} (${response.status}) for ${response.url}.`
         );
         error.response = response;
+        error.params = params;
+        error.options = options;
         throw error;
     }
     return response;
@@ -50,7 +52,7 @@ const createOptions = (obj, method, headers, authenticated) => {
 
 const fetchJson = (url, params, options) => (
     fetch(addParams(url, params), options)
-        .then((response) => verifySuccessful(response))
+        .then((response) => verifySuccessful(response, params, options))
         .then((response) =>
             response.json().then((data) => ({
                 data,
@@ -67,7 +69,7 @@ const getHtml = (url, params, options = {}) => {
     } : TEXT_HTML.headers;
 
     return fetch(addParams(url, params), { headers })
-        .then((response) => verifySuccessful(response))
+        .then((response) => verifySuccessful(response, params, { headers }))
         .then((response) =>
             response.text().then((data) => ({
                 data,
