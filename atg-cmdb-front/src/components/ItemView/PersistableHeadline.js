@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import PersistableField from '../PersistableField';
 import EditIconButton from './EditIconButton';
+import { isShowEditForm, AllStates } from './State';
 
 const Headline = ({ value, state, edit }) => (
     <h2 className="editIconWrapper" style={{ position: 'relative', minHeight: 25 }}>
@@ -12,7 +13,7 @@ const Headline = ({ value, state, edit }) => (
 const PersistableHeadline = React.createClass({
     propTypes: {
         value: PropTypes.string.isRequired,
-        state: PropTypes.oneOf(['readonly', 'editable', 'editing', 'saving', 'failed']).isRequired,
+        state: PropTypes.oneOf(AllStates).isRequired,
         errorText: PropTypes.string,
         edit: PropTypes.func,
         cancel: PropTypes.func,
@@ -30,19 +31,17 @@ const PersistableHeadline = React.createClass({
 
     render() {
         const { value, state, errorText, edit, cancel, change } = this.props;
-        const editActive = (state === 'editing');
-        return (
-            (editActive) ?
-                <PersistableField
-                    id="headlineInput"
-                    value={value}
-                    errorText={errorText}
-                    change={change}
-                    save={this.onSave}
-                    cancel={cancel}
-                    fieldRef={(ref) => (this.fieldRef = ref)}
-                /> :
-                <Headline value={value} state={state} edit={edit} />
+        return (isShowEditForm(state) ?
+            <PersistableField
+                id="headlineInput"
+                value={value}
+                errorText={errorText}
+                change={change}
+                save={this.onSave}
+                cancel={cancel}
+                fieldRef={(ref) => (this.fieldRef = ref)}
+            /> :
+            <Headline value={value} state={state} edit={edit} />
         );
     },
 });

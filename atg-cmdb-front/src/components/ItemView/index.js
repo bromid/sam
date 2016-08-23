@@ -11,41 +11,55 @@ import Meta from '../Meta';
 import { Tags } from '../Tag';
 import PersistableDescription from './PersistableDescription';
 import PersistableHeadline from './PersistableHeadline';
+import { State, isEditState } from './State';
 
 const mapEditState = (authenticated, editFunction, editing = false, disable = false) => {
-    if (disable) return 'readonly';
-    if (editing) return 'editing';
-    if (authenticated && isFunction(editFunction)) return 'editable';
-    return 'readonly';
+    if (disable) return State.readonly;
+    if (editing) return State.editing;
+    if (authenticated && isFunction(editFunction)) return State.editable;
+    return State.readonly;
 };
 
-const mapNewEditState = (name, ownState, otherState, value, error) => {
+const mapNewPropsState = (name, ownState, otherState, value, error) => {
     const stateName = `${name}State`;
-    if (otherState === 'saving' || otherState === 'editing' || otherState === 'failed') {
+    const errorName = `${name}ErrorText`;
+    if (isEditState(otherState)) {
         return {
-            [stateName]: 'readonly',
             [name]: value,
+            [stateName]: 'readonly',
         };
     }
-    if (ownState === 'failed') {
+    if (ownState === State.saveFailed) {
         return {
-            [stateName]: ownState,
             [name]: error.value,
+            [stateName]: ownState,
+            [errorName]: error.message,
         };
     }
     return {
-        [stateName]: ownState,
         [name]: value,
+        [stateName]: ownState,
+    };
+};
+
+const mapChangeState = (name, value, errorText) => {
+    const stateName = `${name}State`;
+    const errorName = `${name}ErrorText`;
+    const newState = (errorText.length > 1) ? State.validationFailed : State.editing;
+    return {
+        [name]: value,
+        [stateName]: newState,
+        [errorName]: errorText,
     };
 };
 
 const changeEditState = (currentState, authenticated, editFunction, saving, error) => {
-    if (currentState === 'saving' || currentState === 'failed') {
-        if (error) return 'failed';
+    if (currentState === State.saving || currentState === State.saveFailed) {
+        if (error) return State.saveFailed;
     }
-    if (currentState === 'editing') {
-        if (saving) return 'saving';
-        return 'editing';
+    if (currentState === State.editing) {
+        if (saving) return State.saving;
+        return State.editing;
     }
     return mapEditState(authenticated, editFunction);
 };
@@ -128,8 +142,8 @@ const ItemViewContainer = React.createClass({
         );
 
         this.setState({
-            ...mapNewEditState('headline', newHeadlineState, newDescState, headline, error),
-            ...mapNewEditState('description', newDescState, newHeadlineState, description, error),
+            ...mapNewPropsState('headline', newHeadlineState, newDescState, headline, error),
+            ...mapNewPropsState('description', newDescState, newHeadlineState, description, error),
         });
     },
 
@@ -158,15 +172,15 @@ const ItemViewContainer = React.createClass({
     },
 
     changeHeadline(event) {
-        const headline = event.target.value;
-        const headlineErrorText = this.validateHeadline(headline);
-        this.setState({ headline, headlineErrorText });
+        const value = event.target.value;
+        const errorText = this.validateHeadline(value);
+        this.setState(mapChangeState('headline', value, errorText));
     },
 
     saveHeadline(event) {
         event.preventDefault();
-        const { headline, headlineErrorText } = this.state;
-        if (headlineErrorText.length < 1) {
+        const { headline, headlineState } = this.state;
+        if (headlineState !== State.validationFailed) {
             this.editHeadline(false);
             this.props.updateHeadline(headline);
         }
@@ -193,15 +207,15 @@ const ItemViewContainer = React.createClass({
     },
 
     changeDescription(event) {
-        const description = event.target.value;
-        const descriptionErrorText = this.validateDescription(description);
-        this.setState({ description, descriptionErrorText });
+        const value = event.target.value;
+        const errorText = this.validateDescription(value);
+        this.setState(mapChangeState('description', value, errorText));
     },
 
     saveDescription(event) {
         event.preventDefault();
-        const { description, descriptionErrorText } = this.state;
-        if (descriptionErrorText.length < 1) {
+        const { description, descriptionState } = this.state;
+        if (descriptionState !== State.validationFailed) {
             this.editDescription(false);
             this.props.updateDescription(description);
         }

@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { borderStyle, flexWrapperStyle } from '../../style';
 import PersistableField from '../PersistableField';
 import EditIconButton from './EditIconButton';
+import { isShowEditForm, AllStates } from './State';
 
 const editIconStyle = { float: 'right', position: 'relative', right: -10, top: -10 };
 
@@ -17,7 +18,7 @@ const Description = ({ value, state, edit, addHandler }) => (
 const PersistableDescription = React.createClass({
     propTypes: {
         value: PropTypes.string.isRequired,
-        state: PropTypes.oneOf(['readonly', 'editable', 'editing', 'saving', 'failed']).isRequired,
+        state: PropTypes.oneOf(AllStates).isRequired,
         errorText: PropTypes.string,
         edit: PropTypes.func,
         cancel: PropTypes.func,
@@ -68,10 +69,9 @@ const PersistableDescription = React.createClass({
             position: 'relative',
         };
 
-        const editActive = (state === 'editing');
         return (
             <div className="editIconWrapper" style={descriptionWrapperStyle}>
-                {(editActive) ?
+                {isShowEditForm(state) ?
                     <PersistableField
                         id="descriptionInput"
                         value={value}
