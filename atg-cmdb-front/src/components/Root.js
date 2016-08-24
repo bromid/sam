@@ -8,6 +8,7 @@ import Group from './Group';
 import NewGroup from './NewGroup';
 import Applications from './ApplicationList';
 import Application from './Application';
+import NewApplication from './NewApplication';
 import Servers from './ServerList';
 import Server from './Server';
 import Assets from './AssetList';
@@ -68,7 +69,7 @@ const Root = () => {
                         onEnter={fetchGroupList}
                         onChange={(state, nextState) => fetchGroupList(nextState)}
                     />
-                    <Router
+                    <Route
                         path="group/new"
                         component={NewGroup}
                     />
@@ -81,6 +82,10 @@ const Root = () => {
                         path="application"
                         component={Applications}
                         onEnter={fetchApplicationList}
+                    />
+                    <Route
+                        path="application/new"
+                        component={NewApplication}
                     />
                     <Route
                         path="application/:id"

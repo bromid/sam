@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
+import * as applicationValidators from '../validators/applicationValidators';
 import * as applicationActions from '../actions/applicationActions';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
@@ -51,8 +52,10 @@ const ApplicationContainer = React.createClass({
                 tabs={tabs}
                 headline={name}
                 updateHeadline={this.updateName}
+                validateHeadline={applicationValidators.name}
                 description={description}
                 updateDescription={this.updateDescription}
+                validateDescription={applicationValidators.description}
                 meta={meta}
                 isLoading={isLoading}
             />

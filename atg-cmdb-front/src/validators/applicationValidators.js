@@ -1,5 +1,6 @@
 import createItemValidator from './helpers/createItemValidator';
 import { containsWhitespace } from '../helpers';
+import * as groupValidators from './groupValidators';
 
 export const id = (param) => {
     const length = param.length;
@@ -16,14 +17,14 @@ export const id = (param) => {
     return '';
 };
 
-export const name = (param, fieldName = 'Name') => {
+export const name = (param) => {
     const length = param.length;
 
     if (length < 1) {
-        return `${fieldName} is mandatory`;
+        return 'Name is mandatory';
     }
     if (length < 3 || length > 50) {
-        return `${fieldName} must be between 3 and 50 characters`;
+        return 'Name must be between 3 and 50 characters';
     }
     return '';
 };
@@ -37,8 +38,18 @@ export const description = (param) => {
     return '';
 };
 
-export const group = (param) => createItemValidator([
+export const group = (param) => {
+    const length = param.length;
+
+    if (length > 0) {
+        return groupValidators.name(param, 'Group');
+    }
+    return '';
+};
+
+export const application = (param) => createItemValidator([
     ['id', id(param.id)],
     ['name', name(param.name)],
+    ['group', group(param.group)],
     ['description', description(param.description)],
 ]);

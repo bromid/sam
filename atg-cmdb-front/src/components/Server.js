@@ -47,11 +47,15 @@ const Network = ({ network }) => (
     </div>
 );
 
-const Deployment = ({ deployment: { applicationLink }, deployment }) => (
-    <Link to={`/application/${applicationLink.id}`}>
-        <ListItem primaryText={`${applicationLink.name} (${deployment.version})`} />
-    </Link>
-);
+const Deployment = ({ deployment: { applicationLink }, deployment }) => {
+    const id = applicationLink.id;
+    const name = (applicationLink.name) ? applicationLink.name : id;
+    return (
+        <Link to={`/application/${id}`}>
+            <ListItem primaryText={`${name} (${deployment.version})`} />
+        </Link>
+    );
+};
 
 const DeploymentList = ({ deployments }) => {
     if (!deployments) return <p>No deployments</p>;

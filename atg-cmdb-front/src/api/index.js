@@ -136,7 +136,7 @@ export const patchApplication = (params, auth) =>
     patchJson(`/services/application/${params.id}`, params, auth);
 
 export const createApplication = (params, auth) =>
-    createJson(`/services/application/${params.id}`, auth);
+    createJson(`/services/application/${params.id}`, params, auth);
 
 export const fetchServerList = (params) => {
     if (params.environment) return getJson(`/services/server/${params.environment}`);

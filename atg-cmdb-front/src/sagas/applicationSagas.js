@@ -1,5 +1,6 @@
 import { takeLatest } from 'redux-saga';
 import { fork, put } from 'redux-saga/effects';
+import { browserHistory } from 'react-router';
 import * as API from '../api';
 import createFetchSaga from './helpers/createFetchSaga';
 import { showNotification, showErrorNotification } from '../actions/notificationActions';
@@ -10,6 +11,8 @@ import {
     FETCH_APPLICATION_RESPONSE,
     PATCH_APPLICATION_REQUEST,
     PATCH_APPLICATION_RESPONSE,
+    CREATE_APPLICATION_REQUEST,
+    CREATE_APPLICATION_RESPONSE,
     FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
 } from '../constants';
 
@@ -31,6 +34,11 @@ const patchApplication = createFetchSaga({
     responseKey: PATCH_APPLICATION_RESPONSE,
 });
 
+const createApplication = createFetchSaga({
+    apiCall: API.createApplication,
+    responseKey: CREATE_APPLICATION_RESPONSE,
+});
+
 const fetchApplicationDeployments = createFetchSaga({
     apiCall: API.fetchApplicationDeployments,
     responseKey: FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
@@ -46,6 +54,16 @@ function* patchApplicationResponse(action) {
         yield put(showNotification(`Updated application ${name}`));
     } else {
         yield put(showErrorNotification('Failed to update application', action.payload));
+    }
+}
+
+function* createApplicationResponse(action) {
+    if (!action.error) {
+        const { id, name } = action.payload;
+        yield put(showNotification(`Created application ${name}`));
+        browserHistory.push(`/application/${id}`);
+    } else {
+        yield put(showErrorNotification('Failed to create application', action.payload));
     }
 }
 
@@ -72,9 +90,19 @@ export function* watchPatchApplicationResponse() {
     yield* takeLatest(PATCH_APPLICATION_RESPONSE, patchApplicationResponse);
 }
 
+export function* watchCreateApplicationRequest() {
+    yield* takeLatest(CREATE_APPLICATION_REQUEST, createApplication);
+}
+
+export function* watchCreateApplicationResponse() {
+    yield* takeLatest(CREATE_APPLICATION_RESPONSE, createApplicationResponse);
+}
+
 export default function* applicationSagas() {
     yield fork(watchFetchApplication);
     yield fork(watchFetchApplicationList);
     yield fork(watchPatchApplicationResponse);
     yield fork(watchPatchApplicationRequest);
+    yield fork(watchCreateApplicationRequest);
+    yield fork(watchCreateApplicationResponse);
 }
