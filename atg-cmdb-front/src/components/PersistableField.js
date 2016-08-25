@@ -33,7 +33,7 @@ const PersistableField = (props) => {
                 id={id}
                 value={value}
                 errorText={errorText}
-                style={{ flex: 1 }}
+                textareaStyle={{ minHeight: 150 }}
                 fullWidth={true}
                 multiLine={multiLine}
                 onChange={change}

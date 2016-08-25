@@ -3,11 +3,12 @@ import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
+import AutoComplete from 'material-ui/AutoComplete';
 import { removeEmptyFields } from '../helpers';
-import * as groupActions from '../actions/groupActions';
-import * as groupValidators from '../validators/groupValidators';
+import * as applicationActions from '../actions/applicationActions';
+import * as applicationValidators from '../validators/applicationValidators';
 
-const NewGroupContainer = React.createClass({
+const NewApplicationContainer = React.createClass({
 
     getInitialState() {
         return {
@@ -17,39 +18,47 @@ const NewGroupContainer = React.createClass({
             nameErrorText: '',
             description: '',
             descriptionErrorText: '',
+            group: '',
+            groupErrorText: '',
         };
     },
 
     onChangeId(event) {
         const id = event.target.value.trim();
-        const error = groupValidators.id(id);
-        this.setState({ id, idErrorText: error });
+        const idErrorText = applicationValidators.id(id);
+        this.setState({ id, idErrorText });
     },
 
     onChangeName(event) {
         const name = event.target.value.trim();
-        const error = groupValidators.name(name);
-        this.setState({ name, nameErrorText: error });
+        const nameErrorText = applicationValidators.name(name);
+        this.setState({ name, nameErrorText });
     },
 
     onChangeDescription(event) {
         const description = event.target.value.trim();
-        const error = groupValidators.description(description);
-        this.setState({ description, descriptionErrorText: error });
+        const descriptionErrorText = applicationValidators.description(description);
+        this.setState({ description, descriptionErrorText });
+    },
+
+    onChangeGroup(groupName) {
+        const group = groupName.trim();
+        const groupErrorText = applicationValidators.group(group);
+        this.setState({ group, groupErrorText });
     },
 
     onCreate() {
-        const { id, name, description } = this.state;
-        const group = { id, name, description };
+        const { id, name, description, group } = this.state;
+        const application = { id, name, description, group };
 
-        const errors = groupValidators.group(group);
+        const errors = applicationValidators.application(application);
 
         if (errors.hasError) {
             this.refs.get(errors.first).focus();
             this.setState(errors.text);
         } else {
-            const groupNoEmptyFields = removeEmptyFields(group);
-            this.props.createGroup(groupNoEmptyFields);
+            const applicationNoEmptyFields = removeEmptyFields(application);
+            this.props.createApplication(applicationNoEmptyFields);
         }
     },
 
@@ -65,6 +74,7 @@ const NewGroupContainer = React.createClass({
             id, idErrorText,
             name, nameErrorText,
             description, descriptionErrorText,
+            group, groupErrorText,
         } = this.state;
 
         const formStyle = {
@@ -74,9 +84,11 @@ const NewGroupContainer = React.createClass({
             alignItems: 'stretch',
         };
 
+        const groupIds = [];
+
         return (
             <div>
-                <h2>New group</h2>
+                <h2>New application</h2>
                 <form style={formStyle}>
                     <TextField
                         value={id}
@@ -94,6 +106,16 @@ const NewGroupContainer = React.createClass({
                         fullWidth={true}
                         ref={(ref) => this.addField('name', ref)}
                     />
+                    <AutoComplete
+                        searchText={group}
+                        errorText={groupErrorText}
+                        onUpdateInput={this.onChangeGroup}
+                        onNewRequest={this.onChangeGroup}
+                        dataSource={groupIds}
+                        floatingLabelText="Group"
+                        fullWidth={true}
+                        ref={(ref) => this.addField('group', ref)}
+                    />
                     <TextField
                         value={description}
                         errorText={descriptionErrorText}
@@ -107,7 +129,7 @@ const NewGroupContainer = React.createClass({
                     <div style={{ display: 'flex', marginTop: 16 }}>
                         <span style={{ flex: 1 }}>* indicates required field</span>
                         <RaisedButton
-                            label="Create group"
+                            label="Create application"
                             secondary={true}
                             onTouchTap={this.onCreate}
                         />
@@ -119,6 +141,6 @@ const NewGroupContainer = React.createClass({
 });
 
 const Actions = {
-    createGroup: groupActions.createGroup,
+    createApplication: applicationActions.createApplication,
 };
-export default connect(null, Actions)(NewGroupContainer);
+export default connect(null, Actions)(NewApplicationContainer);

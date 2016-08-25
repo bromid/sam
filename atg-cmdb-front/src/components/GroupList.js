@@ -55,11 +55,10 @@ const Group = ({ group, nestedLevel = 0 }) => {
     );
 };
 
-export const GroupList = ({ groups, header }) => {
+export const GroupList = ({ groups }) => {
     if (!groups) return <p>No groups</p>;
     return (
         <List>
-            {header}
             {groups.map((group) =>
                 <Group group={group} key={group.id} />
             )}
@@ -95,10 +94,7 @@ const Groups = (props) => {
                     </Link>
                 }
             </div>
-            <GroupList
-                groups={groups}
-                isLoading={isLoading}
-            />
+            <GroupList groups={groups} />
         </div>
     );
 };

@@ -104,7 +104,6 @@ const mapStateToProps = (state) => ({
     isLoading: fromGroup.getCurrentIsPending(state),
 });
 
-
 const Actions = {
     patchGroup: groupActions.patchGroup,
 };

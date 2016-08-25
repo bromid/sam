@@ -2,6 +2,7 @@ import {
     FETCH_APPLICATION_LIST_REQUEST,
     FETCH_APPLICATION_REQUEST,
     PATCH_APPLICATION_REQUEST,
+    CREATE_APPLICATION_REQUEST,
 } from '../constants';
 
 export const fetchApplicationList = () => ({
@@ -16,4 +17,9 @@ export const fetchApplication = (applicationId) => ({
 export const patchApplication = (id, obj, options) => ({
     type: PATCH_APPLICATION_REQUEST,
     payload: { id, obj, options },
+});
+
+export const createApplication = (obj, options) => ({
+    type: CREATE_APPLICATION_REQUEST,
+    payload: { id: obj.id, obj, options },
 });
