@@ -37,6 +37,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Aggregates;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.UnwindOptions;
 
 import io.dropwizard.jersey.PATCH;
@@ -90,6 +91,20 @@ public class GroupResource {
   }
 
   @GET
+  @Path("services/group/tag")
+  @ApiOperation("Fetch all group tags")
+  public PaginatedCollection<Tag> getGroupTags() {
+    return getTags();
+  }
+
+  @GET
+  @Path("services/group/id")
+  @ApiOperation("Fetch all group ids")
+  public PaginatedCollection<String> getGroupIds() {
+    return getIds();
+  }
+
+  @GET
   @Path("services/group/{id}")
   @ApiOperation("Fetch group")
   public Group getGroup(
@@ -101,13 +116,6 @@ public class GroupResource {
       throw new WebApplicationException(Status.NOT_FOUND);
     }
     return TreeHelper.createTree(group.id, groups, Group::resetGroups, Group::addGroup);
-  }
-
-  @GET
-  @Path("services/group/tag")
-  @ApiOperation("Fetch all group tags")
-  public PaginatedCollection<Tag> getGroupTags() {
-    return getTags();
   }
 
   @PUT
@@ -209,13 +217,22 @@ public class GroupResource {
    * Fetch all groups joined (mongodb lookup) with their applications and assets.
    */
   private Map<String,Group> getAllGroups() {
-    return Maps.uniqueIndex(
-      database.getCollection(Collections.GROUPS)
-        .aggregate(Lists.newArrayList(
-          Aggregates.lookup(Collections.APPLICATIONS, "id", "group", "applications"),
-          Aggregates.lookup(Collections.ASSETS, "id", "group", "assets")
-        )).map(Group::new),
+    return Maps.uniqueIndex(database
+      .getCollection(Collections.GROUPS)
+      .aggregate(Lists.newArrayList(
+        Aggregates.lookup(Collections.APPLICATIONS, "id", "group", "applications"),
+        Aggregates.lookup(Collections.ASSETS, "id", "group", "assets")
+      )).map(Group::new),
       t->t.id
+    );
+  }
+
+  private PaginatedCollection<String> getIds() {
+    return RestHelper.paginatedList(database
+      .getCollection(Collections.GROUPS)
+      .find()
+      .projection(Projections.include("id"))
+      .map(t->t.getString("id"))
     );
   }
 
@@ -224,10 +241,10 @@ public class GroupResource {
       .getCollection(Collections.GROUPS)
       .aggregate(Lists.newArrayList(
         Aggregates.unwind("$tags"),
-          Aggregates.group("$tags")
-        )).map(t->new Tag(t.getString("_id")))
-      );
-    }
+        Aggregates.group("$tags")
+      )).map(t->new Tag(t.getString("_id")))
+    );
+  }
 
   /*
    * Fetch root groups. That's all groups that has no inbound references from any other group.
