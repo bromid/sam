@@ -5,9 +5,12 @@ import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
 
 const PersistableField = (props) => {
-    const { id, value, errorText, change, save, cancel, fieldRef, multiLine = false } = props;
+    const {
+        id, value, errorText, change, save, cancel,
+        fieldRef, floatingLabelText, multiLine = false, columnStyle = false,
+    } = props;
 
-    const formStyleSingleLine = {
+    const formStyleRow = {
         flex: 1,
         display: 'flex',
         flexDirection: 'row',
@@ -15,7 +18,7 @@ const PersistableField = (props) => {
         marginBottom: 10,
     };
 
-    const formStyleMultiLine = {
+    const formStyleColumn = {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
@@ -29,15 +32,15 @@ const PersistableField = (props) => {
     };
 
     return (
-        <form style={(multiLine) ? formStyleMultiLine : formStyleSingleLine} onSubmit={save}>
+        <form style={(multiLine || columnStyle) ? formStyleColumn : formStyleRow} onSubmit={save}>
             <TextField
                 id={id}
                 value={value}
                 errorText={errorText}
                 textareaStyle={{ minHeight: 150 }}
                 fullWidth={true}
-                multiLine={multiLine}
                 onChange={change}
+                floatingLabelText={floatingLabelText}
                 ref={saveFieldRef}
             />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

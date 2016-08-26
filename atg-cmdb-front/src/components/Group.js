@@ -7,7 +7,7 @@ import * as groupValidators from '../validators/groupValidators';
 import LoadingIndicator from './LoadingIndicator';
 import Attributes from './Attributes';
 import ItemView from './ItemView';
-import { GroupList } from './GroupList';
+import SubGroups from './SubGroups';
 import { AssetList } from './AssetList';
 import { ApplicationList } from './ApplicationList';
 import { fromGroup } from '../reducers';
@@ -23,7 +23,7 @@ const Group = (props) => {
             name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
-        updateName, updateDescription, onTagDelete, isLoading, patchIsPending, patchError,
+        updateName, updateDescription, onTagDelete, isLoading, authenticated, patchIsPending, patchError,
     } = props;
 
     if (!name) return <p>No result</p>;
@@ -38,7 +38,7 @@ const Group = (props) => {
         },
         {
             name: `Sub groups ${collectionSize(groups)}`,
-            node: <GroupList groups={groups} />,
+            node: <SubGroups authenticated={authenticated} groups={groups} />,
         },
         {
             name: `Attributes ${collectionSize(attributes)}`,
@@ -81,7 +81,7 @@ const GroupContainer = React.createClass({
     },
 
     render() {
-        const { group, isLoading, patchIsPending, patchError } = this.props;
+        const { group, isLoading, authenticated, patchIsPending, patchError } = this.props;
 
         if (isLoading && isEmpty(group)) return <LoadingIndicator />;
 
@@ -89,6 +89,7 @@ const GroupContainer = React.createClass({
             <Group
                 group={group}
                 isLoading={isLoading}
+                authenticated={authenticated}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
                 onTagDelete={this.onTagDelete}
@@ -100,6 +101,7 @@ const GroupContainer = React.createClass({
 });
 
 const mapStateToProps = (state) => ({
+    authenticated: state.authenticated,
     group: fromGroup.getCurrent(state),
     fetchError: fromGroup.getCurrentError(state),
     patchResult: fromGroup.getPatchResult(state),
