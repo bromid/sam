@@ -21,7 +21,8 @@ const AssetContainer = React.createClass({
     },
 
     render() {
-        const { asset, isLoading } = this.props;
+        const { asset, isLoading, patchIsPending, patchError } = this.props;
+
         if (isLoading && isEmpty(asset)) return <LoadingIndicator />;
 
         const { name, description = '', group, attributes, meta } = asset;
@@ -48,6 +49,8 @@ const AssetContainer = React.createClass({
                 meta={meta}
                 tabs={tabs}
                 isLoading={isLoading}
+                patchIsPending={patchIsPending}
+                patchError={patchError}
             />
         );
     },

@@ -12,6 +12,7 @@ const PersistableField = (props) => {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'baseline',
+        marginBottom: 10,
     };
 
     const formStyleMultiLine = {

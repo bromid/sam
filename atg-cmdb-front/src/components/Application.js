@@ -23,7 +23,7 @@ const ApplicationContainer = React.createClass({
     },
 
     render() {
-        const { application, isLoading } = this.props;
+        const { application, isLoading, patchIsPending, patchError } = this.props;
 
         if (isLoading && isEmpty(application)) return <LoadingIndicator />;
 
@@ -58,6 +58,8 @@ const ApplicationContainer = React.createClass({
                 validateDescription={applicationValidators.description}
                 meta={meta}
                 isLoading={isLoading}
+                patchIsPending={patchIsPending}
+                patchError={patchError}
             />
         );
     },

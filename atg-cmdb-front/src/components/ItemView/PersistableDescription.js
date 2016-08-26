@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import { withRouter } from 'react-router';
 import ReactMarkdown from 'react-markdown';
 import { borderStyle, flexWrapperStyle } from '../../style';
 import PersistableField from '../PersistableField';
 import EditIconButton from './EditIconButton';
+import { isShowEditForm, AllStates } from './State';
 
-const Description = ({ value, edit, addHandler }) => (
+const editIconStyle = { float: 'right', position: 'relative', right: -10, top: -10 };
+
+const Description = ({ value, state, edit, addHandler }) => (
     <div style={{ flex: 1 }} ref={addHandler}>
-        <EditIconButton edit={edit} style={{ float: 'right', right: -10, top: -10 }} />
+        <EditIconButton edit={edit} state={state} style={editIconStyle} />
         <ReactMarkdown skipHtml={true} source={value} />
     </div>
 );
 
 const PersistableDescription = React.createClass({
+    propTypes: {
+        value: PropTypes.string.isRequired,
+        state: PropTypes.oneOf(AllStates).isRequired,
+        errorText: PropTypes.string,
+        edit: PropTypes.func,
+        cancel: PropTypes.func,
+        save: PropTypes.func,
+        change: PropTypes.func,
+    },
 
     componentWillUnmount() {
         if (this.linkWrapper) {
@@ -46,7 +58,7 @@ const PersistableDescription = React.createClass({
     },
 
     render() {
-        const { value, errorText, editActive, edit, cancel, change } = this.props;
+        const { value, state, errorText, edit, cancel, change } = this.props;
         const descriptionWrapperStyle = {
             ...borderStyle,
             ...flexWrapperStyle,
@@ -54,11 +66,12 @@ const PersistableDescription = React.createClass({
             minHeight: 75,
             padding: 10,
             margin: '15px 15px 15px 0',
+            position: 'relative',
         };
 
         return (
             <div className="editIconWrapper" style={descriptionWrapperStyle}>
-                {(editActive) ?
+                {isShowEditForm(state) ?
                     <PersistableField
                         id="descriptionInput"
                         value={value}
@@ -71,6 +84,7 @@ const PersistableDescription = React.createClass({
                     /> :
                     <Description
                         value={value}
+                        state={state}
                         edit={edit}
                         addHandler={this.addLinkWrapperHandler}
                     />
