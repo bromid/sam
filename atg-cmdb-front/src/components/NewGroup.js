@@ -21,26 +21,30 @@ const NewGroupContainer = React.createClass({
     },
 
     onChangeId(event) {
-        const id = event.target.value.trim();
+        const id = event.target.value.trim().toLowerCase();
         const error = groupValidators.id(id);
         this.setState({ id, idErrorText: error });
     },
 
     onChangeName(event) {
-        const name = event.target.value.trim();
+        const name = event.target.value;
         const error = groupValidators.name(name);
         this.setState({ name, nameErrorText: error });
     },
 
     onChangeDescription(event) {
-        const description = event.target.value.trim();
+        const description = event.target.value;
         const error = groupValidators.description(description);
         this.setState({ description, descriptionErrorText: error });
     },
 
     onCreate() {
         const { id, name, description } = this.state;
-        const group = { id, name, description };
+        const group = {
+            id,
+            name: name.trim(),
+            description: description.trim(),
+        };
 
         const errors = groupValidators.group(group);
 

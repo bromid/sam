@@ -119,6 +119,9 @@ export const fetchGroup = (groupId) =>
 export const fetchGroupTags = () =>
     getJson('/services/group/tag');
 
+export const fetchGroupIds = () =>
+    getJson('/services/group/id');
+
 export const patchGroup = (params, auth) =>
     patchJson(`/services/group/${params.id}`, params, auth);
 
