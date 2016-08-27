@@ -5,6 +5,7 @@ import {
     FETCH_GROUP_ID_REQUEST,
     PATCH_GROUP_REQUEST,
     CREATE_GROUP_REQUEST,
+    ADD_SUBGROUP_REQUEST,
 } from '../constants';
 
 export const fetchGroupList = (tags) => ({
@@ -33,4 +34,9 @@ export const patchGroup = (id, obj, options) => ({
 export const createGroup = (obj, options) => ({
     type: CREATE_GROUP_REQUEST,
     payload: { id: obj.id, obj, options },
+});
+
+export const addSubgroup = (groupId, subGroupId, options) => ({
+    type: ADD_SUBGROUP_REQUEST,
+    payload: { groupId, subGroupId, options },
 });

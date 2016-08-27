@@ -1,17 +1,17 @@
 import createItemValidator from './helpers/createItemValidator';
 import { containsWhitespace } from '../helpers';
 
-export const id = (param) => {
+export const id = (param, fieldName = 'Id') => {
     const length = param.length;
 
     if (length < 1) {
-        return 'Id is mandatory';
+        return `${fieldName} is mandatory`;
     }
     if (length < 2 || length > 50) {
-        return 'Id must be between 2 and 50 characters';
+        return `${fieldName} must be between 2 and 50 characters`;
     }
     if (containsWhitespace(param)) {
-        return 'Id should not contain whitespace characters';
+        return `${fieldName} should not contain whitespace characters`;
     }
     return '';
 };

@@ -20,6 +20,10 @@ const NewGroupContainer = React.createClass({
         };
     },
 
+    componentDidMount() {
+        this.refs.get('id').focus();
+    },
+
     onChangeId(event) {
         const id = event.target.value.trim().toLowerCase();
         const error = groupValidators.id(id);
@@ -58,10 +62,12 @@ const NewGroupContainer = React.createClass({
     },
 
     addField(id, ref) {
-        if (isEmpty(this.refs)) {
-            this.refs = new Map();
+        if (ref) {
+            if (isEmpty(this.refs)) {
+                this.refs = new Map();
+            }
+            this.refs.set(id, ref);
         }
-        this.refs.set(id, ref);
     },
 
     render() {

@@ -10,7 +10,7 @@ import ItemView from './ItemView';
 import SubGroups from './SubGroups';
 import { AssetList } from './AssetList';
 import { ApplicationList } from './ApplicationList';
-import { fromGroup } from '../reducers';
+import { fromGroup, getAuthenticated } from '../reducers';
 
 const collectionSize = (collection) => {
     if (!collection) return ' (0)';
@@ -23,7 +23,8 @@ const Group = (props) => {
             name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
-        updateName, updateDescription, onTagDelete, isLoading, authenticated, patchIsPending, patchError,
+        updateName, updateDescription, onTagDelete, addSubGroup,
+        isLoading, authenticated, patchIsPending, patchError,
     } = props;
 
     if (!name) return <p>No result</p>;
@@ -38,7 +39,11 @@ const Group = (props) => {
         },
         {
             name: `Sub groups ${collectionSize(groups)}`,
-            node: <SubGroups authenticated={authenticated} groups={groups} />,
+            node: <SubGroups
+                authenticated={authenticated}
+                groups={groups}
+                addGroup={addSubGroup}
+            />,
         },
         {
             name: `Attributes ${collectionSize(attributes)}`,
@@ -80,6 +85,11 @@ const GroupContainer = React.createClass({
         patchGroup(id, { description }, { hash: meta.hash });
     },
 
+    addSubGroup(subGroupId) {
+        const { group: { id }, addSubgroup } = this.props;
+        addSubgroup(id, subGroupId);
+    },
+
     render() {
         const { group, isLoading, authenticated, patchIsPending, patchError } = this.props;
 
@@ -95,22 +105,24 @@ const GroupContainer = React.createClass({
                 onTagDelete={this.onTagDelete}
                 updateName={this.updateName}
                 updateDescription={this.updateDescription}
+                addSubGroup={this.addSubGroup}
             />
         );
     },
 });
 
 const mapStateToProps = (state) => ({
-    authenticated: state.authenticated,
     group: fromGroup.getCurrent(state),
     fetchError: fromGroup.getCurrentError(state),
     patchResult: fromGroup.getPatchResult(state),
     patchError: fromGroup.getPatchResultError(state),
     patchIsPending: fromGroup.getPatchResultIsPending(state),
     isLoading: fromGroup.getCurrentIsPending(state),
+    authenticated: getAuthenticated(state),
 });
 
 const Actions = {
     patchGroup: groupActions.patchGroup,
+    addSubgroup: groupActions.addSubgroup,
 };
 export default connect(mapStateToProps, Actions)(GroupContainer);
