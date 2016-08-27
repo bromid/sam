@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
-import PersistableField from '../PersistableField';
+import TextField from 'material-ui/TextField';
+import SaveCancelForm from '../SaveCancelForm';
 import EditIconButton from './EditIconButton';
 import { isShowEditForm, AllStates } from './State';
 
@@ -32,15 +33,17 @@ const PersistableHeadline = React.createClass({
     render() {
         const { value, state, errorText, edit, cancel, change } = this.props;
         return (isShowEditForm(state) ?
-            <PersistableField
-                id="headlineInput"
-                value={value}
-                errorText={errorText}
-                change={change}
-                save={this.onSave}
-                cancel={cancel}
-                fieldRef={(ref) => (this.fieldRef = ref)}
-            /> :
+            <SaveCancelForm cancel={cancel} save={this.onSave}>
+                <TextField
+                    value={value}
+                    errorText={errorText}
+                    onChange={change}
+                    id="headlineInput"
+                    hintText="Name"
+                    ref={(ref) => (this.fieldRef = ref)}
+                    fullWidth={true}
+                />
+            </SaveCancelForm> :
             <Headline value={value} state={state} edit={edit} />
         );
     },

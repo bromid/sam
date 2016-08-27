@@ -1,20 +1,23 @@
 import React from 'react';
+import AutoComplete from 'material-ui/AutoComplete';
 import RaisedButton from 'material-ui/RaisedButton';
 import { flexWrapperStyle } from '../style';
 import { GroupList } from './GroupList';
-import PersistableField from './PersistableField';
+import SaveCancelForm from './SaveCancelForm';
 
 const AddSubGroup = ({ groupId, change, cancel }) => (
     <div>
         <h3>Add sub group</h3>
-        <PersistableField
-            id="group-id"
-            value={groupId}
-            floatingLabelText="Group id"
-            change={change}
-            cancel={cancel}
-            columnStyle={true}
-        />
+        <SaveCancelForm columnStyle={true} cancel={cancel} save={() => console.info('Save')}>
+            <AutoComplete
+                id="group-id"
+                value={groupId}
+                dataSource={[]}
+                floatingLabelText="Group id"
+                onChange={change}
+                fullWidth={true}
+            />
+        </SaveCancelForm>
     </div>
 );
 

@@ -1,13 +1,10 @@
 import React from 'react';
-import isFunction from 'lodash/isFunction';
-import TextField from 'material-ui/TextField';
 import FlatButton from 'material-ui/FlatButton';
 import RaisedButton from 'material-ui/RaisedButton';
 
-const PersistableField = (props) => {
+const SaveCancelForm = (props) => {
     const {
-        id, value, errorText, change, save, cancel,
-        fieldRef, floatingLabelText, multiLine = false, columnStyle = false,
+        children, save, cancel, columnStyle = false,
     } = props;
 
     const formStyleRow = {
@@ -25,24 +22,9 @@ const PersistableField = (props) => {
         alignItems: 'stretch',
     };
 
-    const saveFieldRef = (ref) => {
-        if (isFunction(fieldRef)) {
-            fieldRef(ref);
-        }
-    };
-
     return (
-        <form style={(multiLine || columnStyle) ? formStyleColumn : formStyleRow} onSubmit={save}>
-            <TextField
-                id={id}
-                value={value}
-                errorText={errorText}
-                textareaStyle={{ minHeight: 150 }}
-                fullWidth={true}
-                onChange={change}
-                floatingLabelText={floatingLabelText}
-                ref={saveFieldRef}
-            />
+        <form style={(columnStyle) ? formStyleColumn : formStyleRow} onSubmit={save}>
+            {children}
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <FlatButton
                     label="Cancel"
@@ -59,4 +41,4 @@ const PersistableField = (props) => {
         </form>
     );
 };
-export default PersistableField;
+export default SaveCancelForm;

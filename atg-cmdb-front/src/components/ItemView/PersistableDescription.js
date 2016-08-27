@@ -1,8 +1,9 @@
 import React, { PropTypes } from 'react';
 import { withRouter } from 'react-router';
 import ReactMarkdown from 'react-markdown';
+import TextField from 'material-ui/TextField';
 import { borderStyle, flexWrapperStyle } from '../../style';
-import PersistableField from '../PersistableField';
+import SaveCancelForm from '../SaveCancelForm';
 import EditIconButton from './EditIconButton';
 import { isShowEditForm, AllStates } from './State';
 
@@ -72,16 +73,20 @@ const PersistableDescription = React.createClass({
         return (
             <div className="editIconWrapper" style={descriptionWrapperStyle}>
                 {isShowEditForm(state) ?
-                    <PersistableField
-                        id="descriptionInput"
-                        value={value}
-                        errorText={errorText}
-                        change={change}
-                        save={this.onSave}
-                        cancel={cancel}
-                        fieldRef={(ref) => (this.fieldRef = ref)}
-                        multiLine={true}
-                    /> :
+                    <SaveCancelForm columnStyle={true} cancel={cancel} save={this.onSave}>
+                        <TextField
+                            value={value}
+                            errorText={errorText}
+                            onChange={change}
+                            id="descriptionInput"
+                            hintText="Description"
+                            hintStyle={{ top: 12, bottom: 'inherit' }}
+                            ref={(ref) => (this.fieldRef = ref)}
+                            textareaStyle={{ minHeight: 150 }}
+                            multiLine={true}
+                            fullWidth={true}
+                        />
+                    </SaveCancelForm> :
                     <Description
                         value={value}
                         state={state}
