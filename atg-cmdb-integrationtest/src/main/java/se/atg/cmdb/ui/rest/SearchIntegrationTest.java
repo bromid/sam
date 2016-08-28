@@ -21,7 +21,6 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.Asset;
 import se.atg.cmdb.model.Group;
@@ -491,7 +490,7 @@ public class SearchIntegrationTest {
       fqdn = "vLtma1.test1.hh.atg.SE";
       description = "Hit on servername";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server1, "intergration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server1, objectMapper));
 
     final Server server2 = new Server() {{
       hostname = "vLPma2";
@@ -499,7 +498,7 @@ public class SearchIntegrationTest {
       fqdn = "vLPpma2.test1.hh.atg.SE";
       description = "No hit";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server2, "intergration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server2, objectMapper));
 
     final Server server3 = new Server() {{
       hostname = "vltmA1";
@@ -507,7 +506,7 @@ public class SearchIntegrationTest {
       fqdn = "vltmA1.test2.hh.atg.Se";
       description = "Hit on servername";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server3, "intergration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server3, objectMapper));
 
     final Server server4 = new Server() {{
       hostname = "vlTMa4";
@@ -515,7 +514,7 @@ public class SearchIntegrationTest {
       fqdn = "vlTMa4.test1.hh.atg.Se";
       description = "Hit on description/vltma1";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server4, "intergration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server4, objectMapper));
 
     final Server server5 = new Server() {{
       hostname = "VLpma5";
@@ -523,14 +522,14 @@ public class SearchIntegrationTest {
       fqdn = "VLpma5.test1.hh.atg.sE";
       description = "Denna server kör alla webbapparna.";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server5, "intergration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server5, objectMapper));
 
     final Server server6 = new Server() {{
       hostname = "webapp1";
       environment = "test10";
       fqdn = "test.atg.se";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server6, "intergration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server6, objectMapper));
 
     return Lists.newArrayList(server1, server2, server3, server4, server5, server6);
   }
@@ -543,28 +542,28 @@ public class SearchIntegrationTest {
       description = "Hit on group id";
       tags = Lists.newArrayList(new Tag("tag1"), new Tag("tag2"), new Tag("webbappar"), new Tag("tag4"));
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Group group2 = new Group() {{
       id = "groupid2";
       name = "groupname2";
       description = "No hit";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group2, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group2, objectMapper));
 
     final Group group3 = new Group() {{
       id = "groupid3";
       name = "groupid1";
       description = "Denna grupp innehåller webbappar och en massa annat.";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group3, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group3, objectMapper));
 
     final Group group4 = new Group() {{
       id = "groupid4";
       name = "groupname4";
       description = "Hit on description-groupid1.";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group4, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group4, objectMapper));
 
     final Group group5 = new Group() {{
       id = "groupid5";
@@ -572,7 +571,7 @@ public class SearchIntegrationTest {
       description = "Hit on tag";
       tags = Lists.newArrayList(new Tag("tag1"), new Tag("tag2"), new Tag("groupid1"), new Tag("tag4"));
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group5, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group5, objectMapper));
 
     return Lists.newArrayList(group1, group2, group3, group4, group5);
   }
@@ -585,7 +584,7 @@ public class SearchIntegrationTest {
       description = "Hit on id";
       group = new GroupLink("my-group");
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
 
     final Application application2 = new Application() {{
       id = "applicationid2";
@@ -593,33 +592,33 @@ public class SearchIntegrationTest {
       description = "No hit (no search on group).";
       group = new GroupLink("applicationid1");
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application2, objectMapper));
 
     final Application application3 = new Application() {{
       id = "applicationid3";
       name = "applicationid1";
       description = "Hit on name";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application3, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application3, objectMapper));
 
     final Application application4 = new Application() {{
       id = "applicationid4";
       name = "appname4";
       description = "Hit on description:applicationid1:er";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application4, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application4, objectMapper));
 
     final Application application5 = new Application() {{
       id = "appname5";
       name = "Strange id";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application5, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application5, objectMapper));
 
     final Application application6 = new Application() {{
       id = "webbappar-id1";
       name = "Some Name";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application6, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application6, objectMapper));
 
     return Lists.newArrayList(application1, application2, application3, application4, application5, application6);
   }
@@ -632,7 +631,7 @@ public class SearchIntegrationTest {
       description = "Hit on id";
       group = new GroupLink("my-group");
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test",  objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset1, objectMapper));
 
     final Asset asset2 = new Asset() {{
       id = "assetid2";
@@ -640,39 +639,39 @@ public class SearchIntegrationTest {
       description = "No hit (no search on group).";
       group = new GroupLink("assetid1");
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset2, "integration-test",  objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset2, objectMapper));
 
     final Asset asset3 = new Asset() {{
       id = "assetid3";
       name = "assetid1";
       description = "Hit on name";
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset3, "integration-test",  objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset3, objectMapper));
 
     final Asset asset4 = new Asset() {{
       id = "asset-id4";
       name = "assetname4";
       description = "Hit on description\\assetid1!";
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset4, "integration-test",  objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset4, objectMapper));
 
     final Asset asset5 = new Asset() {{
       id = "assetid5";
       name = "assetname1";
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset5, "integration-test",  objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset5, objectMapper));
 
     final Asset asset6 = new Asset() {{
       id = "webbap";
       name = "assetname6";
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset6, "integration-test",  objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset6, objectMapper));
 
     final Asset asset7 = new Asset() {{
       id = "webbapp";
       name = "assetname7";
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset7, "integration-test",  objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset7, objectMapper));
 
     return Lists.newArrayList(asset1, asset2, asset3, asset4, asset5, asset6, asset7);
   }

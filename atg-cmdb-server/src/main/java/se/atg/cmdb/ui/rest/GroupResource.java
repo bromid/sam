@@ -48,6 +48,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import se.atg.cmdb.dao.Collections;
+import se.atg.cmdb.helpers.JsonHelper;
+import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.helpers.MongoHelper;
 import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.helpers.TreeHelper;
@@ -55,6 +57,7 @@ import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Tag;
+import se.atg.cmdb.model.User;
 import se.atg.cmdb.ui.dropwizard.auth.Roles;
 
 @Path("/")
@@ -115,7 +118,28 @@ public class GroupResource {
     if (group == null) {
       throw new WebApplicationException(Status.NOT_FOUND);
     }
-    return TreeHelper.createTree(group.id, groups, Group::resetGroups, Group::addGroup);
+    return TreeHelper.createTree(group.id, groups, Group::resetGroups, Group::addGroup, Group::new);
+  }
+
+  @GET
+  @Path("services/group/{id}/group")
+  @ApiOperation("Fetch group")
+  public PaginatedCollection<Group> getSubGroups(
+    @ApiParam("id") @PathParam("id") String id,
+    @ApiParam(PaginatedCollection.LIMIT_DESC) @QueryParam("limit") Integer limit,
+    @ApiParam(PaginatedCollection.START_DESC) @QueryParam("start") Integer start,
+    @Context UriInfo uriInfo
+  ) {
+    final Map<String, Group> groups = getAllGroups();
+    final Group group = groups.get(id);
+    if (group == null) {
+      throw new WebApplicationException(Status.NOT_FOUND);
+    }
+    return RestHelper.paginatedList(uriInfo.getRequestUriBuilder(), limit, start,
+      group.groups
+        .stream()
+        .map(t -> createTree(t.id, groups))
+    );
   }
 
   @PUT
@@ -125,6 +149,7 @@ public class GroupResource {
   @ApiResponses({
     @ApiResponse(code = 201, message = "A new group was created.", response = GroupLink.class),
     @ApiResponse(code = 200, message = "The group was successfully replaced.", response = GroupLink.class),
+    @ApiResponse(code = 404, message = "No group exists with the supplied id.", response = ErrorMessage.class),
     @ApiResponse(code = 412, message = "No group exists with the supplied id and hash.", response = ErrorMessage.class),
     @ApiResponse(code = 422, message = "The supplied group is not valid.", response = ErrorMessage.class),
   })
@@ -151,12 +176,45 @@ public class GroupResource {
     return linkResponse(Status.OK, updated, uriInfo);
   }
 
+  @PUT
+  @Path("services/group/{id}/group/{subGroupId}")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation("Add an existing sub group to a group.")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The subgroup was successfully added to the group.", response = GroupLink.class),
+    @ApiResponse(code = 404, message = "No group exists with the supplied id.", response = ErrorMessage.class),
+    @ApiResponse(code = 412, message = "No group exists with the supplied id and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied subgroup id is not valid.", response = ErrorMessage.class),
+  })
+  public Response addSubGroup(
+    @ApiParam("Group id") @PathParam("id") String groupId,
+    @ApiParam("Subgroup id") @PathParam("subGroupId") String subGroupId,
+    @Context UriInfo uriInfo,
+    @Context Request request,
+    @Context SecurityContext securityContext
+  ) {
+    logger.info("Add subgroup {} to {}", subGroupId, groupId);
+
+    final Document existing = getGroupForUpdate(groupId);
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
+
+    final Document update = JsonHelper.entityToBson(new Group(subGroupId), objectMapper);
+    Mapper.upsertList(existing, update, "groups", (item) -> item.get("id").equals(subGroupId));
+
+    final User user = RestHelper.getUser(securityContext);
+    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
+
+    MongoHelper.updateDocument(existing, existing, hash, database.getCollection(Collections.GROUPS));
+    return linkResponse(Status.OK, existing, uriInfo);
+  }
+
   @PATCH
   @RolesAllowed(Roles.EDIT)
   @Path("services/group/{id}")
   @ApiOperation(value = "Update group")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The group was successfully updated.", response = GroupLink.class),
+    @ApiResponse(code = 404, message = "No group exists with the supplied id.", response = ErrorMessage.class),
     @ApiResponse(code = 412, message = "No group exists with the supplied id and hash.", response = ErrorMessage.class),
     @ApiResponse(code = 422, message = "The supplied group is not valid.", response = ErrorMessage.class),
   })
@@ -187,15 +245,12 @@ public class GroupResource {
   ) {
     logger.info("Delete group: {}", id);
 
-    final Bson filter = Filters.eq("id", id);
-    final MongoCollection<Document> collection = database.getCollection(Collections.GROUPS);
-    final Document existing = collection.find(filter).first();
-    if (existing == null) {
-      throw new WebApplicationException(Status.NOT_FOUND);
-    }
-
+    final Document existing = getGroupForUpdate(id);
     final Optional<String> hash = RestHelper.verifyHash(existing, request);
-    MongoHelper.deleteDocument(filter, hash, collection);
+
+    final MongoCollection<Document> collection = database.getCollection(Collections.GROUPS);
+    MongoHelper.deleteDocument(Filters.eq("id", id), hash, collection);
+
     return Response.noContent().build();
   }
 
@@ -211,6 +266,36 @@ public class GroupResource {
         .find(Filters.eq("id", id))
         .first()
     );
+  }
+
+  @DELETE
+  @Path("services/group/{id}/group/{subGroupId}")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation("Remove sub group")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The subgroup was successfully removed from the group.", response = GroupLink.class),
+    @ApiResponse(code = 404, message = "No group exists with the supplied id.", response = ErrorMessage.class),
+    @ApiResponse(code = 412, message = "No group exists with the supplied id and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied subgroup id is not valid.", response = ErrorMessage.class),
+  })
+  public Response removeSubGroup(
+    @ApiParam("Group id") @PathParam("id") String groupId,
+    @ApiParam("Subgroup id") @PathParam("subGroupId") String subGroupId,
+    @Context UriInfo uriInfo,
+    @Context Request request,
+    @Context SecurityContext securityContext
+  ) {
+    logger.info("Remove subgroup {} from {}", subGroupId, groupId);
+
+    final Document existing = getGroupForUpdate(groupId);
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
+    Mapper.removeFromList(existing, "groups", (item) -> item.get("id").equals(subGroupId));
+
+    final User user = RestHelper.getUser(securityContext);
+    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
+
+    MongoHelper.updateDocument(existing, existing, hash, database.getCollection(Collections.GROUPS));
+    return linkResponse(Status.OK, existing, uriInfo);
   }
 
   /*
@@ -287,10 +372,13 @@ public class GroupResource {
   private static Group createTree(String groupId, Map<String, Group> groups) {
 
     final Group group = groups.get(groupId);
+    if (group == null) {
+      return new Group(groupId);
+    }
     if (group.getGroups().isEmpty()) {
       return group;
     }
-    return TreeHelper.createTree(groupId, groups, Group::resetGroups, Group::addGroup);
+    return TreeHelper.createTree(groupId, groups, Group::resetGroups, Group::addGroup, Group::new);
   }
 
   private static Response linkResponse(Status status, Document bson, UriInfo uriInfo) {

@@ -27,7 +27,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
 import se.atg.cmdb.model.Asset;
@@ -36,6 +35,7 @@ import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Tag;
+import se.atg.cmdb.ui.rest.integrationtest.EntityResponse;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class GroupIntegrationTest {
@@ -72,7 +72,7 @@ public class GroupIntegrationTest {
       id = "my-group";
       name = "My group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Group response = getGroup(group1.id);
     TestHelper.isEqualExceptMeta(group1, response);
@@ -85,13 +85,13 @@ public class GroupIntegrationTest {
       id = "group1";
       name = "My group 1";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Group group2 = new Group() {{
       id = "group2";
       name = "My group 2";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group2, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group2, objectMapper));
 
     final PaginatedCollection<Group> response = testEndpoint.path("group")
       .request(MediaType.APPLICATION_JSON_TYPE)
@@ -102,7 +102,6 @@ public class GroupIntegrationTest {
     Assert.assertNull(response.start);
     Assert.assertNull(response.limit);
 
-    Assert.assertEquals(2, response.items.size());
     TestHelper.assertEquals(Arrays.asList(group1, group2), response.items, Group::getId, TestHelper::isEqualExceptMeta);
   }
 
@@ -123,11 +122,17 @@ public class GroupIntegrationTest {
       id = "root3";
       name = "Empty Group";
     }};
+    final Group root4 = new Group() {{
+      id = "root4";
+      name = "Contains non-existing subgroup";
+      groups = Arrays.asList(new Group("sub11"), new Group("unknown"));
+    }};
 
     final List<Group> groupsToAdd = Arrays.asList(
       root1,
       root2,
       root3,
+      root4,
       new Group() {{
         id = "sub11";
         name = "Sub-group 1 to Group 1";
@@ -145,7 +150,7 @@ public class GroupIntegrationTest {
         name = "Sub-group 2 to Group 2";
       }}
     );
-    groups.insertMany(JsonHelper.entitiesToBson(groupsToAdd, objectMapper));
+    groups.insertMany(TestHelper.addMetaForCreate(groupsToAdd, objectMapper));
 
     final PaginatedCollection<Group> response = testEndpoint.path("group")
       .request(MediaType.APPLICATION_JSON_TYPE)
@@ -156,7 +161,7 @@ public class GroupIntegrationTest {
     Assert.assertNull(response.start);
     Assert.assertNull(response.limit);
 
-    TestHelper.assertEquals(Arrays.asList(root1, root2, root3), response.items, Group::getId, GroupIntegrationTest::verifyGroups);
+    TestHelper.assertEquals(Arrays.asList(root1, root2, root3, root4), response.items, Group::getId, GroupIntegrationTest::verifyGroups);
   }
 
   @Test
@@ -198,7 +203,7 @@ public class GroupIntegrationTest {
         name = "Sub-group 2 to Group 2";
       }}
     );
-    groups.insertMany(JsonHelper.entitiesToBson(groupsToAdd, objectMapper));
+    groups.insertMany(TestHelper.addMetaForCreate(groupsToAdd, objectMapper));
 
     final PaginatedCollection<String> response = testEndpoint.path("group").path("id")
         .request(MediaType.APPLICATION_JSON_TYPE)
@@ -223,22 +228,24 @@ public class GroupIntegrationTest {
     }};
     createGroup(group1);
 
+    final Group group3 = new Group("group3");
+
     final Group group2 = new Group() {{
       id = "group2";
       name = "Group 2";
       description = "Group description";
-      groups = Arrays.asList(new Group("group1"), new Group("group3"));
+      groups = Arrays.asList(new Group("group1"), group3);
       tags = Arrays.asList(new Tag("tag1"));
     }};
     final GroupResponse createResponse = createGroup(group2);
     Assert.assertNotNull(createResponse.db);
 
-    final Group response = getGroup(createResponse.link);
-    TestHelper.assertEquals(Arrays.asList(group1), response.groups, Group::getId, TestHelper::isEqualExceptMeta);
+    final EntityResponse<Group> response = getGroup(createResponse.link);
+    TestHelper.assertEquals(Arrays.asList(group1, group3), response.entity.groups, Group::getId, TestHelper::isEqualDisregardMeta);
 
-    response.groups = null;
+    response.entity.groups = null;
     group2.groups = null;
-    TestHelper.isEqualExceptMeta(group2, response);
+    TestHelper.isEqualExceptMeta(group2, response.entity);
   }
 
   @Test
@@ -250,7 +257,7 @@ public class GroupIntegrationTest {
       description = "Min testserver";
       group = new GroupLink("group1");
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
 
     final Application application2 = new Application() {{
       id = "my-application2";
@@ -258,7 +265,7 @@ public class GroupIntegrationTest {
       description = "Min testserver";
       group = new GroupLink("group1");
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application2, objectMapper));
 
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
@@ -266,7 +273,7 @@ public class GroupIntegrationTest {
       description = "Very useful asset";
       group = new GroupLink("group1");
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset1, objectMapper));
 
     final Asset asset2 = new Asset() {{
       id = "my-asset2";
@@ -274,7 +281,7 @@ public class GroupIntegrationTest {
       description = "Very useful asset";
       group = new GroupLink("group1");
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset2, "integration-test", objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset2, objectMapper));
 
     final Group group1 = new Group() {{
       id = "group1";
@@ -284,17 +291,17 @@ public class GroupIntegrationTest {
     final GroupResponse createResponse = createGroup(group1);
     Assert.assertNotNull(createResponse.db);
 
-    final Group response = getGroup(createResponse.link);
-    Assert.assertEquals(group1.id, response.id);
-    Assert.assertEquals(group1.name, response.name);
-    Assert.assertEquals(group1.description, response.description);
+    final EntityResponse<Group> response = getGroup(createResponse.link);
+    Assert.assertEquals(group1.id, response.entity.id);
+    Assert.assertEquals(group1.name, response.entity.name);
+    Assert.assertEquals(group1.description, response.entity.description);
 
     final List<String> expectedApplicationIds = Lists.newArrayList(application1.id, application2.id);
-    final List<String> actualApplicationIds = response.applications.stream().map(t->t.getId()).collect(Collectors.toList());
+    final List<String> actualApplicationIds = response.entity.applications.stream().map(t->t.getId()).collect(Collectors.toList());
     Assert.assertEquals(expectedApplicationIds, actualApplicationIds);
 
     final List<String> expectedAssetIds = Lists.newArrayList(asset1.id, asset2.id);
-    final List<String> actualAssetIds = response.assets.stream().map(t->t.getId()).collect(Collectors.toList());
+    final List<String> actualAssetIds = response.entity.assets.stream().map(t->t.getId()).collect(Collectors.toList());
     Assert.assertEquals(expectedAssetIds, actualAssetIds);
   }
 
@@ -377,11 +384,11 @@ public class GroupIntegrationTest {
     /*
      * Get and verify
      */
-    final Group patchedGroup = getGroup(patchedGroupResponse.link);
-    Assert.assertEquals(group1.id, patchedGroup.id);
-    Assert.assertEquals(groupPatch.name, patchedGroup.name);
-    Assert.assertEquals(groupPatch.description, patchedGroup.description);
-    Assert.assertEquals(groupPatch.tags, patchedGroup.tags);
+    final EntityResponse<Group> patchedGroup = getGroup(patchedGroupResponse.link);
+    Assert.assertEquals(group1.id, patchedGroup.entity.id);
+    Assert.assertEquals(groupPatch.name, patchedGroup.entity.name);
+    Assert.assertEquals(groupPatch.description, patchedGroup.entity.description);
+    Assert.assertEquals(groupPatch.tags, patchedGroup.entity.tags);
   }
 
   @Test
@@ -462,6 +469,229 @@ public class GroupIntegrationTest {
     Assert.assertEquals(404, response.getStatus());
   }
 
+  @Test
+  public void getSubGroups() {
+
+    final Group root1 = new Group() {{
+      id = "root1";
+      name = "Root Group 1";
+      groups = Arrays.asList(new Group("sub11"), new Group("sub12"));
+    }};
+    final Group root2 = new Group() {{
+      id = "root2";
+      name = "Root Group 2";
+      groups = Arrays.asList(new Group("sub21"), new Group("sub22"));
+    }};
+    final Group root3 = new Group() {{
+      id = "root3";
+      name = "Empty Group";
+    }};
+    final Group root4 = new Group() {{
+      id = "root4";
+      name = "Contains non-existing subgroup";
+      groups = Arrays.asList(new Group("sub11"), new Group("unknown"));
+    }};
+    final Group sub11 = new Group() {{
+      id = "sub11";
+      name = "Sub-group 1 to Group 1";
+    }};
+    final Group sub12 = new Group() {{
+      id = "sub12";
+      name = "Sub-group 2 to Group 1";
+    }};
+    final Group sub21 = new Group() {{
+      id = "sub21";
+      name = "Sub-group 1 to Group 2";
+    }};
+    final Group sub22 = new Group() {{
+      id = "sub22";
+      name = "Sub-group 2 to Group 2";
+    }};
+
+    final List<Group> groupsToAdd = Arrays.asList(
+      root1,
+      root2,
+      root3,
+      root4,
+      sub11,
+      sub12,
+      sub21,
+      sub22
+    );
+    groups.insertMany(TestHelper.addMetaForCreate(groupsToAdd, objectMapper));
+
+    final EntityResponse<PaginatedCollection<Group>> response1 = getSubGroups(root1.id);
+    TestHelper.assertEquals(Arrays.asList(sub11, sub12), response1.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+
+    final EntityResponse<PaginatedCollection<Group>> response2 = getSubGroups(root2.id);
+    TestHelper.assertEquals(Arrays.asList(sub21, sub22), response2.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+
+    final EntityResponse<PaginatedCollection<Group>> response3 = getSubGroups(root3.id);
+    Assert.assertNull(response3.entity.items);
+
+    final EntityResponse<PaginatedCollection<Group>> response4 = getSubGroups(root4.id);
+    Assert.assertEquals(response4.entity.items.size(), 2);
+  }
+
+  @Test
+  public void addSubGroup() {
+
+    final Group root1 = new Group() {{
+      id = "root1";
+      name = "Root Group 1";
+      groups = Arrays.asList(new Group("sub1"), new Group("sub2"));
+    }};
+    final Group root2 = new Group() {{
+      id = "root2";
+      name = "Root Group 2";
+    }};
+    final Group sub1 = new Group() {{
+      id = "sub1";
+      name = "Sub-group 1";
+    }};
+    final Group sub2 = new Group() {{
+      id = "sub2";
+      name = "Sub-group 2";
+    }};
+    final Group sub3 = new Group() {{
+      id = "sub3";
+      name = "Sub-group 3";
+    }};
+    final Group sub4 = new Group() {{
+      id = "sub4";
+      name = "Sub-group 4";
+    }};
+
+    final List<Group> groupsToAdd = Arrays.asList(
+      root1,
+      root2,
+      sub1,
+      sub2,
+      sub3,
+      sub4
+    );
+    groups.insertMany(TestHelper.addMetaForCreate(groupsToAdd, objectMapper));
+
+    /*
+     * Verify initial state
+     */
+    final EntityResponse<PaginatedCollection<Group>> response1 = getSubGroups(root1.id);
+    TestHelper.assertEquals(Arrays.asList(sub1, sub2), response1.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+
+    final EntityResponse<PaginatedCollection<Group>> response2 = getSubGroups(root2.id);
+    Assert.assertNull(response2.entity.items);
+
+    /*
+     * Add a subgroup to a group
+     */
+    final EntityResponse<GroupLink> addSubGroupResponse1 = addSubGroup(root2.id, sub4.id);
+    final EntityResponse<PaginatedCollection<Group>> response3 = getSubGroups(root2.id);
+    TestHelper.assertEquals(Arrays.asList(sub4), response3.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+    Assert.assertNotEquals(response1.etag, addSubGroupResponse1.etag);
+
+    /*
+     * Add a subgroup to a group with existing subgroups
+     */
+    final EntityResponse<GroupLink> addSubGroupResponse2 = addSubGroup(root1.id, sub3.id);
+    final EntityResponse<PaginatedCollection<Group>> response4 = getSubGroups(root1.id);
+    TestHelper.assertEquals(Arrays.asList(sub1, sub2, sub3), response4.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+    Assert.assertNotEquals(response1.etag, addSubGroupResponse2.etag);
+
+    /*
+     * Verify that the operation is idempotent
+     */
+    final EntityResponse<GroupLink> addSubGroupResponse3 = addSubGroup(root1.id, sub3.id);
+    final EntityResponse<PaginatedCollection<Group>> response5 = getSubGroups(root1.id);
+    TestHelper.assertEquals(Arrays.asList(sub1, sub2, sub3), response5.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+    Assert.assertEquals(addSubGroupResponse2.etag, addSubGroupResponse3.etag);
+
+    /*
+     * Add one more subgroup to a group
+     */
+    final EntityResponse<GroupLink> addSubGroupResponse4 = addSubGroup(root1.id, sub4.id);
+    final EntityResponse<PaginatedCollection<Group>> response6 = getSubGroups(root1.id);
+    TestHelper.assertEquals(Arrays.asList(sub1, sub2, sub3, sub4), response6.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+    Assert.assertNotEquals(addSubGroupResponse3.etag, addSubGroupResponse4.etag);
+  }
+
+  @Test
+  public void removeSubGroup() {
+
+    final Group root1 = new Group() {{
+      id = "root1";
+      name = "Root Group 1";
+      groups = Arrays.asList(new Group("sub1"), new Group("sub2"));
+    }};
+    final Group root2 = new Group() {{
+      id = "root2";
+      name = "Root Group 2";
+    }};
+    final Group sub1 = new Group() {{
+      id = "sub1";
+      name = "Sub-group 1";
+    }};
+    final Group sub2 = new Group() {{
+      id = "sub2";
+      name = "Sub-group 2";
+    }};
+    final Group sub3 = new Group() {{
+      id = "sub3";
+      name = "Sub-group 3";
+    }};
+    final Group sub4 = new Group() {{
+      id = "sub4";
+      name = "Sub-group 4";
+    }};
+
+    final List<Group> groupsToAdd = Arrays.asList(
+      root1,
+      root2,
+      sub1,
+      sub2,
+      sub3,
+      sub4
+    );
+    groups.insertMany(TestHelper.addMetaForCreate(groupsToAdd, objectMapper));
+
+    /*
+     * Verify initial state
+     */
+    final EntityResponse<PaginatedCollection<Group>> response1 = getSubGroups(root1.id);
+    TestHelper.assertEquals(Arrays.asList(sub1, sub2), response1.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+
+    final EntityResponse<PaginatedCollection<Group>> response2 = getSubGroups(root2.id);
+    Assert.assertNull(response2.entity.items);
+
+    /*
+     * Remove a sub group
+     */
+    final EntityResponse<GroupLink> removeSubGroupResponse1 = removeSubGroup(root1.id, sub1.id);
+    final EntityResponse<PaginatedCollection<Group>> response3 = getSubGroups(root1.id);
+    TestHelper.assertEquals(Arrays.asList(sub2), response3.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+
+    /*
+     * Verify that the operation is idempotent
+     */
+    final EntityResponse<GroupLink> removeSubGroupResponse2 = removeSubGroup(root1.id, sub1.id);
+    final EntityResponse<PaginatedCollection<Group>> response4 = getSubGroups(root1.id);
+    TestHelper.assertEquals(Arrays.asList(sub2), response4.entity.items, Group::getId, TestHelper::isEqualExceptMeta);
+    Assert.assertEquals(removeSubGroupResponse1.etag, removeSubGroupResponse2.etag);
+
+    /*
+     * Remove subgroup from group without subgroups
+     */
+    removeSubGroup(root2.id, sub1.id);
+    final EntityResponse<PaginatedCollection<Group>> response5 = getSubGroups(root2.id);
+    Assert.assertNull(response5.entity.items);
+
+    /*
+     * Remove last subgroup from group
+     */
+    removeSubGroup(root1.id, sub2.id);
+    final EntityResponse<PaginatedCollection<Group>> response6 = getSubGroups(root1.id);
+    Assert.assertNull(response6.entity.items);
+  }
+
   private GroupResponse createGroup(Group group) {
 
     final Response response = testEndpoint.path("group").path(group.id)
@@ -499,13 +729,40 @@ public class GroupIntegrationTest {
     return response.readEntity(Group.class);
   }
 
-  private Group getGroup(Link link) {
+  private EntityResponse<Group> getGroup(Link link) {
 
     final Response response = client.target(link)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .get();
     TestHelper.assertSuccessful(response);
-    return response.readEntity(Group.class);
+    return new EntityResponse<>(response, Group.class);
+  }
+
+  private EntityResponse<PaginatedCollection<Group>> getSubGroups(String id) {
+
+    final Response response = testEndpoint.path("group").path(id).path("group")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    TestHelper.assertSuccessful(response);
+    return new EntityResponse<>(response, new GenericType<PaginatedCollection<Group>>() {});
+  }
+
+  private EntityResponse<GroupLink> addSubGroup(String groupId, String subGroupId) {
+
+    final Response response = testEndpoint.path("group").path(groupId).path("group").path(subGroupId)
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .put(Entity.json(new Group()));
+    TestHelper.assertSuccessful(response);
+    return new EntityResponse<>(response, GroupLink.class);
+  }
+
+  private EntityResponse<GroupLink> removeSubGroup(String groupId, String subGroupId) {
+
+    final Response response = testEndpoint.path("group").path(groupId).path("group").path(subGroupId)
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .delete();
+    TestHelper.assertSuccessful(response);
+    return new EntityResponse<>(response, GroupLink.class);
   }
 
   private static void verifyGroups(Group expected, Group actual) {

@@ -23,7 +23,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Asset;
 import se.atg.cmdb.model.AssetLink;
 import se.atg.cmdb.model.Group;
@@ -63,7 +62,7 @@ public class AssetIntegrationTest {
       id = "group-id1";
       name = "First group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
@@ -71,7 +70,7 @@ public class AssetIntegrationTest {
       description = "Very useful asset";
       group = new GroupLink("group-id1");
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset1, objectMapper));
 
     final Asset response = getAsset(asset1.id);
     verifyAsset(asset1, response);
@@ -84,7 +83,7 @@ public class AssetIntegrationTest {
       id = "group-id1";
       name = "First group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
@@ -92,7 +91,7 @@ public class AssetIntegrationTest {
       description = "Very useful asset";
       group = new GroupLink("group-id1");
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset1, "integration-test", objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset1, objectMapper));
 
     final Asset asset2 = new Asset() {{
       id = "my-asset2";
@@ -100,7 +99,7 @@ public class AssetIntegrationTest {
       description = "Also a very useful asset";
       group = new GroupLink("group-id1");
     }};
-    assets.insertOne(JsonHelper.addMetaForCreate(asset2, "integration-test", objectMapper));
+    assets.insertOne(TestHelper.addMetaForCreate(asset2, objectMapper));
 
     final PaginatedCollection<Asset> response = testEndpoint.path("asset")
       .request(MediaType.APPLICATION_JSON_TYPE)
@@ -130,7 +129,7 @@ public class AssetIntegrationTest {
       id = "group-id1";
       name = "First group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
@@ -200,7 +199,7 @@ public class AssetIntegrationTest {
       id = "group-id1";
       name = "First group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     /*
      * Create Application

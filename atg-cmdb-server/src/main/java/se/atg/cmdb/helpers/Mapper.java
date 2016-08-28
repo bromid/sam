@@ -117,6 +117,20 @@ public abstract class Mapper {
     }
   }
 
+  public static void removeFromList(Document bson, String field, Function<Document,Boolean> equals) {
+
+    final List<Document> existingList = (List<Document>) bson.get(field);
+    if (existingList != null) {
+      final Iterator<Document> iterator = existingList.iterator();
+      while (iterator.hasNext()) {
+        if (equals.apply(iterator.next())) {
+          iterator.remove();
+          break;
+        }
+      }
+    }
+  }
+
   public static ZonedDateTime mapDateTime(Document bson, String field) {
 
     final Date date = bson.get(field, Date.class);
