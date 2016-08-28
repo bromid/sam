@@ -34,6 +34,9 @@ const Root = () => {
     const fetchGroup = ({ params }) =>
         store.dispatch(GroupActions.fetchGroup(params.id));
 
+    const fetchGroupIds = () =>
+        store.dispatch(GroupActions.fetchGroupIds());
+
     const fetchApplicationList = () =>
         store.dispatch(ApplicationActions.fetchApplicationList());
 
@@ -86,6 +89,7 @@ const Root = () => {
                     <Route
                         path="application/new"
                         component={NewApplication}
+                        onEnter={fetchGroupIds}
                     />
                     <Route
                         path="application/:id"

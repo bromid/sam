@@ -11,6 +11,8 @@ import {
     FETCH_GROUP_RESPONSE,
     FETCH_GROUP_TAG_REQUEST,
     FETCH_GROUP_TAG_RESPONSE,
+    FETCH_GROUP_ID_REQUEST,
+    FETCH_GROUP_ID_RESPONSE,
     PATCH_GROUP_REQUEST,
     PATCH_GROUP_RESPONSE,
     CREATE_GROUP_REQUEST,
@@ -33,6 +35,11 @@ const fetchGroup = createFetchSaga({
 const fetchGroupTags = createFetchSaga({
     apiCall: API.fetchGroupTags,
     responseKey: FETCH_GROUP_TAG_RESPONSE,
+});
+
+const fetchGroupIds = createFetchSaga({
+    apiCall: API.fetchGroupIds,
+    responseKey: FETCH_GROUP_ID_RESPONSE,
 });
 
 const patchGroup = createFetchSaga({
@@ -79,6 +86,10 @@ export function* watchFetchGroupTags() {
     yield* takeLatest(FETCH_GROUP_TAG_REQUEST, fetchGroupTags);
 }
 
+export function* watchFetchGroupIds() {
+    yield* takeLatest(FETCH_GROUP_ID_REQUEST, fetchGroupIds);
+}
+
 export function* watchPatchGroupRequest() {
     yield* takeLatest(PATCH_GROUP_REQUEST, patchGroup);
 }
@@ -99,6 +110,7 @@ export default function* groupSagas() {
     yield fork(watchFetchGroup);
     yield fork(watchFetchGroupList);
     yield fork(watchFetchGroupTags);
+    yield fork(watchFetchGroupIds);
     yield fork(watchPatchGroupRequest);
     yield fork(watchPatchGroupResponse);
     yield fork(watchCreateGroupRequest);

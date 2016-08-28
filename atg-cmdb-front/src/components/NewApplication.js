@@ -7,6 +7,7 @@ import AutoComplete from 'material-ui/AutoComplete';
 import { removeEmptyFields } from '../helpers';
 import * as applicationActions from '../actions/applicationActions';
 import * as applicationValidators from '../validators/applicationValidators';
+import { fromGroup } from '../reducers';
 
 const NewApplicationContainer = React.createClass({
 
@@ -24,32 +25,36 @@ const NewApplicationContainer = React.createClass({
     },
 
     onChangeId(event) {
-        const id = event.target.value.trim();
+        const id = event.target.value.trim().toLowerCase();
         const idErrorText = applicationValidators.id(id);
         this.setState({ id, idErrorText });
     },
 
     onChangeName(event) {
-        const name = event.target.value.trim();
+        const name = event.target.value;
         const nameErrorText = applicationValidators.name(name);
         this.setState({ name, nameErrorText });
     },
 
     onChangeDescription(event) {
-        const description = event.target.value.trim();
+        const description = event.target.value;
         const descriptionErrorText = applicationValidators.description(description);
         this.setState({ description, descriptionErrorText });
     },
 
     onChangeGroup(groupName) {
-        const group = groupName.trim();
+        const group = groupName.trim().toLowerCase();
         const groupErrorText = applicationValidators.group(group);
         this.setState({ group, groupErrorText });
     },
 
     onCreate() {
         const { id, name, description, group } = this.state;
-        const application = { id, name, description, group };
+        const application = {
+            id, group,
+            name: name.trim(),
+            description: description.trim(),
+        };
 
         const errors = applicationValidators.application(application);
 
@@ -70,6 +75,8 @@ const NewApplicationContainer = React.createClass({
     },
 
     render() {
+        const { groupIds = [] } = this.props;
+
         const {
             id, idErrorText,
             name, nameErrorText,
@@ -83,8 +90,6 @@ const NewApplicationContainer = React.createClass({
             flexDirection: 'column',
             alignItems: 'stretch',
         };
-
-        const groupIds = [];
 
         return (
             <div>
@@ -140,7 +145,11 @@ const NewApplicationContainer = React.createClass({
     },
 });
 
+const mapStateToProps = (state) => ({
+    groupIds: fromGroup.getIds(state),
+});
+
 const Actions = {
     createApplication: applicationActions.createApplication,
 };
-export default connect(null, Actions)(NewApplicationContainer);
+export default connect(mapStateToProps, Actions)(NewApplicationContainer);
