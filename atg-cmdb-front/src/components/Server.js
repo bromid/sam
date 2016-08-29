@@ -29,6 +29,15 @@ export const serverLink = (server) => (
     `/server/${server.environment}/${server.hostname}`
 );
 
+const General = ({ server }) => (
+    <div style={flexChildStyle}>
+        <dl style={{ margin: 0 }}>
+            <dt>Qualified domain name</dt>
+            <dd>{server.fqdn}</dd>
+        </dl>
+    </div>
+);
+
 const Os = ({ os }) => (
     <div style={flexChildStyle}>
         <h3>Operative system</h3>
@@ -88,8 +97,9 @@ const ServerContainer = React.createClass({
                 name: 'Details',
                 node: (
                     <div style={{ ...flexWrapperStyle, margin: '16px 0' }}>
-                        <Os os={os} />
-                        <Network network={network} />
+                        <General server={server} />
+                        {os && <Os os={os} />}
+                        {network && <Network network={network} />}
                     </div>
                 ),
             },
