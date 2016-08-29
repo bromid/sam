@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Dashboard for managing assets",
   "scripts": {
-    "start": "babel-node devServer.js",
+    "start": "webpack-dashboard -- babel-node devServer.js",
     "prebuild": "rm -rf dist",
     "build": "webpack --config webpack.prod.config.babel.js -p",
     "postbuild": "cp index.html dist/static/",
@@ -57,6 +57,7 @@
     "json-loader": "^0.5.4",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1",
+    "webpack-dashboard": "^0.1.8",
     "webpack-dev-middleware": "^1.6.1",
     "webpack-validator": "^2.2.6"
   }
