@@ -106,6 +106,7 @@ public class ApplicationResource {
   @ApiResponses({
     @ApiResponse(code = 201, message = "A new application was created.", response = ApplicationLink.class),
     @ApiResponse(code = 200, message = "The application was successfully replaced.", response = ApplicationLink.class),
+    @ApiResponse(code = 404, message = "No application exists with the supplied id.", response = ErrorMessage.class),
     @ApiResponse(code = 412, message = "No application exists with the supplied id and hash.", response = ErrorMessage.class),
     @ApiResponse(code = 422, message = "The supplied application is not valid.", response = ErrorMessage.class),
   })
@@ -138,6 +139,7 @@ public class ApplicationResource {
   @ApiOperation(value = "Update application")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The application was successfully updated.", response = ApplicationLink.class),
+    @ApiResponse(code = 404, message = "No application exists with the supplied id.", response = ErrorMessage.class),
     @ApiResponse(code = 412, message = "No application exists with the supplied id and hash.", response = ErrorMessage.class),
     @ApiResponse(code = 422, message = "The supplied application is not valid.", response = ErrorMessage.class),
   })

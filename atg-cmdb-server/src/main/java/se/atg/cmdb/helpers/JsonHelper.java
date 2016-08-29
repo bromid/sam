@@ -3,9 +3,7 @@ package se.atg.cmdb.helpers;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Link;
 
@@ -32,7 +30,6 @@ import com.fasterxml.jackson.databind.ser.BeanSerializerFactory;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.rest.serializer.LinkDeserializer;
 import se.atg.cmdb.ui.rest.serializer.LinkSerializer;
@@ -179,12 +176,6 @@ public abstract class JsonHelper {
       logger.error("Failed to generate json for: " + entity, exc);
       return null;
     }
-  }
-
-  public static List<? extends Document> entitiesToBson(List<Group> groupsToAdd, ObjectMapper objectMapper) {
-    return groupsToAdd.stream()
-      .map(t -> entityToBson(t, objectMapper))
-      .collect(Collectors.toList());
   }
 
   public static JsonSerializer<Object> getBeanSerializer(SerializerProvider sp, Class<?> cls) throws JsonMappingException {

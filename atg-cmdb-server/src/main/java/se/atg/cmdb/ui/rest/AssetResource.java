@@ -93,6 +93,7 @@ public class AssetResource {
   @ApiResponses({
     @ApiResponse(code = 201, message = "A new asset was created.", response = AssetLink.class),
     @ApiResponse(code = 200, message = "The asset was successfully replaced.", response = AssetLink.class),
+    @ApiResponse(code = 404, message = "No asset exists with the supplied id.", response = ErrorMessage.class),
     @ApiResponse(code = 412, message = "No asset exists with the supplied id and hash.", response = ErrorMessage.class),
     @ApiResponse(code = 422, message = "The supplied asset is not valid.", response = ErrorMessage.class),
   })
@@ -125,6 +126,7 @@ public class AssetResource {
   @ApiOperation(value = "Update asset")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The asset was successfully updated.", response = AssetLink.class),
+    @ApiResponse(code = 404, message = "No asset exists with the supplied id.", response = ErrorMessage.class),
     @ApiResponse(code = 412, message = "No asset exists with the supplied id and hash.", response = ErrorMessage.class),
     @ApiResponse(code = 422, message = "The supplied asset is not valid.", response = ErrorMessage.class),
   })
@@ -155,10 +157,12 @@ public class AssetResource {
   ) {
     logger.info("Delete asset: {}", id);
 
-    final Bson filter = Filters.eq("id", id);
-    final Document existing = findAsset(filter);
+    final Document existing = getAssetForUpdate(id);
     final Optional<String> hash = RestHelper.verifyHash(existing, request);
-    MongoHelper.deleteDocument(filter, hash, database.getCollection(Collections.ASSETS));
+
+    final MongoCollection<Document> collection = database.getCollection(Collections.ASSETS);
+    MongoHelper.deleteDocument(Filters.eq("id", id), hash, collection);
+
     return Response.noContent().build();
   }
 

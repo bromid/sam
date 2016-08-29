@@ -161,6 +161,12 @@ public class ServerResource {
   @Path("services/server/{environment}/{hostname}/deployment/{applicationId}")
   @RolesAllowed(Roles.EDIT)
   @ApiOperation(value = "Add a deployed applications to the server", response = ServerLink.class)
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The deployment was successfully added to the server.", response = ServerLink.class),
+    @ApiResponse(code = 404, message = "No server exists with the supplied environment and hostname.", response = ErrorMessage.class),
+    @ApiResponse(code = 412, message = "No server exists with the supplied environment, hostname and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied deployment is not valid.", response = ErrorMessage.class),
+  })
   public Response addDeployment(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
     @ApiParam("Test environment") @PathParam("environment") String environment,
@@ -170,7 +176,7 @@ public class ServerResource {
     @Context Request request,
     @Context SecurityContext securityContext
   ) {
-    logger.info("Add deployment: {}, {}", applicationId, deployment);
+    logger.info("Add deployment: {} to {}@{}, {}", applicationId, hostname, environment, deployment);
 
     RestHelper.validate(deployment);
 
@@ -194,6 +200,7 @@ public class ServerResource {
   @ApiResponses({
     @ApiResponse(code = 201, message = "A new server was created.", response = ServerLink.class),
     @ApiResponse(code = 200, message = "The server was successfully replaced.", response = ServerLink.class),
+    @ApiResponse(code = 404, message = "No server exists with the supplied environment and hostname.", response = ErrorMessage.class),
     @ApiResponse(code = 412, message = "No server exists with the supplied environment, hostname and hash.", response = ErrorMessage.class),
     @ApiResponse(code = 422, message = "The supplied server is not valid.", response = ErrorMessage.class),
   })
@@ -205,7 +212,7 @@ public class ServerResource {
     @Context Request request,
     @Context SecurityContext securityContext
   ) throws JsonParseException, JsonMappingException, IOException {
-    logger.info("Create or replace server: {}, {}, {}", environment, hostname, server);
+    logger.info("Create or replace server: {}@{}, {}", hostname, environment, server);
 
     RestHelper.validate(server, Server.Create.class);
 
@@ -227,6 +234,7 @@ public class ServerResource {
   @ApiOperation(value = "Update server")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The server was successfully updated.", response = ServerLink.class),
+    @ApiResponse(code = 404, message = "No server exists with the supplied environment and hostname.", response = ErrorMessage.class),
     @ApiResponse(code = 412, message = "No server exists with the supplied environment, hostname and hash.", response = ErrorMessage.class),
     @ApiResponse(code = 422, message = "The supplied server is not valid.", response = ErrorMessage.class),
   })
@@ -238,7 +246,7 @@ public class ServerResource {
     @Context Request request,
     @Context SecurityContext securityContext
   ) throws IOException {
-    logger.info("Update server: {}", server);
+    logger.info("Update server {}@{}, {}", hostname, environment, server);
 
     RestHelper.validate(server, Server.Update.class);
 
@@ -252,15 +260,21 @@ public class ServerResource {
   @Path("services/server/{environment}/{hostname}")
   @RolesAllowed(Roles.EDIT)
   @ApiOperation(value = "Remove a server")
+  @ApiResponses({
+    @ApiResponse(code = 204, message = "The server was successfully deleted."),
+    @ApiResponse(code = 404, message = "No server exists with the supplied environment and hostname.", response = ErrorMessage.class),
+    @ApiResponse(code = 412, message = "No server exists with the supplied environment, hostname and hash.", response = ErrorMessage.class)
+  })
   public Response deleteServer(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
     @ApiParam("Test environment") @PathParam("environment") String environment,
     @Context Request request
   ) {
-    logger.info("Delete server: {}, {}", environment, hostname);
+    logger.info("Delete server: {}@{}", hostname, environment);
 
     final Document existing = getServerForUpdate(hostname, environment);
     final Optional<String> hash = RestHelper.verifyHash(existing, request);
+
     MongoHelper.deleteDocument(Filters.and(
         Filters.eq("environment", environment),
         Filters.eq("hostname", hostname)
@@ -268,6 +282,37 @@ public class ServerResource {
       database.getCollection(Collections.SERVERS)
     );
     return Response.noContent().build();
+  }
+
+  @DELETE
+  @Path("services/server/{environment}/{hostname}/deployment/{applicationId}")
+  @RolesAllowed(Roles.EDIT)
+  @ApiOperation(value = "Remove a deployed applications from the server", response = ServerLink.class)
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The deployment was successfully removed from the server.", response = ServerLink.class),
+    @ApiResponse(code = 404, message = "No server exists with the supplied environment and hostname.", response = ErrorMessage.class),
+    @ApiResponse(code = 412, message = "No server exists with the supplied environment, hostname and hash.", response = ErrorMessage.class),
+    @ApiResponse(code = 422, message = "The supplied application id is not valid.", response = ErrorMessage.class),
+  })
+  public Response removeDeployment(
+    @ApiParam("Server hostname") @PathParam("hostname") String hostname,
+    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam("Application id") @PathParam("applicationId") String applicationId,
+    @Context UriInfo uriInfo,
+    @Context Request request,
+    @Context SecurityContext securityContext
+  ) {
+    logger.info("Remove deployment: {} from {}@{}", applicationId, hostname, environment);
+
+    final Document existing = getServerForUpdate(hostname, environment);
+    final Optional<String> hash = RestHelper.verifyHash(existing, request);
+    Mapper.removeFromList(existing, "deployments", (item) -> item.get("applicationId").equals(applicationId));
+
+    final User user = RestHelper.getUser(securityContext);
+    JsonHelper.updateMetaForUpdate(existing, hash, user.name);
+
+    MongoHelper.updateDocument(existing, existing, hash, database.getCollection(Collections.SERVERS));
+    return linkResponse(Status.OK, existing, uriInfo);
   }
 
   private PaginatedCollection<String> getEnvironments() {

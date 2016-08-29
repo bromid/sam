@@ -9,8 +9,13 @@ import java.util.stream.Collectors;
 
 public abstract class TreeHelper {
 
-  public static <T> T createTree(String rootNodeId, Map<String, T> nodes, Function<T, List<String>> getSubNodes, BiConsumer<T, T> addSubNode) {
-
+  public static <T> T createTree(
+    String rootNodeId,
+    Map<String, T> nodes,
+    Function<T, List<String>> getSubNodes,
+    BiConsumer<T, T> addSubNode,
+    Function<String,T> handleNull
+  ) {
     final Map<String, NodeState> loopCheck = nodes
       .keySet()
       .stream()
@@ -20,13 +25,17 @@ public abstract class TreeHelper {
       thisLoopCheck = loopCheck;
       thisGetSubNodes = getSubNodes;
       thisAddSubNode = addSubNode;
+      thisHandleNull = handleNull;
     }};
-    return recursiveCreateTree(state.getNode(rootNodeId), state.getLoopCheck(rootNodeId), state);
+    return recursiveCreateTree(rootNodeId, state.getNode(rootNodeId), state.getLoopCheck(rootNodeId), state);
   }
 
-  private static <T> T recursiveCreateTree(T rootNode, NodeState nodeState, State<T> state) {
+  private static <T> T recursiveCreateTree(String id, T rootNode, NodeState nodeState, State<T> state) {
 
-    if (nodeState == null || nodeState.onStack) {
+    if (nodeState == null) {
+      return state.handleNull(id);
+    }
+    if (nodeState.onStack) {
       return null;
     }
     if (nodeState.visit()) {
@@ -35,7 +44,7 @@ public abstract class TreeHelper {
 
     final List<String> subNodeIds = state.getSubNodes(rootNode);
     subNodeIds.stream()
-      .map(t -> recursiveCreateTree(state.getNode(t), state.getLoopCheck(t), state))
+      .map(t -> recursiveCreateTree(t, state.getNode(t), state.getLoopCheck(t), state))
       .filter(Objects::nonNull)
       .forEach(t -> state.addSubNode(rootNode, t));
 
@@ -72,6 +81,7 @@ public abstract class TreeHelper {
     Map<String, NodeState> thisLoopCheck;
     Function<T, List<String>> thisGetSubNodes;
     BiConsumer<T, T> thisAddSubNode;
+    Function<String,T> thisHandleNull;
 
     List<String> getSubNodes(T rootNode) {
       return thisGetSubNodes.apply(rootNode);
@@ -87,6 +97,10 @@ public abstract class TreeHelper {
 
     public T getNode(String nodeId) {
       return thisNodes.get(nodeId);
+    }
+
+    public T handleNull(String nodeId) {
+      return thisHandleNull.apply(nodeId);
     }
   }
 }

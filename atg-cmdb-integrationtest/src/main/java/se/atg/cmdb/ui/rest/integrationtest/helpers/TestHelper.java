@@ -1,6 +1,7 @@
 package se.atg.cmdb.ui.rest.integrationtest.helpers;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -10,11 +11,25 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;
 
+import org.bson.Document;
 import org.junit.Assert;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Base;
 
 public abstract class TestHelper {
+
+  public static <T> Document addMetaForCreate(T node, ObjectMapper objectMapper) {
+    return JsonHelper.addMetaForCreate(node, "integration-test", objectMapper);
+  }
+
+  public static <T> List<Document> addMetaForCreate(Collection<T> nodes, ObjectMapper objectMapper) {
+    return nodes.stream()
+      .map(t -> addMetaForCreate(t, objectMapper))
+      .collect(Collectors.toList());
+  }
 
   public static <K,V> void assertEquals(Map<K,V> expected, Collection<V> actual, Function<? super V,K> keyMapper) {
     assertEquals(expected, actual, keyMapper, Assert::assertEquals);
@@ -66,15 +81,18 @@ public abstract class TestHelper {
   }
 
   public static void assertValidationError(String expected, Response response) {
-
     Assert.assertEquals(422, response.getStatus());
     final String jsonResponse = response.readEntity(String.class);
     Assert.assertTrue(jsonResponse + " doesn't contain \"" + expected + "\".", jsonResponse.contains(expected));
   }
 
   public static void isEqualExceptMeta(Base expected, Base actual) {
-    Assert.assertNotNull(actual.meta);
+    Assert.assertNotNull("Expected " + actual + " to have meta", actual.meta);
+    isEqualDisregardMeta(expected, actual);
+  }
+
+  public static void isEqualDisregardMeta(Base expected, Base actual) {
     actual.meta = null;
-    Assert.assertEquals(expected, actual);
+    Assert.assertEquals("Got " + actual + " expected " + expected, expected, actual);
   }
 }

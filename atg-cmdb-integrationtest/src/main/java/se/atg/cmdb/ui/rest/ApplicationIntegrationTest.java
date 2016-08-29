@@ -25,7 +25,6 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.ApplicationLink;
 import se.atg.cmdb.model.Deployment;
@@ -71,7 +70,7 @@ public class ApplicationIntegrationTest {
       id = "my-group";
       name = "My group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Application application1 = new Application() {{
       id = "my-application1";
@@ -79,7 +78,7 @@ public class ApplicationIntegrationTest {
       description = "Min testserver";
       group = new GroupLink("my-group");
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
 
     final Application response = getApplication(application1.id);
     verifyApplication(application1, response);
@@ -92,7 +91,7 @@ public class ApplicationIntegrationTest {
       id = "my-group";
       name = "My group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Application application1 = new Application() {{
       id = "my-application1";
@@ -100,7 +99,7 @@ public class ApplicationIntegrationTest {
       description = "Min testserver";
       group = new GroupLink("my-group");
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
 
     final Application application2 = new Application() {{
       id = "my-application2";
@@ -108,7 +107,7 @@ public class ApplicationIntegrationTest {
       description = "Min testserver";
       group = new GroupLink("my-group");
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration-test",  objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application2, objectMapper));
 
     final PaginatedCollection<Application> response = testEndpoint.path("application")
       .request(MediaType.APPLICATION_JSON_TYPE)
@@ -167,7 +166,7 @@ public class ApplicationIntegrationTest {
       description = "Min testserver #1";
       deployments = Arrays.asList(deployment1, deployment2, deployment3);
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server1, objectMapper));
 
     final Server server2 = new Server() {{
       hostname = "vltma2";
@@ -176,7 +175,7 @@ public class ApplicationIntegrationTest {
       description = "Min testserver #2";
       deployments = Arrays.asList(deployment3, deployment4, deployment5);
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server2, "integration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server2, objectMapper));
 
     final PaginatedCollection<ServerDeployment> response = testEndpoint
       .path("application").path(applicationId1).path("deployment")
@@ -200,7 +199,7 @@ public class ApplicationIntegrationTest {
       id = "my-group";
       name = "My group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     final Application application1 = new Application() {{
       id = "my-application1";
@@ -245,7 +244,7 @@ public class ApplicationIntegrationTest {
       id = "my-group";
       name = "My group";
     }};
-    groups.insertOne(JsonHelper.addMetaForCreate(group1, "intergration-test", objectMapper));
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     /*
      * Create Application

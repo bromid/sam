@@ -25,13 +25,13 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
 import se.atg.cmdb.dao.Collections;
-import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.model.Application;
 import se.atg.cmdb.model.Deployment;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
 import se.atg.cmdb.model.ServerLink;
+import se.atg.cmdb.ui.rest.integrationtest.EntityResponse;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class ServerIntegrationTest {
@@ -66,7 +66,7 @@ public class ServerIntegrationTest {
       fqdn = "vltma2.test1.hh.atg.se";
       description = "Min testserver";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server1, objectMapper));
 
     final Server response = getServer(server1.environment, server1.hostname);
     TestHelper.isEqualExceptMeta(server1, response);
@@ -80,14 +80,14 @@ public class ServerIntegrationTest {
       environment = "test1";
       fqdn = "vltma1.test1.hh.atg.se";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server1, objectMapper));
 
     final Server server2 = new Server() {{
       hostname = "vltma2";
       environment = "test1";
       fqdn = "vltma2.test1.hh.atg.se";
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server2, "integration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server2, objectMapper));
 
     final PaginatedCollection<Server> response = testEndpoint.path("server")
       .request(MediaType.APPLICATION_JSON_TYPE)
@@ -249,13 +249,13 @@ public class ServerIntegrationTest {
       id = "my-application1";
       name = "My Application 1";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration.test", objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
 
     final Application application2 = new Application() {{
       id = "my-application2";
       name = "My Application 2";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration.test", objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application2, objectMapper));
 
     /*
      * Get and verify server
@@ -358,7 +358,7 @@ public class ServerIntegrationTest {
       description = "Min testserver";
       deployments = Arrays.asList(deployment1, deployment2, deployment3);
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server1, objectMapper));
 
     /*
      * Create applications
@@ -367,13 +367,13 @@ public class ServerIntegrationTest {
       id = "application1";
       name = "Application 1";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test", objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
 
     final Application application3 = new Application() {{
       id = "application3";
       name = "Application 3";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application3, "integration-test", objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application3, objectMapper));
 
     final PaginatedCollection<Deployment> response = getServerDeployments(server1.environment, server1.hostname);
     Assert.assertEquals(3, response.items.size());
@@ -409,7 +409,7 @@ public class ServerIntegrationTest {
       description = "Min testserver";
       deployments = Arrays.asList(deployment1, deployment2, deployment3);
     }};
-    servers.insertOne(JsonHelper.addMetaForCreate(server1, "integration-test", objectMapper));
+    servers.insertOne(TestHelper.addMetaForCreate(server1, objectMapper));
 
     /*
      * Create applications
@@ -418,13 +418,13 @@ public class ServerIntegrationTest {
       id = "application1";
       name = "Application 1";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test", objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
 
     final Application application3 = new Application() {{
       id = "application3";
       name = "Application 3";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application3, "integration-test", objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application3, objectMapper));
 
     final Deployment response = getServerDeployment(server1.environment, server1.hostname, application3.id);
     verifyServerDeploymentRest(deployment3, response);
@@ -449,14 +449,14 @@ public class ServerIntegrationTest {
       name = "My application 1";
       description = "Important app";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application1, "integration-test", objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
 
     final Application application2 = new Application() {{
       id = "my-app2";
       name = "My application 2";
       description = "Another important app";
     }};
-    applications.insertOne(JsonHelper.addMetaForCreate(application2, "integration-test", objectMapper));
+    applications.insertOne(TestHelper.addMetaForCreate(application2, objectMapper));
 
     final PaginatedCollection<Deployment> serverDeployments = getServerDeployments(server.link);
     Assert.assertNull(serverDeployments.items);
@@ -468,8 +468,8 @@ public class ServerIntegrationTest {
       version = "1.2.3";
       releaseNotes = "http://www.atg.se/release-notes1";
     }};
-    final ServerLink addDeploymentResponse1 = addServerDeployment(server.link, deployment1);
-    final Server serverAfterAdd1 = getServer(addDeploymentResponse1.link);
+    final EntityResponse<ServerLink> addDeploymentResponse1 = addServerDeployment(server.link, deployment1);
+    final Server serverAfterAdd1 = getServer(addDeploymentResponse1.entity.link);
     Assert.assertEquals(1, serverAfterAdd1.deployments.size());
     verifyServerDeploymentRest(deployment1, serverAfterAdd1.deployments.get(0));
 
@@ -480,17 +480,100 @@ public class ServerIntegrationTest {
       version = "1.0.0";
       releaseNotes = "http://www.atg.se/release-notes2";
     }};
-    final ServerLink addDeploymentResponse2 = addServerDeployment(server.link, deployment2);
-    final Server serverAfterAdd2 = getServer(addDeploymentResponse2.link);
+    final EntityResponse<ServerLink> addDeploymentResponse2 = addServerDeployment(server.link, deployment2);
+    final Server serverAfterAdd2 = getServer(addDeploymentResponse2.entity.link);
     verifyServerDeploymentsRest(Arrays.asList(deployment1, deployment2), serverAfterAdd2.deployments);
 
     /*
      * Update deployment
      */
     deployment2.version = "1.1.0";
-    final ServerLink updateDeploymentResponse1 = addServerDeployment(server.link, deployment2);
-    final Server serverAfterUpdate1 = getServer(updateDeploymentResponse1.link);
+    final EntityResponse<ServerLink> updateDeploymentResponse1 = addServerDeployment(server.link, deployment2);
+    final Server serverAfterUpdate1 = getServer(updateDeploymentResponse1.entity.link);
     verifyServerDeploymentsRest(Arrays.asList(deployment1, deployment2), serverAfterUpdate1.deployments);
+    Assert.assertNotEquals(addDeploymentResponse2.etag, updateDeploymentResponse1.etag);
+
+    /*
+     * Verify that the operation is idempotent
+     */
+    final EntityResponse<ServerLink> updateDeploymentResponse2 = addServerDeployment(server.link, deployment2);
+    final Server serverAfterUpdate2 = getServer(updateDeploymentResponse2.entity.link);
+    verifyServerDeploymentsRest(Arrays.asList(deployment1, deployment2), serverAfterUpdate2.deployments);
+    Assert.assertEquals(updateDeploymentResponse1.etag, updateDeploymentResponse2.etag);
+  }
+
+  @Test
+  public void removeServerDeployment() {
+
+    /*
+     * Add applications to db
+     */
+    final Application application1 = new Application() {{
+      id = "my-application1";
+      name = "My Application 1";
+    }};
+    applications.insertOne(TestHelper.addMetaForCreate(application1, objectMapper));
+
+    final Application application2 = new Application() {{
+      id = "my-application2";
+      name = "My Application 2";
+    }};
+    applications.insertOne(TestHelper.addMetaForCreate(application2, objectMapper));
+
+    /*
+     * Create server
+     */
+    final Server server = new Server() {{
+      hostname = "vltma1";
+      environment = "qa";
+      fqdn = "vltma1.qa.hh.atg.se";
+      os = new Os() {{
+        name = "RedHat";
+        type = "Linux";
+        version = "6.7";
+      }};
+      network = new Network() {{
+        ipv4Address = "10.0.0.1";
+      }};
+      deployments = Arrays.asList(
+        new Deployment(application1.id),
+        new Deployment(application2.id) {{
+          version = "1.2.3";
+          releaseNotes = "https://service.test1.hh.atg.se/info/atgse/service/release-notes";
+        }}
+      );
+    }};
+    final ServerResponse createServerResponse = createServer(server);
+
+    /*
+     * Get and verify server deployments prior to removal
+     */
+    final Server response = getServer(createServerResponse.link);
+    verifyServerDeploymentsRest(server.deployments, response.deployments);
+
+    /*
+     * Remove a deployment and verify
+     */
+    final EntityResponse<ServerLink> removeDeploymentResponse1 = removeServerDeployment(createServerResponse.link, application2.id);
+
+    final Server responseAfterRemoval1 = getServer(createServerResponse.link);
+    verifyServerDeploymentsRest(Arrays.asList(server.deployments.get(0)), responseAfterRemoval1.deployments);
+
+    /*
+     * Verify that the operation is idempotent
+     */
+    final EntityResponse<ServerLink> removeDeploymentResponse2 = removeServerDeployment(createServerResponse.link, application2.id);
+
+    final Server responseAfterRemoval2 = getServer(createServerResponse.link);
+    verifyServerDeploymentsRest(Arrays.asList(server.deployments.get(0)), responseAfterRemoval2.deployments);
+    Assert.assertEquals(removeDeploymentResponse1.etag, removeDeploymentResponse2.etag);
+
+    /*
+     * Remove last deployment and verify
+     */
+    removeServerDeployment(createServerResponse.link, application1.id);
+    final Server responseAfterRemoval3 = getServer(createServerResponse.link);
+    Assert.assertNull(responseAfterRemoval3.deployments);
   }
 
   private ServerResponse createServer(final Server server) {
@@ -571,14 +654,24 @@ public class ServerIntegrationTest {
     return response.readEntity(new GenericType<PaginatedCollection<Deployment>>(){});
   }
 
-  private ServerLink addServerDeployment(Link link, Deployment deployment) {
+  private EntityResponse<ServerLink> addServerDeployment(Link link, Deployment deployment) {
 
     final Response response = client.target(link)
         .path("deployment").path(deployment.getApplicationId())
         .request(MediaType.APPLICATION_JSON_TYPE)
         .put(Entity.json(deployment));
       TestHelper.assertSuccessful(response);
-      return response.readEntity(ServerLink.class);
+      return new EntityResponse<>(response, ServerLink.class);
+  }
+
+  private EntityResponse<ServerLink> removeServerDeployment(Link link, String applicationId) {
+
+    final Response response = client.target(link)
+        .path("deployment").path(applicationId)
+        .request(MediaType.APPLICATION_JSON_TYPE)
+        .delete();
+      TestHelper.assertSuccessful(response);
+      return new EntityResponse<>(response, ServerLink.class);
   }
 
   private static void verifyServerDeployments(Collection<Deployment> expectedDeployments, Collection<Deployment> actualDeployments) {
