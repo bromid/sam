@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "description": "Dashboard for managing assets",
   "scripts": {
-    "start": "webpack-dashboard -- babel-node devServer.js",
+    "start": "babel-node devServer.js",
+    "startFancy": "webpack-dashboard -- babel-node devServer.js",
     "prebuild": "rm -rf dist",
     "build": "webpack --config webpack.prod.config.babel.js -p",
     "postbuild": "cp index.html dist/static/",
