@@ -34,10 +34,12 @@ const ApplicationContainer = React.createClass({
                 name: 'Details',
                 node: (
                     <div>
-                        <dl>
-                            <dt>Group</dt>
-                            <dd>{group && <Link to={`/group/${group.id}`}>{group.name}</Link>}</dd>
-                        </dl>
+                        {group &&
+                            <dl>
+                                <dt>Group</dt>
+                                <dd><Link to={`/group/${group.id}`}>{group.name}</Link></dd>
+                            </dl>
+                        }
                         <Attributes attributes={attributes} />
                     </div>
                 ),
