@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import isFunction from 'lodash/isFunction';
+import isNumber from 'lodash/isNumber';
 import first from 'lodash/first';
 import keys from 'lodash/keys';
 import { Tabs, Tab } from 'material-ui/Tabs';
@@ -148,7 +149,10 @@ const ItemViewContainer = React.createClass({
     },
 
     onTabChanged(tab) {
-        this.setState({ selectedTab: tab });
+        // Prevent bug causing Tabs.onChange to be called with bubbling events
+        if (isNumber(tab)) {
+            this.setState({ selectedTab: tab });
+        }
     },
 
     validateHeadline(value) {

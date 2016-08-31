@@ -58,7 +58,7 @@ const Network = ({ network }) => (
 
 const Deployment = ({ deployment: { applicationLink }, deployment }) => {
     const id = applicationLink.id;
-    const name = (applicationLink.name) ? applicationLink.name : id;
+    const name = (applicationLink.name) ? applicationLink.name : `(${id})`;
     return (
         <Link to={`/application/${id}`}>
             <ListItem primaryText={`${name} (${deployment.version})`} />

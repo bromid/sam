@@ -3,6 +3,7 @@ import { fork, put } from 'redux-saga/effects';
 import { browserHistory } from 'react-router';
 import * as API from '../api';
 import createFetchSaga from './helpers/createFetchSaga';
+import * as groupActions from '../actions/groupActions';
 import { showNotification, showErrorNotification } from '../actions/notificationActions';
 import {
     FETCH_GROUP_LIST_REQUEST,
@@ -17,6 +18,8 @@ import {
     PATCH_GROUP_RESPONSE,
     CREATE_GROUP_REQUEST,
     CREATE_GROUP_RESPONSE,
+    ADD_SUBGROUP_REQUEST,
+    ADD_SUBGROUP_RESPONSE,
 } from '../constants';
 
 const fetchGroupList = createFetchSaga({
@@ -52,6 +55,11 @@ const createGroup = createFetchSaga({
     responseKey: CREATE_GROUP_RESPONSE,
 });
 
+const addSubgroup = createFetchSaga({
+    apiCall: API.addSubgroup,
+    responseKey: ADD_SUBGROUP_RESPONSE,
+});
+
 function* patchGroupResponse(action) {
     if (!action.error) {
         yield fork(fetchGroup, action);
@@ -69,6 +77,18 @@ function* createGroupResponse(action) {
         browserHistory.push(`/group/${id}`);
     } else {
         yield put(showErrorNotification('Failed to create group', action.payload));
+    }
+}
+
+function* addSubgroupResponse(action) {
+    const { groupId, subGroupId } = action.request;
+    if (!action.error) {
+        const message = `Added ${subGroupId} as a sub group to ${groupId}`;
+        yield put(showNotification(message));
+        yield put(groupActions.fetchGroup(groupId));
+    } else {
+        const message = `Failed to add ${subGroupId} as a sub group to ${groupId}`;
+        yield put(showErrorNotification(message, action.payload));
     }
 }
 
@@ -106,6 +126,14 @@ export function* watchCreateGroupResponse() {
     yield* takeLatest(CREATE_GROUP_RESPONSE, createGroupResponse);
 }
 
+export function* watchAddSubgroupRequest() {
+    yield* takeLatest(ADD_SUBGROUP_REQUEST, addSubgroup);
+}
+
+export function* watchAddSubgroupResponse() {
+    yield* takeLatest(ADD_SUBGROUP_RESPONSE, addSubgroupResponse);
+}
+
 export default function* groupSagas() {
     yield fork(watchFetchGroup);
     yield fork(watchFetchGroupList);
@@ -115,4 +143,6 @@ export default function* groupSagas() {
     yield fork(watchPatchGroupResponse);
     yield fork(watchCreateGroupRequest);
     yield fork(watchCreateGroupResponse);
+    yield fork(watchAddSubgroupRequest);
+    yield fork(watchAddSubgroupResponse);
 }

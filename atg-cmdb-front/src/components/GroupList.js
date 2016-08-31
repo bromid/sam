@@ -36,9 +36,10 @@ const Group = ({ group, nestedLevel = 0 }) => {
     const appCount = group.applications ? group.applications.length : null;
     const assetCount = group.assets ? group.assets.length : null;
 
+    const name = (group.name) ? group.name : `(${group.id})`;
     const text = (
         <Link to={`/group/${group.id}`}>
-            {group.name}
+            {name}
             {appCount && <CountBadge title="Applications" primary={true}>{appCount}</CountBadge>}
             {assetCount && <CountBadge title="Assets" secondary={true}>{assetCount}</CountBadge>}
         </Link>

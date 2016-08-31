@@ -20,6 +20,7 @@ export default function createFetchSaga(options) {
             const payload = yield call(apiCall, apiParams, authenticated);
             yield put({
                 type: responseKey,
+                request: action.payload,
                 payload: payloadTransform(payload.data, payload.response),
             });
         } catch (error) {
@@ -30,6 +31,7 @@ export default function createFetchSaga(options) {
             yield put({
                 type: responseKey,
                 error: true,
+                request: action.payload,
                 payload: errorTransform(error, error.response),
             });
         }

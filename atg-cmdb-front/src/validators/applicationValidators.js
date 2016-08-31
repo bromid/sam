@@ -42,7 +42,7 @@ export const group = (param) => {
     const length = param.length;
 
     if (length > 0) {
-        return groupValidators.name(param, 'Group');
+        return groupValidators.id(param, 'Group');
     }
     return '';
 };

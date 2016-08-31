@@ -24,6 +24,10 @@ const NewApplicationContainer = React.createClass({
         };
     },
 
+    componentDidMount() {
+        this.refs.get('id').focus();
+    },
+
     onChangeId(event) {
         const id = event.target.value.trim().toLowerCase();
         const idErrorText = applicationValidators.id(id);
@@ -42,8 +46,8 @@ const NewApplicationContainer = React.createClass({
         this.setState({ description, descriptionErrorText });
     },
 
-    onChangeGroup(groupName) {
-        const group = groupName.trim().toLowerCase();
+    onChangeGroup(groupId) {
+        const group = groupId.trim().toLowerCase();
         const groupErrorText = applicationValidators.group(group);
         this.setState({ group, groupErrorText });
     },
@@ -68,10 +72,12 @@ const NewApplicationContainer = React.createClass({
     },
 
     addField(id, ref) {
-        if (isEmpty(this.refs)) {
-            this.refs = new Map();
+        if (ref) {
+            if (isEmpty(this.refs)) {
+                this.refs = new Map();
+            }
+            this.refs.set(id, ref);
         }
-        this.refs.set(id, ref);
     },
 
     render() {
@@ -117,7 +123,7 @@ const NewApplicationContainer = React.createClass({
                         onUpdateInput={this.onChangeGroup}
                         onNewRequest={this.onChangeGroup}
                         dataSource={groupIds}
-                        floatingLabelText="Group"
+                        floatingLabelText="Group id"
                         fullWidth={true}
                         ref={(ref) => this.addField('group', ref)}
                     />
