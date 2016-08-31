@@ -1,27 +1,61 @@
 import React, { PropTypes } from 'react';
+import isEmpty from 'lodash/isEmpty';
+import IconButton from 'material-ui/IconButton';
+import IconMenu from 'material-ui/IconMenu';
+import MenuItem from 'material-ui/MenuItem';
 import RaisedButton from 'material-ui/RaisedButton';
+import { ListItem } from 'material-ui/List';
+import VertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import AddSubGroup from './AddSubGroup';
 import { flexWrapperStyle } from '../../style';
-import { GroupList } from '../GroupList';
+import { GroupList, GroupText } from '../GroupList';
 import * as groupValidators from '../../validators/groupValidators';
 
-const SubGroupsList = ({ authenticated, groups, onAddGroup }) => (
-    <div>
-        <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
-            <div style={{ flex: 1 }}>
-                <h3>Sub groups</h3>
+const SubGroupsList = ({ authenticated, groups, onAddGroup }) => {
+    const button = (
+        <IconButton tooltip="menu">
+            <VertIcon />
+        </IconButton>
+    );
+
+    const menu = (group) => (
+        <IconMenu iconButtonElement={button}>
+            <MenuItem onTouchTap={() => console.info(`Expand ${group.id}`)}>Expand</MenuItem>
+            <MenuItem onTouchTap={() => console.info(`Removed ${group.id}`)}>Remove</MenuItem>
+        </IconMenu>
+    );
+
+    const renderGroup = (group, nestedItems, nestedLevel) => (
+        <ListItem
+            primaryText={<GroupText group={group} />}
+            secondaryText={group.description}
+            primaryTogglesNestedList={true}
+            disabled={isEmpty(nestedItems)}
+            nestedItems={nestedItems}
+            nestedLevel={nestedLevel}
+            rightIconButton={menu(group)}
+            onNestedListToggle={() => console.info('Toggle Nested')}
+        />
+    );
+
+    return (
+        <div>
+            <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                    <h3>Sub groups</h3>
+                </div>
+                {authenticated &&
+                    <RaisedButton
+                        label="Add group"
+                        onTouchTap={onAddGroup}
+                        style={{ borderRadius: 3 }}
+                    />
+                }
             </div>
-            {authenticated &&
-                <RaisedButton
-                    label="Add group"
-                    onTouchTap={onAddGroup}
-                    style={{ borderRadius: 3 }}
-                />
-            }
+            <GroupList groups={groups} renderGroup={renderGroup} />
         </div>
-        <GroupList groups={groups} />
-    </div>
-);
+    );
+};
 
 const SubGroups = React.createClass({
     propTypes: {
