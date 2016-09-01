@@ -1,8 +1,8 @@
 import React, { PropTypes } from 'react';
 import TextField from 'material-ui/TextField';
 import SaveCancelForm from '../SaveCancelForm';
-import EditIconButton from './EditIconButton';
-import { isShowEditForm, AllStates } from './State';
+import EditIconButton from '../EditIconButton';
+import { isShowEditForm, AllStates } from '../EditState';
 
 const Headline = ({ value, state, edit }) => (
     <h2 className="editIconWrapper" style={{ position: 'relative', minHeight: 25 }}>

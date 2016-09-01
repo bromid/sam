@@ -3,6 +3,7 @@ import { fork, put } from 'redux-saga/effects';
 import { browserHistory } from 'react-router';
 import * as API from '../api';
 import createFetchSaga from './helpers/createFetchSaga';
+import * as applicationActions from '../actions/applicationActions';
 import { showNotification, showErrorNotification } from '../actions/notificationActions';
 import {
     FETCH_APPLICATION_LIST_REQUEST,
@@ -49,9 +50,9 @@ const fetchApplicationDeployments = createFetchSaga({
 
 function* patchApplicationResponse(action) {
     if (!action.error) {
-        yield fork(fetchApplication, action);
-        const { name } = action.payload;
+        const { id, name } = action.payload;
         yield put(showNotification(`Updated application ${name}`));
+        yield put(applicationActions.fetchApplication(id));
     } else {
         yield put(showErrorNotification('Failed to update application', action.payload));
     }

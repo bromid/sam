@@ -2,8 +2,6 @@ import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import isFunction from 'lodash/isFunction';
 import isNumber from 'lodash/isNumber';
-import first from 'lodash/first';
-import keys from 'lodash/keys';
 import { Tabs, Tab } from 'material-ui/Tabs';
 import * as metaActions from '../../actions/metaActions';
 import { containerStyle, flexWrapperStyle } from '../../style';
@@ -12,71 +10,8 @@ import Meta from '../Meta';
 import { Tags } from '../Tag';
 import PersistableDescription from './PersistableDescription';
 import PersistableHeadline from './PersistableHeadline';
-import { State, isEditState } from './State';
-
-const mapEditState = (authenticated, editFunction, editing = false, disable = false) => {
-    if (disable) return State.readonly;
-    if (editing) return State.editing;
-    if (authenticated && isFunction(editFunction)) return State.editable;
-    return State.readonly;
-};
-
-const mapNewPropsState = (name, ownState, otherState, value, error) => {
-    const stateName = `${name}State`;
-    const errorName = `${name}ErrorText`;
-    if (isEditState(otherState)) {
-        return {
-            [name]: value,
-            [stateName]: 'readonly',
-        };
-    }
-    if (ownState === State.saveFailed) {
-        return {
-            [name]: error.value,
-            [stateName]: ownState,
-            [errorName]: error.message,
-        };
-    }
-    return {
-        [name]: value,
-        [stateName]: ownState,
-    };
-};
-
-const mapChangeState = (name, value, errorText) => {
-    const stateName = `${name}State`;
-    const errorName = `${name}ErrorText`;
-    const newState = (errorText.length > 1) ? State.validationFailed : State.editing;
-    return {
-        [name]: value,
-        [stateName]: newState,
-        [errorName]: errorText,
-    };
-};
-
-const changeEditState = (currentState, authenticated, editFunction, saving, error) => {
-    if (currentState === State.saving || currentState === State.saveFailed) {
-        if (error) return State.saveFailed;
-    }
-    if (currentState === State.editing) {
-        if (saving) return State.saving;
-        return State.editing;
-    }
-    return mapEditState(authenticated, editFunction);
-};
-
-const parseError = (error) => {
-    if (error && error.error) {
-        const body = JSON.parse(error.options.body);
-        const fieldName = first(keys(body));
-        return {
-            isError: true,
-            message: error.message,
-            value: body[fieldName],
-        };
-    }
-    return { isError: false };
-};
+import { State } from '../EditState';
+import * as StateMachine from '../EditStateMachine';
 
 const ItemViewContainer = React.createClass({
     propTypes: {
@@ -106,10 +41,10 @@ const ItemViewContainer = React.createClass({
             selectedTab: 0,
             headline,
             headlineErrorText: '',
-            headlineState: mapEditState(authenticated, updateHeadline),
+            headlineState: StateMachine.mapState(authenticated, updateHeadline),
             description,
             descriptionErrorText: '',
-            descriptionState: mapEditState(authenticated, updateDescription),
+            descriptionState: StateMachine.mapState(authenticated, updateDescription),
         };
     },
 
@@ -124,9 +59,9 @@ const ItemViewContainer = React.createClass({
             headlineState, descriptionState,
         } = this.state;
 
-        const error = parseError(patchError);
+        const error = StateMachine.parseError(patchError);
 
-        const newHeadlineState = changeEditState(
+        const newHeadlineState = StateMachine.mapStateFromCurrent(
             headlineState,
             authenticated,
             updateHeadline,
@@ -134,7 +69,7 @@ const ItemViewContainer = React.createClass({
             error.isError
         );
 
-        const newDescState = changeEditState(
+        const newDescState = StateMachine.mapStateFromCurrent(
             descriptionState,
             authenticated,
             updateDescription,
@@ -143,8 +78,20 @@ const ItemViewContainer = React.createClass({
         );
 
         this.setState({
-            ...mapNewPropsState('headline', newHeadlineState, newDescState, headline, error),
-            ...mapNewPropsState('description', newDescState, newHeadlineState, description, error),
+            ...StateMachine.newPropsState(
+                'headline',
+                newHeadlineState,
+                newDescState,
+                headline,
+                error
+            ),
+            ...StateMachine.newPropsState(
+                'description',
+                newDescState,
+                newHeadlineState,
+                description,
+                error
+            ),
         });
     },
 
@@ -162,9 +109,8 @@ const ItemViewContainer = React.createClass({
 
     editHeadline(edit = true, disable = null) {
         const { authenticated, updateHeadline } = this.props;
-        this.setState({
-            headlineState: mapEditState(authenticated, updateHeadline, edit, disable),
-        });
+        const state = StateMachine.mapState(authenticated, updateHeadline, edit, disable);
+        this.setState({ headlineState: state });
         if (disable === null) {
             this.editDescription(false, edit);
         }
@@ -178,7 +124,7 @@ const ItemViewContainer = React.createClass({
     changeHeadline(event) {
         const value = event.target.value;
         const errorText = this.validateHeadline(value);
-        this.setState(mapChangeState('headline', value, errorText));
+        this.setState(StateMachine.changeState('headline', value, errorText));
     },
 
     saveHeadline(event) {
@@ -197,9 +143,8 @@ const ItemViewContainer = React.createClass({
 
     editDescription(edit = true, disable = null) {
         const { authenticated, updateDescription } = this.props;
-        this.setState({
-            descriptionState: mapEditState(authenticated, updateDescription, edit, disable),
-        });
+        const state = StateMachine.mapState(authenticated, updateDescription, edit, disable);
+        this.setState({ descriptionState: state });
         if (disable === null) {
             this.editHeadline(false, edit);
         }
@@ -213,7 +158,7 @@ const ItemViewContainer = React.createClass({
     changeDescription(event) {
         const value = event.target.value;
         const errorText = this.validateDescription(value);
-        this.setState(mapChangeState('description', value, errorText));
+        this.setState(StateMachine.changeState('description', value, errorText));
     },
 
     saveDescription(event) {
