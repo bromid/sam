@@ -4,10 +4,10 @@ import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
 import * as applicationValidators from '../validators/applicationValidators';
 import * as applicationActions from '../actions/applicationActions';
-import LoadingIndicator from './LoadingIndicator';
-import Attributes from './Attributes';
-import ItemView from './ItemView';
-import ApplicationDeployments from './ApplicationDeployments';
+import LoadingIndicator from '../components/LoadingIndicator';
+import Attributes from '../components/Attributes';
+import ItemView from '../components/ItemView';
+import ApplicationDeployments from '../components/ApplicationDeployment';
 import { fromApplication } from '../reducers';
 
 const ApplicationContainer = React.createClass({

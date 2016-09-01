@@ -3,9 +3,9 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
 import * as assetActions from '../actions/assetActions';
-import LoadingIndicator from './LoadingIndicator';
-import Attributes from './Attributes';
-import ItemView from './ItemView';
+import LoadingIndicator from '../components/LoadingIndicator';
+import Attributes from '../components/Attributes';
+import ItemView from '../components/ItemView';
 import { fromAsset } from '../reducers';
 
 const AssetContainer = React.createClass({

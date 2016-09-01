@@ -4,12 +4,12 @@ import size from 'lodash/size';
 import isEmpty from 'lodash/isEmpty';
 import * as groupActions from '../actions/groupActions';
 import * as groupValidators from '../validators/groupValidators';
-import LoadingIndicator from './LoadingIndicator';
-import Attributes from './Attributes';
-import ItemView from './ItemView';
-import SubGroups from './SubGroups';
-import { AssetList } from './AssetList';
-import { ApplicationList } from './ApplicationList';
+import LoadingIndicator from '../components/LoadingIndicator';
+import Attributes from '../components/Attributes';
+import ItemView from '../components/ItemView';
+import SubGroups from '../components/SubGroups';
+import { AssetList } from '../components/AssetList';
+import { ApplicationList } from '../components/ApplicationList';
 import { fromGroup, getAuthenticated } from '../reducers';
 
 const collectionSize = (collection) => {

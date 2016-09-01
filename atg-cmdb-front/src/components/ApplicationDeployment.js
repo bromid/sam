@@ -3,10 +3,10 @@ import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import { List, ListItem } from 'material-ui/List';
 import LoadingIndicator from './LoadingIndicator';
-import { serverName, serverLink } from './Server';
+import { serverName, serverLink } from './ServerList';
 import { fromApplication } from '../reducers';
 
-const Deployment = ({ deployment }) => (
+const DeploymentListItem = ({ deployment }) => (
     <Link to={serverLink(deployment)}>
         <ListItem primaryText={`${serverName(deployment)} (${deployment.version})`} />
     </Link>
@@ -18,7 +18,7 @@ export const DeploymentList = ({ deployments, header }) => {
         <List>
             {header}
             {deployments.map((deployment) => (
-                <Deployment key={serverName(deployment)} deployment={deployment} />
+                <DeploymentListItem key={serverName(deployment)} deployment={deployment} />
             ))}
         </List>
     );

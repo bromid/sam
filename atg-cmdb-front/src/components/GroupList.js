@@ -35,7 +35,7 @@ export const GroupText = ({ group }) => {
     );
 };
 
-export const Group = ({ group, GroupListItem, remove, nestedLevel = 0 }) => {
+const Group = ({ group, GroupListItem, remove, nestedLevel = 0 }) => {
     const nestedItems = group.groups ?
         group.groups.map((item) =>
             <Group key={item.id} group={item} GroupListItem={GroupListItem} />

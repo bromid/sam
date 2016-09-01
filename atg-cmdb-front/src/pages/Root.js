@@ -3,16 +3,16 @@ import { Provider } from 'react-redux';
 import { Router, Route, browserHistory } from 'react-router';
 import configureStore from '../configureStore';
 import App from './App';
-import Groups from './Groups';
 import Group from './Group';
+import GroupList from './GroupList';
 import NewGroup from './NewGroup';
-import Applications from './ApplicationList';
 import Application from './Application';
+import ApplicationList from './ApplicationList';
 import NewApplication from './NewApplication';
-import Servers from './ServerList';
 import Server from './Server';
-import Assets from './AssetList';
+import ServerList from './ServerList';
 import Asset from './Asset';
+import AssetList from './AssetList';
 import ReleaseNotes from './ReleaseNotes';
 import * as ApplicationActions from '../actions/applicationActions';
 import * as AssetActions from '../actions/assetActions';
@@ -68,7 +68,7 @@ const Root = () => {
                 >
                     <Route
                         path="group"
-                        component={Groups}
+                        component={GroupList}
                         onEnter={fetchGroupList}
                         onChange={(state, nextState) => fetchGroupList(nextState)}
                     />
@@ -83,7 +83,7 @@ const Root = () => {
                     />
                     <Route
                         path="application"
-                        component={Applications}
+                        component={ApplicationList}
                         onEnter={fetchApplicationList}
                     />
                     <Route
@@ -98,12 +98,12 @@ const Root = () => {
                     />
                     <Route
                         path="server"
-                        component={Servers}
+                        component={ServerList}
                         onEnter={fetchServerList}
                     />
                     <Route
                         path="server/:environment"
-                        component={Servers}
+                        component={ServerList}
                         onEnter={fetchServerList}
                     />
                     <Route
@@ -113,7 +113,7 @@ const Root = () => {
                     />
                     <Route
                         path="asset"
-                        component={Assets}
+                        component={AssetList}
                         onEnter={fetchAssetList}
                     />
                     <Route

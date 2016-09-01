@@ -5,9 +5,9 @@ import RaisedButton from 'material-ui/RaisedButton';
 import { ListItem } from 'material-ui/List';
 import { flexWrapperStyle } from '../style';
 import { toArray } from '../helpers';
-import LoadingIndicator from './LoadingIndicator';
-import { TagFilter } from './Tag';
-import { GroupList, GroupText } from './GroupList';
+import LoadingIndicator from '../components/LoadingIndicator';
+import { TagFilter } from '../components/Tag';
+import { GroupList, GroupText } from '../components/GroupList';
 import { fromGroup, getAuthenticated } from '../reducers';
 
 const GroupListItem = ({ group, nestedItems, nestedLevel }) => (
@@ -20,7 +20,7 @@ const GroupListItem = ({ group, nestedItems, nestedLevel }) => (
     />
 );
 
-const Groups = (props) => {
+const GroupListPage = (props) => {
     const {
         authenticated, groups, groupTags = [],
         addFilter, removeFilter, activeFilter, isLoading,
@@ -53,7 +53,7 @@ const Groups = (props) => {
     );
 };
 
-const GroupsContainer = React.createClass({
+const GroupListPageContainer = React.createClass({
 
     setFilter(filterQuery) {
         const { router, location } = this.props;
@@ -85,7 +85,7 @@ const GroupsContainer = React.createClass({
         const { isLoading, authenticated, groups, groupTags, activeFilter } = this.props;
 
         return (
-            <Groups
+            <GroupListPage
                 isLoading={isLoading}
                 authenticated={authenticated}
                 groups={groups}
@@ -105,4 +105,4 @@ const mapStateToProps = (state, { location: { query } }) => ({
     isLoading: fromGroup.getListIsPending(state),
     authenticated: getAuthenticated(state),
 });
-export default withRouter(connect(mapStateToProps)(GroupsContainer));
+export default withRouter(connect(mapStateToProps)(GroupListPageContainer));
