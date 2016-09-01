@@ -105,6 +105,12 @@ const updateJson = (url, apiParams, authenticated) => {
     return fetchJson(url, params, options);
 };
 
+const deleteJson = (url, apiParams, authenticated) => {
+    const { obj, options: { params } = {} } = apiParams;
+    const options = createOptions(obj, 'DELETE', APPLICATION_JSON.headers, authenticated);
+    return fetchJson(url, params, options);
+};
+
 const createJson = (url, apiParams, authenticated) => {
     const { obj, options: { params } = {} } = apiParams;
     const headers = {
@@ -136,6 +142,9 @@ export const createGroup = (params, auth) =>
 
 export const addSubgroup = (params, auth) =>
     updateJson(`/services/group/${params.groupId}/group/${params.subGroupId}`, params, auth);
+
+export const removeSubgroup = (params, auth) =>
+    deleteJson(`/services/group/${params.groupId}/group/${params.subGroupId}`, params, auth);
 
 export const fetchApplicationList = () =>
     getJson('/services/application');

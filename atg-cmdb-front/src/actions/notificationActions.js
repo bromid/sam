@@ -15,7 +15,7 @@ export const showErrorNotification = (message, error) => ({
     type: NOTIFICATION,
     payload: {
         id: uuid.v4(),
-        duration: 5000,
+        duration: 7000,
         action: {
             name: 'info',
             onTouchTap: (showDialog) => showDialog(error.message, message),

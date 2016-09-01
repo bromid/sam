@@ -9,7 +9,7 @@ const getNotification = (param) => {
     const notification = isFunction(param) ? param() : param;
     return {
         message: '',
-        duration: 2000,
+        duration: 3500,
         action: {},
         ...notification,
     };

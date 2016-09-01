@@ -23,7 +23,7 @@ const Group = (props) => {
             name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
-        updateName, updateDescription, onTagDelete, addSubGroup,
+        updateName, updateDescription, onTagDelete, addSubGroup, removeSubGroup,
         isLoading, authenticated, patchIsPending, patchError,
     } = props;
 
@@ -43,6 +43,7 @@ const Group = (props) => {
                 authenticated={authenticated}
                 groups={groups}
                 addGroup={addSubGroup}
+                removeGroup={removeSubGroup}
             />,
         },
         {
@@ -90,6 +91,11 @@ const GroupContainer = React.createClass({
         addSubgroup(id, subGroupId);
     },
 
+    removeSubGroup(subGroupId) {
+        const { group: { id }, removeSubgroup } = this.props;
+        removeSubgroup(id, subGroupId);
+    },
+
     render() {
         const { group, isLoading, authenticated, patchIsPending, patchError } = this.props;
 
@@ -106,6 +112,7 @@ const GroupContainer = React.createClass({
                 updateName={this.updateName}
                 updateDescription={this.updateDescription}
                 addSubGroup={this.addSubGroup}
+                removeSubGroup={this.removeSubGroup}
             />
         );
     },
@@ -124,5 +131,6 @@ const mapStateToProps = (state) => ({
 const Actions = {
     patchGroup: groupActions.patchGroup,
     addSubgroup: groupActions.addSubgroup,
+    removeSubgroup: groupActions.removeSubgroup,
 };
 export default connect(mapStateToProps, Actions)(GroupContainer);
