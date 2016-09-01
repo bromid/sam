@@ -11,51 +11,49 @@ import { flexWrapperStyle } from '../../style';
 import { GroupList, GroupText } from '../GroupList';
 import * as groupValidators from '../../validators/groupValidators';
 
-const SubGroupsList = ({ authenticated, groups, onAddGroup }) => {
-    const button = (
-        <IconButton tooltip="menu">
-            <VertIcon />
-        </IconButton>
-    );
+const menuButton = (
+    <IconButton tooltip="menu">
+        <VertIcon />
+    </IconButton>
+);
 
-    const menu = (group) => (
-        <IconMenu iconButtonElement={button}>
-            <MenuItem onTouchTap={() => console.info(`Expand ${group.id}`)}>Expand</MenuItem>
-            <MenuItem onTouchTap={() => console.info(`Removed ${group.id}`)}>Remove</MenuItem>
-        </IconMenu>
-    );
+const menu = (group) => (
+    <IconMenu iconButtonElement={menuButton}>
+        <MenuItem onTouchTap={() => console.info(`Expand ${group.id}`)}>Expand</MenuItem>
+        <MenuItem onTouchTap={() => console.info(`Removed ${group.id}`)}>Remove</MenuItem>
+    </IconMenu>
+);
 
-    const renderGroup = (group, nestedItems, nestedLevel) => (
-        <ListItem
-            primaryText={<GroupText group={group} />}
-            secondaryText={group.description}
-            primaryTogglesNestedList={true}
-            disabled={isEmpty(nestedItems)}
-            nestedItems={nestedItems}
-            nestedLevel={nestedLevel}
-            rightIconButton={menu(group)}
-            onNestedListToggle={() => console.info('Toggle Nested')}
-        />
-    );
+const GroupListItem = ({ group, nestedItems, nestedLevel }) => (
+    <ListItem
+        primaryText={<GroupText group={group} />}
+        secondaryText={group.description}
+        primaryTogglesNestedList={true}
+        disabled={isEmpty(nestedItems)}
+        nestedItems={nestedItems}
+        nestedLevel={nestedLevel}
+        rightIconButton={menu(group)}
+        onNestedListToggle={() => console.info('Toggle Nested')}
+    />
+);
 
-    return (
-        <div>
-            <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
-                <div style={{ flex: 1 }}>
-                    <h3>Sub groups</h3>
-                </div>
-                {authenticated &&
-                    <RaisedButton
-                        label="Add group"
-                        onTouchTap={onAddGroup}
-                        style={{ borderRadius: 3 }}
-                    />
-                }
+const SubGroupsList = ({ authenticated, groups, onAddGroup }) => (
+    <div>
+        <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+                <h3>Sub groups</h3>
             </div>
-            <GroupList groups={groups} renderGroup={renderGroup} />
+            {authenticated &&
+                <RaisedButton
+                    label="Add group"
+                    onTouchTap={onAddGroup}
+                    style={{ borderRadius: 3 }}
+                />
+            }
         </div>
-    );
-};
+        <GroupList groups={groups} listItem={GroupListItem} />
+    </div>
+);
 
 const SubGroups = React.createClass({
     propTypes: {

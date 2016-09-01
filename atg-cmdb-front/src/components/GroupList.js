@@ -35,20 +35,20 @@ export const GroupText = ({ group }) => {
     );
 };
 
-export const Group = ({ group, renderGroup, nestedLevel = 0 }) => {
+export const Group = ({ group, GroupListItem, nestedLevel = 0 }) => {
     const nestedItems = group.groups ?
         group.groups.map((item) =>
-            <Group key={item.id} group={item} renderGroup={renderGroup} />
+            <Group key={item.id} group={item} GroupListItem={GroupListItem} />
         ) : undefined;
-    return renderGroup(group, nestedItems, nestedLevel);
+    return <GroupListItem group={group} nestedItems={nestedItems} nestedLevel={nestedLevel} />;
 };
 
-export const GroupList = ({ groups, renderGroup }) => {
+export const GroupList = ({ groups, listItem }) => {
     if (!groups) return <p>No groups</p>;
     return (
         <List>
             {groups.map((group) =>
-                <Group key={group.id} group={group} renderGroup={renderGroup} />
+                <Group key={group.id} group={group} GroupListItem={listItem} />
             )}
         </List>
     );

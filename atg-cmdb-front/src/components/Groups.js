@@ -10,21 +10,21 @@ import { TagFilter } from './Tag';
 import { GroupList, GroupText } from './GroupList';
 import { fromGroup, getAuthenticated } from '../reducers';
 
+const GroupListItem = ({ group, nestedItems, nestedLevel }) => (
+    <ListItem
+        primaryText={<GroupText group={group} />}
+        secondaryText={group.description}
+        primaryTogglesNestedList={true}
+        nestedItems={nestedItems}
+        nestedLevel={nestedLevel}
+    />
+);
+
 const Groups = (props) => {
     const {
         authenticated, groups, groupTags = [],
         addFilter, removeFilter, activeFilter, isLoading,
     } = props;
-
-    const renderGroup = (group, nestedItems, nestedLevel) => (
-        <ListItem
-            primaryText={<GroupText group={group} />}
-            secondaryText={group.description}
-            primaryTogglesNestedList={true}
-            nestedItems={nestedItems}
-            nestedLevel={nestedLevel}
-        />
-    );
 
     if (isLoading) return <LoadingIndicator />;
     return (
@@ -48,7 +48,7 @@ const Groups = (props) => {
                     </Link>
                 }
             </div>
-            <GroupList groups={groups} renderGroup={renderGroup} />
+            <GroupList groups={groups} listItem={GroupListItem} />
         </div>
     );
 };
