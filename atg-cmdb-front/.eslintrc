@@ -12,6 +12,9 @@
     "react/prefer-es6-class": 0,
     "react/jsx-boolean-value": 0,
     "react/jsx-indent": ["error", 4],
-    "react/jsx-indent-props": ["error", 4]
+    "react/jsx-indent-props": ["error", 4],
+    "import/no-restricted-paths": ["error", {
+      "zones": [ { "target": "./src/components", "from": "./src/pages" } ]
+    }]
   }
 }

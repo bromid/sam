@@ -1,7 +1,7 @@
 import { takeLatest } from 'redux-saga';
 import { fork, put } from 'redux-saga/effects';
 import * as API from '../api';
-import { serverName } from '../components/Server';
+import { serverName } from '../components/ServerList';
 import createFetchSaga from './helpers/createFetchSaga';
 import { showNotification, showErrorNotification } from '../actions/notificationActions';
 import {

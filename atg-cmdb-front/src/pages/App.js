@@ -3,12 +3,12 @@ import { connect } from 'react-redux';
 import { blue800 } from 'material-ui/styles/colors';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import MainMenu from './MainMenu';
-import matchMedia from './matchMediaHOC';
+import MainMenu from '../components/MainMenu';
+import matchMedia from '../components/matchMediaHOC';
 import * as menuActions from '../actions/menuActions';
 import { getIsMenuOpen, getNotification } from '../reducers';
-import TopBar from './TopBar';
-import Notifier from './Notifier';
+import TopBar from '../components/TopBar';
+import Notifier from '../components/Notifier';
 
 const theme = {
     spacing: {

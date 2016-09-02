@@ -1,14 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router';
 import { connect } from 'react-redux';
 import size from 'lodash/size';
 import isEmpty from 'lodash/isEmpty';
 import * as serverActions from '../actions/serverActions';
-import { List, ListItem } from 'material-ui/List';
 import { flexWrapperStyle } from '../style';
-import LoadingIndicator from './LoadingIndicator';
-import Attributes from './Attributes';
-import ItemView from './ItemView';
+import LoadingIndicator from '../components/LoadingIndicator';
+import Attributes from '../components/Attributes';
+import ItemView from '../components/ItemView';
+import { DeploymentList } from '../components/ServerDeployment';
+import { serverName } from '../components/ServerList';
 import { fromServer } from '../reducers';
 
 const flexChildStyle = {
@@ -20,14 +20,6 @@ const collectionSize = (collection) => {
     if (!collection) return ' (0)';
     return ` (${size(collection)})`;
 };
-
-export const serverName = (server) => (
-    `${server.hostname}@${server.environment}`
-);
-
-export const serverLink = (server) => (
-    `/server/${server.environment}/${server.hostname}`
-);
 
 const General = ({ server }) => (
     <div style={flexChildStyle}>
@@ -55,27 +47,6 @@ const Network = ({ network }) => (
         <Attributes attributes={network.attributes} />
     </div>
 );
-
-const Deployment = ({ deployment: { applicationLink }, deployment }) => {
-    const id = applicationLink.id;
-    const name = (applicationLink.name) ? applicationLink.name : `(${id})`;
-    return (
-        <Link to={`/application/${id}`}>
-            <ListItem primaryText={`${name} (${deployment.version})`} />
-        </Link>
-    );
-};
-
-const DeploymentList = ({ deployments }) => {
-    if (!deployments) return <p>No deployments</p>;
-    return (
-        <List>
-            {deployments.map((deployment) => (
-                <Deployment key={deployment.applicationLink.id} deployment={deployment} />
-            ))}
-        </List>
-    );
-};
 
 const ServerContainer = React.createClass({
 
@@ -135,7 +106,6 @@ const mapStateToProps = (state) => ({
     patchIsPending: fromServer.getPatchResultIsPending(state),
     isLoading: fromServer.getCurrentIsPending(state),
 });
-
 
 const Actions = {
     patchServer: serverActions.patchServer,
