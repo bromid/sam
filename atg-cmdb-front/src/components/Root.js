@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { Router, Route, browserHistory } from 'react-router';
 import configureStore from '../configureStore';
 import App from './App';
-import Groups from './GroupList';
+import Groups from './Groups';
 import Group from './Group';
 import NewGroup from './NewGroup';
 import Applications from './ApplicationList';

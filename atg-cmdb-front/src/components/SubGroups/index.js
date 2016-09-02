@@ -1,11 +1,12 @@
 import React, { PropTypes } from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import AddSubGroup from './AddSubGroup';
+import GroupListItem from './GroupListItem';
+import GroupList from '../GroupList';
 import { flexWrapperStyle } from '../../style';
-import { GroupList } from '../GroupList';
 import * as groupValidators from '../../validators/groupValidators';
 
-const SubGroupsList = ({ authenticated, groups, onAddGroup }) => (
+const SubGroupsList = ({ authenticated, groups, onAddGroup, onRemoveGroup }) => (
     <div>
         <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
@@ -19,7 +20,11 @@ const SubGroupsList = ({ authenticated, groups, onAddGroup }) => (
                 />
             }
         </div>
-        <GroupList groups={groups} />
+        <GroupList
+            groups={groups}
+            remove={(authenticated) ? onRemoveGroup : undefined}
+            listItem={GroupListItem}
+        />
     </div>
 );
 
@@ -27,6 +32,7 @@ const SubGroups = React.createClass({
     propTypes: {
         groups: PropTypes.array,
         addGroup: PropTypes.func,
+        removeGroup: PropTypes.func,
         authenticated: PropTypes.object,
     },
 
@@ -58,7 +64,7 @@ const SubGroups = React.createClass({
     },
 
     render() {
-        const { authenticated, groups } = this.props;
+        const { authenticated, groups, removeGroup } = this.props;
         const { isAddingGroup, groupId, groupIdErrorText } = this.state;
         return (
             (isAddingGroup) ?
@@ -73,6 +79,7 @@ const SubGroups = React.createClass({
                     groups={groups}
                     authenticated={authenticated}
                     onAddGroup={this.startAddGroup}
+                    onRemoveGroup={removeGroup}
                 />
         );
     },

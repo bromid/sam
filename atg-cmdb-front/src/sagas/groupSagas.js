@@ -20,6 +20,8 @@ import {
     CREATE_GROUP_RESPONSE,
     ADD_SUBGROUP_REQUEST,
     ADD_SUBGROUP_RESPONSE,
+    REMOVE_SUBGROUP_REQUEST,
+    REMOVE_SUBGROUP_RESPONSE,
 } from '../constants';
 
 const fetchGroupList = createFetchSaga({
@@ -60,6 +62,11 @@ const addSubgroup = createFetchSaga({
     responseKey: ADD_SUBGROUP_RESPONSE,
 });
 
+const removeSubgroup = createFetchSaga({
+    apiCall: API.removeSubgroup,
+    responseKey: REMOVE_SUBGROUP_RESPONSE,
+});
+
 function* patchGroupResponse(action) {
     if (!action.error) {
         yield fork(fetchGroup, action);
@@ -88,6 +95,18 @@ function* addSubgroupResponse(action) {
         yield put(groupActions.fetchGroup(groupId));
     } else {
         const message = `Failed to add ${subGroupId} as a sub group to ${groupId}`;
+        yield put(showErrorNotification(message, action.payload));
+    }
+}
+
+function* removeSubgroupResponse(action) {
+    const { groupId, subGroupId } = action.request;
+    if (!action.error) {
+        const message = `Removed sub group ${subGroupId} from ${groupId}`;
+        yield put(showNotification(message));
+        yield put(groupActions.fetchGroup(groupId));
+    } else {
+        const message = `Failed to remove ${subGroupId} as a sub group of ${groupId}`;
         yield put(showErrorNotification(message, action.payload));
     }
 }
@@ -134,6 +153,14 @@ export function* watchAddSubgroupResponse() {
     yield* takeLatest(ADD_SUBGROUP_RESPONSE, addSubgroupResponse);
 }
 
+export function* watchRemoveSubgroupRequest() {
+    yield* takeLatest(REMOVE_SUBGROUP_REQUEST, removeSubgroup);
+}
+
+export function* watchRemoveSubgroupResponse() {
+    yield* takeLatest(REMOVE_SUBGROUP_RESPONSE, removeSubgroupResponse);
+}
+
 export default function* groupSagas() {
     yield fork(watchFetchGroup);
     yield fork(watchFetchGroupList);
@@ -145,4 +172,6 @@ export default function* groupSagas() {
     yield fork(watchCreateGroupResponse);
     yield fork(watchAddSubgroupRequest);
     yield fork(watchAddSubgroupResponse);
+    yield fork(watchRemoveSubgroupRequest);
+    yield fork(watchRemoveSubgroupResponse);
 }
