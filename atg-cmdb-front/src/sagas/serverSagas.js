@@ -1,4 +1,4 @@
-import { takeLatest } from 'redux-saga';
+import { takeLatest, takeEvery } from 'redux-saga';
 import { fork, put } from 'redux-saga/effects';
 import * as API from '../api';
 import { serverName } from '../components/ServerList';
@@ -37,27 +37,9 @@ function* patchServerResponse(action) {
     }
 }
 
-/** Watch-sagas start **/
-
-export function* watchFetchServerList() {
-    yield* takeLatest(FETCH_SERVER_LIST_REQUEST, fetchServerList);
-}
-
-export function* watchFetchServer() {
-    yield* takeLatest(FETCH_SERVER_REQUEST, fetchServer);
-}
-
-export function* watchPatchServerRequest() {
-    yield* takeLatest(PATCH_SERVER_REQUEST, patchServer);
-}
-
-export function* watchPatchServerResponse() {
-    yield* takeLatest(PATCH_SERVER_RESPONSE, patchServerResponse);
-}
-
 export default function* serverSagas() {
-    yield fork(watchFetchServer);
-    yield fork(watchFetchServerList);
-    yield fork(watchPatchServerRequest);
-    yield fork(watchPatchServerResponse);
+    yield fork(takeLatest, FETCH_SERVER_REQUEST, fetchServer);
+    yield fork(takeLatest, FETCH_SERVER_LIST_REQUEST, fetchServerList);
+    yield fork(takeEvery, PATCH_SERVER_REQUEST, patchServer);
+    yield fork(takeEvery, PATCH_SERVER_RESPONSE, patchServerResponse);
 }

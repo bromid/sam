@@ -1,4 +1,4 @@
-import { takeLatest } from 'redux-saga';
+import { takeLatest, takeEvery } from 'redux-saga';
 import { fork, put } from 'redux-saga/effects';
 import { browserHistory } from 'react-router';
 import * as API from '../api';
@@ -73,37 +73,11 @@ function* fetchApplicationFork(action) {
     yield fork(fetchApplicationDeployments, action);
 }
 
-/** Watch-sagas start **/
-
-export function* watchFetchApplicationList() {
-    yield* takeLatest(FETCH_APPLICATION_LIST_REQUEST, fetchApplicationList);
-}
-
-export function* watchFetchApplication() {
-    yield* takeLatest(FETCH_APPLICATION_REQUEST, fetchApplicationFork);
-}
-
-export function* watchPatchApplicationRequest() {
-    yield* takeLatest(PATCH_APPLICATION_REQUEST, patchApplication);
-}
-
-export function* watchPatchApplicationResponse() {
-    yield* takeLatest(PATCH_APPLICATION_RESPONSE, patchApplicationResponse);
-}
-
-export function* watchCreateApplicationRequest() {
-    yield* takeLatest(CREATE_APPLICATION_REQUEST, createApplication);
-}
-
-export function* watchCreateApplicationResponse() {
-    yield* takeLatest(CREATE_APPLICATION_RESPONSE, createApplicationResponse);
-}
-
 export default function* applicationSagas() {
-    yield fork(watchFetchApplication);
-    yield fork(watchFetchApplicationList);
-    yield fork(watchPatchApplicationResponse);
-    yield fork(watchPatchApplicationRequest);
-    yield fork(watchCreateApplicationRequest);
-    yield fork(watchCreateApplicationResponse);
+    yield fork(takeLatest, FETCH_APPLICATION_REQUEST, fetchApplicationFork);
+    yield fork(takeLatest, FETCH_APPLICATION_LIST_REQUEST, fetchApplicationList);
+    yield fork(takeEvery, PATCH_APPLICATION_REQUEST, patchApplication);
+    yield fork(takeEvery, PATCH_APPLICATION_RESPONSE, patchApplicationResponse);
+    yield fork(takeEvery, CREATE_APPLICATION_REQUEST, createApplication);
+    yield fork(takeEvery, CREATE_APPLICATION_RESPONSE, createApplicationResponse);
 }

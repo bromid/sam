@@ -1,4 +1,4 @@
-import { takeLatest } from 'redux-saga';
+import { takeLatest, takeEvery } from 'redux-saga';
 import { fork, put } from 'redux-saga/effects';
 import { browserHistory } from 'react-router';
 import * as API from '../api';
@@ -111,67 +111,17 @@ function* removeSubgroupResponse(action) {
     }
 }
 
-/** Watch-sagas start **/
-
-export function* watchFetchGroupList() {
-    yield* takeLatest(FETCH_GROUP_LIST_REQUEST, fetchGroupList);
-}
-
-export function* watchFetchGroup() {
-    yield* takeLatest(FETCH_GROUP_REQUEST, fetchGroup);
-}
-
-export function* watchFetchGroupTags() {
-    yield* takeLatest(FETCH_GROUP_TAG_REQUEST, fetchGroupTags);
-}
-
-export function* watchFetchGroupIds() {
-    yield* takeLatest(FETCH_GROUP_ID_REQUEST, fetchGroupIds);
-}
-
-export function* watchPatchGroupRequest() {
-    yield* takeLatest(PATCH_GROUP_REQUEST, patchGroup);
-}
-
-export function* watchPatchGroupResponse() {
-    yield* takeLatest(PATCH_GROUP_RESPONSE, patchGroupResponse);
-}
-
-export function* watchCreateGroupRequest() {
-    yield* takeLatest(CREATE_GROUP_REQUEST, createGroup);
-}
-
-export function* watchCreateGroupResponse() {
-    yield* takeLatest(CREATE_GROUP_RESPONSE, createGroupResponse);
-}
-
-export function* watchAddSubgroupRequest() {
-    yield* takeLatest(ADD_SUBGROUP_REQUEST, addSubgroup);
-}
-
-export function* watchAddSubgroupResponse() {
-    yield* takeLatest(ADD_SUBGROUP_RESPONSE, addSubgroupResponse);
-}
-
-export function* watchRemoveSubgroupRequest() {
-    yield* takeLatest(REMOVE_SUBGROUP_REQUEST, removeSubgroup);
-}
-
-export function* watchRemoveSubgroupResponse() {
-    yield* takeLatest(REMOVE_SUBGROUP_RESPONSE, removeSubgroupResponse);
-}
-
 export default function* groupSagas() {
-    yield fork(watchFetchGroup);
-    yield fork(watchFetchGroupList);
-    yield fork(watchFetchGroupTags);
-    yield fork(watchFetchGroupIds);
-    yield fork(watchPatchGroupRequest);
-    yield fork(watchPatchGroupResponse);
-    yield fork(watchCreateGroupRequest);
-    yield fork(watchCreateGroupResponse);
-    yield fork(watchAddSubgroupRequest);
-    yield fork(watchAddSubgroupResponse);
-    yield fork(watchRemoveSubgroupRequest);
-    yield fork(watchRemoveSubgroupResponse);
+    yield fork(takeLatest, FETCH_GROUP_REQUEST, fetchGroup);
+    yield fork(takeLatest, FETCH_GROUP_LIST_REQUEST, fetchGroupList);
+    yield fork(takeLatest, FETCH_GROUP_TAG_REQUEST, fetchGroupTags);
+    yield fork(takeLatest, FETCH_GROUP_ID_REQUEST, fetchGroupIds);
+    yield fork(takeEvery, PATCH_GROUP_REQUEST, patchGroup);
+    yield fork(takeEvery, PATCH_GROUP_RESPONSE, patchGroupResponse);
+    yield fork(takeEvery, CREATE_GROUP_REQUEST, createGroup);
+    yield fork(takeEvery, CREATE_GROUP_RESPONSE, createGroupResponse);
+    yield fork(takeEvery, ADD_SUBGROUP_REQUEST, addSubgroup);
+    yield fork(takeEvery, ADD_SUBGROUP_RESPONSE, addSubgroupResponse);
+    yield fork(takeEvery, REMOVE_SUBGROUP_REQUEST, removeSubgroup);
+    yield fork(takeEvery, REMOVE_SUBGROUP_RESPONSE, removeSubgroupResponse);
 }

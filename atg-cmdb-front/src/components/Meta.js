@@ -21,12 +21,12 @@ const appBarTitleStyle = {
     lineHeight: '48px',
 };
 
-function timeSince(time) {
+const timeSince = (time) => {
     if (!time) return null;
     return ` (${moment(time).toNow(true)} ago)`;
-}
+};
 
-function Icon({ open, toggleState }) {
+const Icon = ({ open, toggleState }) => {
     if (open) {
         return (
             <IconButton
@@ -44,14 +44,13 @@ function Icon({ open, toggleState }) {
             children={<ExpandMoreIcon color={white} />}
         />
     );
-}
+};
 
 export default function Meta(props) {
     if (!props.meta) return null;
 
     const {
-        open,
-        toggle,
+        open, toggle,
         meta: {
             created, createdBy, updated, updatedBy, refreshed, refreshedBy,
         },
