@@ -19,17 +19,7 @@ const fetchReleaseNotes = createFetchSaga({
     responseKey: FETCH_RELEASE_NOTES_RESPONSE,
 });
 
-/** Watch-sagas start **/
-
-export function* watchFetchInfo() {
-    yield* takeLatest(FETCH_INFO_REQUEST, fetchInfo);
-}
-
-export function* watchFetchReleaseNotes() {
-    yield* takeLatest(FETCH_RELEASE_NOTES_REQUEST, fetchReleaseNotes);
-}
-
 export default function* infoSagas() {
-    yield fork(watchFetchInfo);
-    yield fork(watchFetchReleaseNotes);
+    yield fork(takeLatest, FETCH_INFO_REQUEST, fetchInfo);
+    yield fork(takeLatest, FETCH_RELEASE_NOTES_REQUEST, fetchReleaseNotes);
 }

@@ -12,12 +12,6 @@ const fetchSearch = createFetchSaga({
     responseKey: FETCH_SEARCH_RESPONSE,
 });
 
-/** Watch-sagas start **/
-
-export function* watchFetchSearch() {
-    yield* takeLatest(FETCH_SEARCH_REQUEST, fetchSearch);
-}
-
 export default function* searchSagas() {
-    yield fork(watchFetchSearch);
+    yield fork(takeLatest, FETCH_SEARCH_REQUEST, fetchSearch);
 }

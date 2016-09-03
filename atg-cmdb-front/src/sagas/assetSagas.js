@@ -1,4 +1,4 @@
-import { takeLatest } from 'redux-saga';
+import { takeLatest, takeEvery } from 'redux-saga';
 import { fork, put } from 'redux-saga/effects';
 import * as API from '../api';
 import createFetchSaga from './helpers/createFetchSaga';
@@ -40,27 +40,9 @@ function* patchAssetResponse(action) {
     }
 }
 
-/** Watch-sagas start **/
-
-export function* watchFetchAssetList() {
-    yield* takeLatest(FETCH_ASSET_LIST_REQUEST, fetchAssetList);
-}
-
-export function* watchFetchAsset() {
-    yield* takeLatest(FETCH_ASSET_REQUEST, fetchAsset);
-}
-
-export function* watchPatchAssetRequest() {
-    yield* takeLatest(PATCH_ASSET_REQUEST, patchAsset);
-}
-
-export function* watchPatchAssetResponse() {
-    yield* takeLatest(PATCH_ASSET_RESPONSE, patchAssetResponse);
-}
-
 export default function* assetSagas() {
-    yield fork(watchFetchAsset);
-    yield fork(watchFetchAssetList);
-    yield fork(watchPatchAssetRequest);
-    yield fork(watchPatchAssetResponse);
+    yield fork(takeLatest, FETCH_ASSET_REQUEST, fetchAsset);
+    yield fork(takeLatest, FETCH_ASSET_LIST_REQUEST, fetchAssetList);
+    yield fork(takeEvery, PATCH_ASSET_REQUEST, patchAsset);
+    yield fork(takeEvery, PATCH_ASSET_RESPONSE, patchAssetResponse);
 }
