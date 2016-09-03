@@ -4,8 +4,8 @@ import ReactMarkdown from 'react-markdown';
 import TextField from 'material-ui/TextField';
 import { borderStyle, flexWrapperStyle } from '../../style';
 import SaveCancelForm from '../SaveCancelForm';
-import EditIconButton from './EditIconButton';
-import { isShowEditForm, AllStates } from './State';
+import EditIconButton from '../EditIconButton';
+import { isShowEditForm, AllStates } from '../EditState';
 
 const editIconStyle = { float: 'right', position: 'relative', right: -10, top: -10 };
 

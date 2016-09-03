@@ -69,9 +69,9 @@ const removeSubgroup = createFetchSaga({
 
 function* patchGroupResponse(action) {
     if (!action.error) {
-        yield fork(fetchGroup, action);
-        const { name } = action.payload;
+        const { id, name } = action.payload;
         yield put(showNotification(`Updated group ${name}`));
+        yield put(groupActions.fetchGroup(id));
     } else {
         yield put(showErrorNotification('Failed to update group', action.payload));
     }

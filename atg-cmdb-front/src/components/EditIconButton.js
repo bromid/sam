@@ -4,9 +4,9 @@ import IconButton from 'material-ui/IconButton';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 import EditIcon from 'material-ui/svg-icons/image/edit';
 import ErrorIcon from 'material-ui/svg-icons/alert/error';
-import { State } from './State';
+import { State } from './EditState';
 
-export default function EditIconButton({ edit, state, style }) {
+const EditIconButton = ({ edit, state, style }) => {
     if (state === State.readonly) return null;
     if (state === State.saving) {
         return (
@@ -44,4 +44,5 @@ export default function EditIconButton({ edit, state, style }) {
             <EditIcon color={blue800} />
         </IconButton>
     );
-}
+};
+export default EditIconButton;
