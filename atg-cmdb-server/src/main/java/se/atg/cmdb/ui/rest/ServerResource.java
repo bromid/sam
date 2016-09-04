@@ -7,11 +7,13 @@ import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
@@ -92,7 +94,7 @@ public class ServerResource {
   @Path("services/server/{environment}")
   @ApiOperation("Fetch all servers in an environment")
   public PaginatedCollection<Server> getServersInEnvironment(
-    @ApiParam("Test environment") @PathParam("environment") String environment
+    @ApiParam("Environment") @PathParam("environment") String environment
   ) {
     return findServers(
       Filters.eq("environment", environment)
@@ -104,7 +106,7 @@ public class ServerResource {
   @ApiOperation(value = "Fetch a server", response = Server.class)
   public Response getServer(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
-    @ApiParam("Test environment") @PathParam("environment") String environment
+    @ApiParam("Environment") @PathParam("environment") String environment
   ) {
     final Document server = findServer(Filters.and(
       Filters.eq("environment", environment),
@@ -136,7 +138,7 @@ public class ServerResource {
   @ApiOperation(value = "Get a deployed application on the server", response = Deployment.class)
   public Deployment getServerDeployment(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
-    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam("Environment") @PathParam("environment") String environment,
     @ApiParam("Application id") @PathParam("applicationId") String applicationId
   ) {
     final Document document = database.getCollection(Collections.SERVERS)
@@ -169,7 +171,7 @@ public class ServerResource {
   })
   public Response addDeployment(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
-    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam("Environment") @PathParam("environment") String environment,
     @ApiParam("Application id") @PathParam("applicationId") String applicationId,
     @ApiParam("Deployment") Deployment deployment,
     @Context UriInfo uriInfo,
@@ -206,7 +208,7 @@ public class ServerResource {
   })
   public Response createOrReplaceServer(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
-    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam("Environment") @PathParam("environment") String environment,
     @ApiParam("Server") Server server,
     @Context UriInfo uriInfo,
     @Context Request request,
@@ -240,8 +242,9 @@ public class ServerResource {
   })
   public Response updateServer(
     @ApiParam("Server hostname") @PathParam("hostname") String hostname,
-    @ApiParam("Test environment") @PathParam("environment") String environment,
+    @ApiParam("Environment") @PathParam("environment") String environment,
     @ApiParam("Server") Server server,
+    @ApiParam("The number of levels to merge this update") @QueryParam("mergedepth") @DefaultValue(RestHelper.INTEGER_MAX) int mergeDepth,
     @Context UriInfo uriInfo,
     @Context Request request,
     @Context SecurityContext securityContext
@@ -252,7 +255,7 @@ public class ServerResource {
 
     final Document existing = getServerForUpdate(hostname, environment);
     final MongoCollection<Document> collection = database.getCollection(Collections.SERVERS);
-    final Document updated = RestHelper.mergeAndUpdateMeta(existing, server, collection, objectMapper, securityContext, request);
+    final Document updated = RestHelper.mergeAndUpdateMeta(existing, server, mergeDepth, collection, objectMapper, securityContext, request);
     return linkResponse(Status.OK, updated, uriInfo);
   }
 

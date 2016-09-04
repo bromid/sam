@@ -1,5 +1,6 @@
 package se.atg.cmdb.ui.rest.integrationtest.helpers;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -94,5 +95,16 @@ public abstract class TestHelper {
   public static void isEqualDisregardMeta(Base expected, Base actual) {
     actual.meta = null;
     Assert.assertEquals("Got " + actual + " expected " + expected, expected, actual);
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public static Object mapPath(Map<String, Object> map, String... path) {
+
+    Map<String, Object> curr = map;
+    for (String field : Arrays.copyOfRange(path, 0, path.length - 1)) {
+      curr = (Map) curr.get(field);
+    }
+    return curr.get(path[path.length - 1]);
+    
   }
 }

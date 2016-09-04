@@ -99,7 +99,18 @@ public abstract class JsonHelper {
     return bson;
   }
 
+  public static void merge(Document base, JsonNode update, int maxMergeDepth, ObjectMapper objectMapper, String... ignoredFields) {
+    final int currentMergeDepth = 0;
+    merge(base, update, objectMapper, currentMergeDepth, maxMergeDepth, ignoredFields);
+  }
+
   public static void merge(Document base, JsonNode update, ObjectMapper objectMapper, String... ignoredFields) {
+    final int currentMergeDepth = 0;
+    final int maxMergeDepth = Integer.MAX_VALUE;
+    merge(base, update, objectMapper, currentMergeDepth, maxMergeDepth, ignoredFields);
+  }
+
+  private static void merge(Document base, JsonNode update, ObjectMapper objectMapper, int currentDepth, int maxDepth, String... ignoredFields) {
 
     update.fields().forEachRemaining(t -> {
 
@@ -111,8 +122,13 @@ public abstract class JsonHelper {
 
         final Document existing = base.get(key, Document.class);
         if (existing != null) {
-          logger.trace("Merge object {}", key);
-          merge(existing, node, objectMapper);
+          if (currentDepth < maxDepth) {
+            logger.trace("Merge object {}", key);
+            merge(existing, node, objectMapper, currentDepth + 1, maxDepth);
+          } else {
+            logger.trace("Max merge depth {} reached. Overriding object {}", currentDepth, key);
+            base.put(key, jsonToBson(node, objectMapper));
+          }
         } else {
           logger.trace("Add new object {}", key);
           base.put(key, jsonToBson(node, objectMapper));

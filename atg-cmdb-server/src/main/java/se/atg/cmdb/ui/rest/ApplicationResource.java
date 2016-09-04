@@ -7,11 +7,13 @@ import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
@@ -146,6 +148,7 @@ public class ApplicationResource {
   public Response updateApplication(
     @ApiParam("Application id") @PathParam("id") String id,
     @ApiParam("Application") Application application,
+    @ApiParam("The number of levels to merge this update") @QueryParam("mergedepth") @DefaultValue(RestHelper.INTEGER_MAX) int mergeDepth,
     @Context UriInfo uriInfo,
     @Context Request request,
     @Context SecurityContext securityContext
@@ -156,7 +159,7 @@ public class ApplicationResource {
 
     final Document existing = getApplicationForUpdate(id);
     final MongoCollection<Document> collection = database.getCollection(Collections.APPLICATIONS);
-    final Document updated = RestHelper.mergeAndUpdateMeta(existing, application, collection, objectMapper, securityContext, request);
+    final Document updated = RestHelper.mergeAndUpdateMeta(existing, application, mergeDepth, collection, objectMapper, securityContext, request);
     return linkResponse(Status.OK, updated, uriInfo);
   }
 

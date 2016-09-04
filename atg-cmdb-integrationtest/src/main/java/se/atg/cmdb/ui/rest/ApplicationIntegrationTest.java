@@ -3,6 +3,7 @@ package se.atg.cmdb.ui.rest;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -33,6 +34,7 @@ import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
 import se.atg.cmdb.model.ServerDeployment;
+import se.atg.cmdb.ui.rest.integrationtest.helpers.RestHelper;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class ApplicationIntegrationTest {
@@ -265,12 +267,7 @@ public class ApplicationIntegrationTest {
       description = "New description";
       group = new GroupLink("my-group");
     }};
-    final Response response = client.target(createResponse.link)
-      .request(MediaType.APPLICATION_JSON)
-      .build("PATCH", Entity.json(applicationPatch))
-      .invoke();
-    TestHelper.assertSuccessful(response);
-    final ApplicationLink patchedApplicationLink = response.readEntity(ApplicationLink.class);
+    final ApplicationLink patchedApplicationLink = patchApplication(applicationPatch, createResponse.link);
 
     /*
      * Get and verify
@@ -281,6 +278,64 @@ public class ApplicationIntegrationTest {
     Assert.assertEquals(applicationPatch.description, patchedApplication.description);
     Assert.assertEquals(group1.id, patchedApplication.group.id);
     Assert.assertEquals(group1.name, patchedApplication.group.name);
+  }
+
+  @Test
+  public void shallowPatchApplication() {
+
+    final Group group1 = new Group() {{
+      id = "my-group";
+      name = "My group";
+    }};
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
+
+    /*
+     * Create Application
+     */
+    final Application application1 = new Application() {{
+      id = "my-application1";
+      name = "My Application 1";
+      description = "My super application";
+      attributes = ImmutableMap.of(
+        "test1", ImmutableMap.of(
+          "test11", "old",
+          "test12", "old"
+        ),
+        "test2", ImmutableMap.of(
+          "test21", "old"
+        )
+      );
+    }};
+    final ApplicationResponse createResponse = createApplication(application1);
+    Assert.assertNotNull(createResponse.db);
+
+    /*
+     * Patch server
+     */
+    final Application applicationPatch = new Application() {{
+      name = "My patched application name";
+      description = "New description";
+      group = new GroupLink("my-group");
+      attributes = ImmutableMap.of(
+        "test1", ImmutableMap.of(
+          "test11", "new"
+        )
+      );
+    }};
+    final ApplicationLink patchedApplicationLink = patchApplication(applicationPatch, createResponse.link, Optional.of(1));
+
+    /*
+     * Get and verify
+     */
+    final Application patchedApplication = getApplication(patchedApplicationLink.link);
+    Assert.assertEquals(application1.id, patchedApplication.id);
+    Assert.assertEquals(applicationPatch.name, patchedApplication.name);
+    Assert.assertEquals(applicationPatch.description, patchedApplication.description);
+    Assert.assertEquals(group1.id, patchedApplication.group.id);
+    Assert.assertEquals(group1.name, patchedApplication.group.name);
+    Assert.assertEquals("new", TestHelper.mapPath(patchedApplication.attributes, "test1", "test11"));
+    Assert.assertNull(TestHelper.mapPath(patchedApplication.attributes, "test1", "test12"));
+    Assert.assertEquals("old", TestHelper.mapPath(patchedApplication.attributes, "test2", "test21"));
   }
 
   @Test
@@ -332,6 +387,22 @@ public class ApplicationIntegrationTest {
       .get();
     TestHelper.assertSuccessful(response);
     return response.readEntity(Application.class);
+  }
+
+  private ApplicationLink patchApplication(Application applicationPatch, Link applicationLink) {
+    return patchApplication(applicationPatch, applicationLink, Optional.empty());
+  }
+
+  private ApplicationLink patchApplication(Application applicationPatch, Link applicationLink, Optional<Integer> mergeDepth) {
+
+    final Response response = RestHelper.queryParam(client.target(applicationLink), mergeDepth, "mergedepth")
+      .request(MediaType.APPLICATION_JSON)
+      .build("PATCH", Entity.json(applicationPatch))
+      .invoke();
+    TestHelper.assertSuccessful(response);
+
+    final ApplicationLink link = response.readEntity(ApplicationLink.class);
+    return link;
   }
 
   private static String serverId(Server server) {

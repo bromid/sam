@@ -7,11 +7,13 @@ import java.util.Optional;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
@@ -133,6 +135,7 @@ public class AssetResource {
   public Response updateAsset(
     @ApiParam("Asset id") @PathParam("id") String id,
     @ApiParam("Asset") Asset asset,
+    @ApiParam("The number of levels to merge this update") @QueryParam("mergedepth") @DefaultValue(RestHelper.INTEGER_MAX) int mergeDepth,
     @Context UriInfo uriInfo,
     @Context Request request,
     @Context SecurityContext securityContext
@@ -143,7 +146,7 @@ public class AssetResource {
 
     final Document existing = getAssetForUpdate(id);
     final MongoCollection<Document> collection = database.getCollection(Collections.ASSETS);
-    final Document updated = RestHelper.mergeAndUpdateMeta(existing, asset, collection, objectMapper, securityContext, request);
+    final Document updated = RestHelper.mergeAndUpdateMeta(existing, asset, mergeDepth, collection, objectMapper, securityContext, request);
     return linkResponse(Status.OK, updated, uriInfo);
   }
 
