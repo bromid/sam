@@ -3,6 +3,7 @@ package se.atg.cmdb.ui.rest;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
@@ -24,6 +25,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
+import com.google.common.collect.ImmutableMap;
 import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.helpers.Mapper;
 import se.atg.cmdb.model.Application;
@@ -32,6 +34,7 @@ import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
 import se.atg.cmdb.model.ServerLink;
 import se.atg.cmdb.ui.rest.integrationtest.EntityResponse;
+import se.atg.cmdb.ui.rest.integrationtest.helpers.RestHelper;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class ServerIntegrationTest {
@@ -308,6 +311,68 @@ public class ServerIntegrationTest {
     Assert.assertEquals(server.os.type, patchedServer.os.type);
     Assert.assertEquals(serverPatch.environment, patchedServer.environment);
     Assert.assertEquals(serverPatch.os.version, patchedServer.os.version);
+  }
+
+  @Test
+  public void shallowPatchServer() {
+
+    /*
+     * Create server
+     */
+    final Server server = new Server() {{
+      environment = "ci";
+      hostname = "somehost";
+      fqdn = "somehost.ci.hh.atg.se";
+      os = new Os() {{
+        name = "RedHat";
+        type = "Linux";
+        version = "6.7";
+        attributes = ImmutableMap.of(
+          "test1", "old"
+        );
+      }};
+      attributes = ImmutableMap.of(
+        "test1", ImmutableMap.of(
+          "test11", "old",
+          "test12", "old"
+        ),
+        "test2", ImmutableMap.of(
+          "test21", "old"
+        )
+      );
+    }};
+    final ServerResponse createServerResponse = createServer(server);
+
+    /*
+     * Patch server
+     */
+    final Server serverPatch = new Server() {{
+      environment = "test1";
+      os = new Os() {{
+        version = "6.9";
+      }};
+      attributes = ImmutableMap.of(
+        "test1", ImmutableMap.of(
+          "test11", "new"
+        )
+      );
+    }};
+    final ServerResponse patchedServerResponse = patchServer(serverPatch, createServerResponse.link, Optional.of(1));
+
+    /*
+     * Get and verify
+     */
+    final Server patchedServer = getServer(patchedServerResponse.link);
+    Assert.assertEquals(server.hostname, patchedServer.hostname);
+    Assert.assertEquals(server.fqdn, patchedServer.fqdn);
+    Assert.assertEquals(server.os.name, patchedServer.os.name);
+    Assert.assertEquals(server.os.type, patchedServer.os.type);
+    Assert.assertEquals(serverPatch.environment, patchedServer.environment);
+    Assert.assertEquals(serverPatch.os.version, patchedServer.os.version);
+    Assert.assertEquals("old", TestHelper.mapPath(patchedServer.os.attributes, "test1"));
+    Assert.assertEquals("new", TestHelper.mapPath(patchedServer.attributes, "test1", "test11"));
+    Assert.assertNull(TestHelper.mapPath(patchedServer.attributes, "test1", "test12"));
+    Assert.assertEquals("old", TestHelper.mapPath(patchedServer.attributes, "test2", "test21"));
   }
 
   @Test
@@ -589,8 +654,12 @@ public class ServerIntegrationTest {
   }
 
   private ServerResponse patchServer(Server serverPatch, Link serverLink) {
+    return patchServer(serverPatch, serverLink, Optional.empty());
+  }
 
-    final Response response = client.target(serverLink)
+  private ServerResponse patchServer(Server serverPatch, Link serverLink, Optional<Integer> mergeDepth) {
+
+    final Response response = RestHelper.queryParam(client.target(serverLink), mergeDepth, "mergedepth")
       .request(MediaType.APPLICATION_JSON)
       .build("PATCH", Entity.json(serverPatch))
       .invoke();

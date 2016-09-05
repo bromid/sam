@@ -38,6 +38,7 @@ import se.atg.cmdb.model.View;
 public abstract class RestHelper {
 
   public static final int HTTP_STATUS_VALIDATION_ERROR = 422;
+  public static final String INTEGER_MAX = "2147483647";
 
   private static final ValidatorFactory VALIDATOR_FACTORY = Validators.newValidatorFactory();
 
@@ -149,6 +150,7 @@ public abstract class RestHelper {
   public static Document mergeAndUpdateMeta(
       Document existing,
       Object updateObject,
+      int mergeDepth,
       MongoCollection<Document> collection,
       ObjectMapper objectMapper,
       SecurityContext securityContext,
@@ -157,7 +159,7 @@ public abstract class RestHelper {
 
     final Optional<String> hash = verifyHash(existing, request);
     final JsonNode updateNode = JsonHelper.objectToJsonNode(updateObject, objectMapper);
-    JsonHelper.merge(existing, updateNode, objectMapper);
+    JsonHelper.merge(existing, updateNode, mergeDepth, objectMapper);
 
     final User user = getUser(securityContext);
     JsonHelper.updateMetaForUpdate(existing, hash, user.name);

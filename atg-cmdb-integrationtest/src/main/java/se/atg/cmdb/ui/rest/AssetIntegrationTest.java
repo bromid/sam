@@ -1,6 +1,7 @@
 package se.atg.cmdb.ui.rest;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
@@ -22,6 +23,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 
+import com.google.common.collect.ImmutableMap;
 import se.atg.cmdb.dao.Collections;
 import se.atg.cmdb.model.Asset;
 import se.atg.cmdb.model.AssetLink;
@@ -29,6 +31,7 @@ import se.atg.cmdb.model.Group;
 import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Server;
+import se.atg.cmdb.ui.rest.integrationtest.helpers.RestHelper;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class AssetIntegrationTest {
@@ -202,7 +205,7 @@ public class AssetIntegrationTest {
     groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
 
     /*
-     * Create Application
+     * Create Asset
      */
     final Asset asset1 = new Asset() {{
       id = "my-asset1";
@@ -213,19 +216,14 @@ public class AssetIntegrationTest {
     Assert.assertNotNull(createResponse.db);
 
     /*
-     * Patch server
+     * Patch Asset
      */
     final Asset assetPatch = new Asset() {{
       name = "My patched asset name";
       description = "New description";
       group = new GroupLink("group-id1");
     }};
-    final Response response = client.target(createResponse.link)
-      .request(MediaType.APPLICATION_JSON)
-      .build("PATCH", Entity.json(assetPatch))
-      .invoke();
-    TestHelper.assertSuccessful(response);
-    final AssetLink patchedAssetLink = response.readEntity(AssetLink.class);
+    final AssetLink patchedAssetLink = patchAsset(assetPatch, createResponse.link);
 
     /*
      * Get and verify
@@ -236,6 +234,79 @@ public class AssetIntegrationTest {
     Assert.assertEquals(assetPatch.description, patchedAsset.description);
     Assert.assertEquals(group1.id, patchedAsset.group.id);
     Assert.assertEquals(group1.name, patchedAsset.group.name);
+  }
+
+  @Test
+  public void shallowPatchAsset() {
+
+    final Group group1 = new Group() {{
+      id = "group-id1";
+      name = "First group";
+    }};
+    groups.insertOne(TestHelper.addMetaForCreate(group1, objectMapper));
+
+    /*
+     * Create Asset
+     */
+    final Asset asset1 = new Asset() {{
+      id = "my-asset1";
+      name = "My Asset 1";
+      description = "My super asset";
+      os = new Os() {{
+        name = "RedHat";
+        type = "Linux";
+        version = "6.7";
+        attributes = ImmutableMap.of(
+          "test1", "old"
+        );
+      }};
+      attributes = ImmutableMap.of(
+        "test1", ImmutableMap.of(
+          "test11", "old",
+          "test12", "old"
+        ),
+        "test2", ImmutableMap.of(
+          "test21", "old"
+        )
+      );
+    }};
+    final AssetResponse createResponse = createAsset(asset1);
+    Assert.assertNotNull(createResponse.db);
+
+    /*
+     * Patch Asset
+     */
+    final Asset assetPatch = new Asset() {{
+      name = "My patched asset name";
+      group = new GroupLink("group-id1");
+      os = new Os() {{
+        version = "6.9";
+        attributes = ImmutableMap.of(
+          "test2", "new"
+        );
+      }};
+      attributes = ImmutableMap.of(
+        "test1", ImmutableMap.of(
+          "test11", "new"
+        )
+      );
+    }};
+    final AssetLink patchedAssetLink = patchAsset(assetPatch, createResponse.link, Optional.of(1));
+
+    /*
+     * Get and verify
+     */
+    final Asset patchedAsset = getAsset(patchedAssetLink.link);
+    Assert.assertEquals(asset1.id, patchedAsset.id);
+    Assert.assertEquals(assetPatch.name, patchedAsset.name);
+    Assert.assertEquals(asset1.description, patchedAsset.description);
+    Assert.assertEquals(group1.id, patchedAsset.group.id);
+    Assert.assertEquals(group1.name, patchedAsset.group.name);
+    Assert.assertEquals("new", TestHelper.mapPath(patchedAsset.os.attributes, "test2"));
+    Assert.assertNull(TestHelper.mapPath(patchedAsset.os.attributes, "test1"));
+    Assert.assertEquals("new", TestHelper.mapPath(patchedAsset.attributes, "test1", "test11"));
+    Assert.assertNull(TestHelper.mapPath(patchedAsset.attributes, "test1", "test12"));
+    Assert.assertEquals("old", TestHelper.mapPath(patchedAsset.attributes, "test2", "test21"));
   }
 
   @Test
@@ -287,6 +358,22 @@ public class AssetIntegrationTest {
       .get();
     TestHelper.assertSuccessful(response);
     return response.readEntity(Asset.class);
+  }
+
+  private AssetLink patchAsset(Asset assetPatch, Link link) {
+    return patchAsset(assetPatch, link, Optional.empty());
+  }
+
+  private AssetLink patchAsset(Asset assetPatch, Link assetLink, Optional<Integer> mergeDepth) {
+
+    final Response response = RestHelper.queryParam(client.target(assetLink), mergeDepth, "mergedepth")
+      .request(MediaType.APPLICATION_JSON)
+      .build("PATCH", Entity.json(assetPatch))
+      .invoke();
+    TestHelper.assertSuccessful(response);
+
+    final AssetLink link = response.readEntity(AssetLink.class);
+    return link;
   }
 
   private static void verifyAsset(Asset expected, Asset actual) {

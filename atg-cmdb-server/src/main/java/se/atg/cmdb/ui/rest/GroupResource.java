@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -221,6 +222,7 @@ public class GroupResource {
   public Response updateGroup(
     @ApiParam("Group id") @PathParam("id") String id,
     @ApiParam("Group") Group group,
+    @ApiParam("The number of levels to merge this update") @QueryParam("mergedepth") @DefaultValue(RestHelper.INTEGER_MAX) int mergeDepth,
     @Context UriInfo uriInfo,
     @Context Request request,
     @Context SecurityContext securityContext
@@ -231,7 +233,7 @@ public class GroupResource {
 
     final Document existing = getGroupForUpdate(id);
     final MongoCollection<Document> collection = database.getCollection(Collections.GROUPS);
-    final Document updated = RestHelper.mergeAndUpdateMeta(existing, group, collection, objectMapper, securityContext, request);
+    final Document updated = RestHelper.mergeAndUpdateMeta(existing, group, mergeDepth, collection, objectMapper, securityContext, request);
     return linkResponse(Status.OK, updated, uriInfo);
   }
 

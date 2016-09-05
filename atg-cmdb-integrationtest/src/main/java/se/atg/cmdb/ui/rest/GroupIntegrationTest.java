@@ -3,6 +3,7 @@ package se.atg.cmdb.ui.rest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.mongodb.client.MongoCollection;
@@ -36,6 +38,7 @@ import se.atg.cmdb.model.GroupLink;
 import se.atg.cmdb.model.PaginatedCollection;
 import se.atg.cmdb.model.Tag;
 import se.atg.cmdb.ui.rest.integrationtest.EntityResponse;
+import se.atg.cmdb.ui.rest.integrationtest.helpers.RestHelper;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
 public class GroupIntegrationTest {
@@ -392,6 +395,57 @@ public class GroupIntegrationTest {
   }
 
   @Test
+  public void shallowPatchGroup() {
+
+    /*
+     * Create group
+     */
+    final Group group1 = new Group() {{
+      id = "group1";
+      name = "Group 1";
+      description = "Group description";
+      tags = Lists.newArrayList(new Tag("Tag1"), new Tag("Tag2"));
+      attributes = ImmutableMap.of(
+        "test1", ImmutableMap.of(
+          "test11", "old",
+          "test12", "old"
+        ),
+        "test2", ImmutableMap.of(
+          "test21", "old"
+        )
+      );
+    }};
+    final GroupResponse createGroupResponse = createGroup(group1);
+
+    /*
+     * Patch group
+     */
+    final Group groupPatch = new Group() {{
+      name = "My new group";
+      description = "Updated description";
+      tags = Lists.newArrayList(new Tag("Tag2"), new Tag("Tag3"));
+      attributes = ImmutableMap.of(
+        "test1", ImmutableMap.of(
+          "test11", "new"
+        )
+      );
+    }};
+    final GroupResponse patchedGroupResponse = patchGroup(groupPatch, createGroupResponse.link, Optional.of(1));
+
+    /*
+     * Get and verify
+     */
+    final EntityResponse<Group> patchedGroup = getGroup(patchedGroupResponse.link);
+    Assert.assertEquals(group1.id, patchedGroup.entity.id);
+    Assert.assertEquals(groupPatch.name, patchedGroup.entity.name);
+    Assert.assertEquals(groupPatch.description, patchedGroup.entity.description);
+    Assert.assertEquals(groupPatch.tags, patchedGroup.entity.tags);
+    Assert.assertEquals("new", TestHelper.mapPath(patchedGroup. entity.attributes, "test1", "test11"));
+    Assert.assertNull(TestHelper.mapPath(patchedGroup.entity.attributes, "test1", "test12"));
+    Assert.assertEquals("old", TestHelper.mapPath(patchedGroup.entity.attributes, "test2", "test21"));
+  }
+
+  @Test
   public void patchGroupCantHaveApplications() {
 
     /*
@@ -705,8 +759,12 @@ public class GroupIntegrationTest {
   }
 
   private GroupResponse patchGroup(Group groupPatch, Link groupLink) {
+    return patchGroup(groupPatch, groupLink, Optional.empty());
+  }
 
-    final Response response = client.target(groupLink)
+  private GroupResponse patchGroup(Group groupPatch, Link groupLink, Optional<Integer> mergeDepth) {
+
+    final Response response = RestHelper.queryParam(client.target(groupLink), mergeDepth, "mergedepth")
       .request(MediaType.APPLICATION_JSON)
       .build("PATCH", Entity.json(groupPatch))
       .invoke();
