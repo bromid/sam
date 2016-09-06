@@ -5,11 +5,11 @@ import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import AutoComplete from 'material-ui/AutoComplete';
 import { removeEmptyFields } from '../helpers';
-import * as applicationActions from '../actions/applicationActions';
-import * as applicationValidators from '../validators/applicationValidators';
+import * as assetActions from '../actions/assetActions';
+import * as assetValidators from '../validators/assetValidators';
 import { fromGroup } from '../reducers';
 
-const NewApplicationContainer = React.createClass({
+const NewAssetContainer = React.createClass({
 
     getInitialState() {
         return {
@@ -30,44 +30,44 @@ const NewApplicationContainer = React.createClass({
 
     onChangeId(event) {
         const id = event.target.value.trim().toLowerCase();
-        const idErrorText = applicationValidators.id(id);
-        this.setState({ id, idErrorText });
+        const error = assetValidators.id(id);
+        this.setState({ id, idErrorText: error });
     },
 
     onChangeName(event) {
         const name = event.target.value;
-        const nameErrorText = applicationValidators.name(name);
-        this.setState({ name, nameErrorText });
+        const error = assetValidators.name(name);
+        this.setState({ name, nameErrorText: error });
     },
 
     onChangeGroup(groupId) {
         const group = groupId.trim().toLowerCase();
-        const groupErrorText = applicationValidators.group(group);
+        const groupErrorText = assetValidators.group(group);
         this.setState({ group, groupErrorText });
     },
 
     onChangeDescription(event) {
         const description = event.target.value;
-        const descriptionErrorText = applicationValidators.description(description);
-        this.setState({ description, descriptionErrorText });
+        const error = assetValidators.description(description);
+        this.setState({ description, descriptionErrorText: error });
     },
 
     onCreate() {
         const { id, name, group, description } = this.state;
-        const application = {
+        const asset = {
             id, group,
             name: name.trim(),
             description: description.trim(),
         };
 
-        const errors = applicationValidators.application(application);
+        const errors = assetValidators.asset(asset);
 
         if (errors.hasError) {
             this.refs.get(errors.first).focus();
             this.setState(errors.text);
         } else {
-            const applicationNoEmptyFields = removeEmptyFields(application);
-            this.props.createApplication(applicationNoEmptyFields);
+            const assetNoEmptyFields = removeEmptyFields(asset);
+            this.props.createAsset(assetNoEmptyFields);
         }
     },
 
@@ -99,7 +99,7 @@ const NewApplicationContainer = React.createClass({
 
         return (
             <div>
-                <h2>New application</h2>
+                <h2>New asset</h2>
                 <form style={formStyle}>
                     <TextField
                         value={id}
@@ -140,7 +140,7 @@ const NewApplicationContainer = React.createClass({
                     <div style={{ display: 'flex', marginTop: 16 }}>
                         <span style={{ flex: 1 }}>* indicates required field</span>
                         <RaisedButton
-                            label="Create application"
+                            label="Create asset"
                             secondary={true}
                             onTouchTap={this.onCreate}
                         />
@@ -156,6 +156,6 @@ const mapStateToProps = (state) => ({
 });
 
 const Actions = {
-    createApplication: applicationActions.createApplication,
+    createAsset: assetActions.createAsset,
 };
-export default connect(mapStateToProps, Actions)(NewApplicationContainer);
+export default connect(mapStateToProps, Actions)(NewAssetContainer);
