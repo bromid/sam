@@ -105,6 +105,5 @@ public abstract class TestHelper {
       curr = (Map) curr.get(field);
     }
     return curr.get(path[path.length - 1]);
-    
   }
 }
