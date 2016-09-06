@@ -13,6 +13,7 @@ import Server from './Server';
 import ServerList from './ServerList';
 import Asset from './Asset';
 import AssetList from './AssetList';
+import NewAsset from './NewAsset';
 import ReleaseNotes from './ReleaseNotes';
 import * as ApplicationActions from '../actions/applicationActions';
 import * as AssetActions from '../actions/assetActions';
@@ -115,6 +116,11 @@ const Root = () => {
                         path="asset"
                         component={AssetList}
                         onEnter={fetchAssetList}
+                    />
+                    <Route
+                        path="asset/new"
+                        component={NewAsset}
+                        onEnter={fetchGroupIds}
                     />
                     <Route
                         path="asset/:id"

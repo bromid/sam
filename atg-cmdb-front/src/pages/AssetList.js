@@ -1,30 +1,44 @@
 import React from 'react';
+import { Link } from 'react-router';
 import { connect } from 'react-redux';
+import RaisedButton from 'material-ui/RaisedButton';
 import { flexWrapperStyle } from '../style';
 import LoadingIndicator from '../components/LoadingIndicator';
 import { AssetList } from '../components/AssetList';
-import { fromAsset } from '../reducers';
+import { fromAsset, getAuthenticated } from '../reducers';
 
-const AssetListPage = ({ assets }) => (
+const AssetListPage = ({ assets, authenticated }) => (
     <div>
         <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
                 <h2>Assets</h2>
             </div>
+            {authenticated &&
+                <Link to="/asset/new">
+                    <RaisedButton
+                        label="Add asset"
+                        style={{ borderRadius: 3 }}
+                    />
+                </Link>
+            }
         </div>
         <AssetList assets={assets} />
     </div>
 );
 
-const AssetListPageContainer = ({ assets, isLoading }) => {
+const AssetListPageContainer = ({ isLoading, authenticated, assets }) => {
     if (isLoading) return <LoadingIndicator />;
-    return <AssetListPage assets={assets} />;
+    return (
+        <AssetListPage
+            assets={assets}
+            authenticated={authenticated}
+        />
+    );
 };
 
-function mapStateToProps(state) {
-    return {
-        assets: fromAsset.getList(state),
-        isLoading: fromAsset.getListIsPending(state),
-    };
-}
+const mapStateToProps = (state) => ({
+    assets: fromAsset.getList(state),
+    isLoading: fromAsset.getListIsPending(state),
+    authenticated: getAuthenticated(state),
+});
 export default connect(mapStateToProps)(AssetListPageContainer);
