@@ -101,14 +101,14 @@ const ApplicationContainer = React.createClass({
         });
     },
 
-    updateDescription(description) {
-        const { patchApplication, application: { id, meta } } = this.props;
-        patchApplication(id, { description }, { hash: meta.hash });
-    },
-
     updateName(name) {
         const { patchApplication, application: { id, meta } } = this.props;
         patchApplication(id, { name }, { hash: meta.hash });
+    },
+
+    updateDescription(description) {
+        const { patchApplication, application: { id, meta } } = this.props;
+        patchApplication(id, { description }, { hash: meta.hash });
     },
 
     editGroup(edit = true) {

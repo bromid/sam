@@ -4,9 +4,33 @@ import { Link } from 'react-router';
 import AutoComplete from 'material-ui/AutoComplete';
 import SaveCancelForm from '../components/SaveCancelForm';
 import EditIconButton from '../components/EditIconButton';
-import { AllStates, isShowEditForm } from '../components/EditState';
+import { State, AllStates, isShowEditForm } from '../components/EditState';
 import * as groupActions from '../actions/groupActions';
 import { fromGroup } from '../reducers';
+
+const EditableGroupLink = (props) => {
+    const { group, edit, state } = props;
+
+    if (group) {
+        return (
+            <div className="editIconWrapper">
+                <Link to={`/group/${group.id}`}>{group.name}</Link>
+                <EditIconButton
+                    edit={edit}
+                    state={state}
+                    style={{ position: 'absolute', top: 15 }}
+                />
+            </div>
+        );
+    }
+
+    if (state !== State.readonly) {
+        return (
+            <a href="#" onTouchTap={edit}>Assign to group</a>
+        );
+    }
+    return null;
+};
 
 const EditableGroupLinkContainer = React.createClass({
     propTypes: {
@@ -55,14 +79,11 @@ const EditableGroupLinkContainer = React.createClass({
                         ref={(ref) => (this.fieldRef = ref)}
                     />
                 </SaveCancelForm> :
-                <div className="editIconWrapper">
-                    {group && <Link to={`/group/${group.id}`}>{group.name}</Link>}
-                    <EditIconButton
-                        edit={edit}
-                        state={state}
-                        style={{ position: 'absolute', top: 15 }}
-                    />
-                </div>
+                <EditableGroupLink
+                    group={group}
+                    edit={edit}
+                    state={state}
+                />
         );
     },
 });
