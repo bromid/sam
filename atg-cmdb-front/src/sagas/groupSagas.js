@@ -18,6 +18,8 @@ import {
     PATCH_GROUP_RESPONSE,
     CREATE_GROUP_REQUEST,
     CREATE_GROUP_RESPONSE,
+    DELETE_GROUP_REQUEST,
+    DELETE_GROUP_RESPONSE,
     ADD_SUBGROUP_REQUEST,
     ADD_SUBGROUP_RESPONSE,
     REMOVE_SUBGROUP_REQUEST,
@@ -57,6 +59,11 @@ const createGroup = createFetchSaga({
     responseKey: CREATE_GROUP_RESPONSE,
 });
 
+const deleteGroup = createFetchSaga({
+    apiCall: API.deleteGroup,
+    responseKey: DELETE_GROUP_RESPONSE,
+});
+
 const addSubgroup = createFetchSaga({
     apiCall: API.addSubgroup,
     responseKey: ADD_SUBGROUP_RESPONSE,
@@ -84,6 +91,16 @@ function* createGroupResponse(action) {
         browserHistory.push(`/group/${id}`);
     } else {
         yield put(showErrorNotification('Failed to create group', action.payload));
+    }
+}
+
+function* deleteGroupResponse(action) {
+    const { id } = action.request;
+    if (!action.error) {
+        yield put(showNotification(`Deleted group ${id}`));
+        browserHistory.push('/group');
+    } else {
+        yield put(showErrorNotification(`Failed to delete group ${id}`, action.payload));
     }
 }
 
@@ -120,6 +137,8 @@ export default function* groupSagas() {
     yield fork(takeEvery, PATCH_GROUP_RESPONSE, patchGroupResponse);
     yield fork(takeEvery, CREATE_GROUP_REQUEST, createGroup);
     yield fork(takeEvery, CREATE_GROUP_RESPONSE, createGroupResponse);
+    yield fork(takeEvery, DELETE_GROUP_REQUEST, deleteGroup);
+    yield fork(takeEvery, DELETE_GROUP_RESPONSE, deleteGroupResponse);
     yield fork(takeEvery, ADD_SUBGROUP_REQUEST, addSubgroup);
     yield fork(takeEvery, ADD_SUBGROUP_RESPONSE, addSubgroupResponse);
     yield fork(takeEvery, REMOVE_SUBGROUP_REQUEST, removeSubgroup);

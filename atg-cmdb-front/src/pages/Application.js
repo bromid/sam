@@ -31,7 +31,8 @@ const Details = ({ attributes, groupLink }) => (
 const Application = (props) => {
     const {
         application: { id, name, description = '', attributes, meta },
-        isLoading, patchIsPending, patchError, updateName, updateDescription, groupLink,
+        isLoading, patchIsPending, patchError, groupLink,
+        onUpdateName, onUpdateDescription, onRefresh, onDelete,
     } = props;
 
     const tabs = [
@@ -49,15 +50,17 @@ const Application = (props) => {
         <ItemView
             tabs={tabs}
             headline={name}
-            updateHeadline={updateName}
+            updateHeadline={onUpdateName}
             validateHeadline={applicationValidators.name}
             description={description}
-            updateDescription={updateDescription}
+            updateDescription={onUpdateDescription}
             validateDescription={applicationValidators.description}
             meta={meta}
             isLoading={isLoading}
             patchIsPending={patchIsPending}
             patchError={patchError}
+            onRefresh={onRefresh}
+            onDelete={onDelete}
         />
     );
 };
@@ -142,6 +145,7 @@ const ApplicationContainer = React.createClass({
     render() {
         const {
             application, groupIds, isLoading, patchIsPending, patchError,
+            fetchApplication, deleteApplication,
         } = this.props;
 
         if (isLoading && isEmpty(application)) return <LoadingIndicator />;
@@ -166,8 +170,10 @@ const ApplicationContainer = React.createClass({
                 patchIsPending={patchIsPending}
                 patchError={patchError}
                 groupLink={groupLink}
-                updateDescription={this.updateDescription}
-                updateName={this.updateName}
+                onUpdateDescription={this.updateDescription}
+                onUpdateName={this.updateName}
+                onRefresh={() => fetchApplication(application.id)}
+                onDelete={() => deleteApplication(application.id)}
             />
         );
     },
@@ -186,5 +192,7 @@ const mapStateToProps = (state) => ({
 
 const Actions = {
     patchApplication: applicationActions.patchApplication,
+    fetchApplication: applicationActions.fetchApplication,
+    deleteApplication: applicationActions.deleteApplication,
 };
 export default connect(mapStateToProps, Actions)(ApplicationContainer);

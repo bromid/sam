@@ -5,6 +5,7 @@ import {
     FETCH_GROUP_ID_REQUEST,
     PATCH_GROUP_REQUEST,
     CREATE_GROUP_REQUEST,
+    DELETE_GROUP_REQUEST,
     ADD_SUBGROUP_REQUEST,
     REMOVE_SUBGROUP_REQUEST,
 } from '../constants';
@@ -35,6 +36,11 @@ export const patchGroup = (id, obj, options) => ({
 export const createGroup = (obj, options) => ({
     type: CREATE_GROUP_REQUEST,
     payload: { id: obj.id, obj, options },
+});
+
+export const deleteGroup = (id, options) => ({
+    type: DELETE_GROUP_REQUEST,
+    payload: { id, options },
 });
 
 export const addSubgroup = (groupId, subGroupId, options) => ({

@@ -14,6 +14,8 @@ import {
     PATCH_ASSET_RESPONSE,
     CREATE_ASSET_REQUEST,
     CREATE_ASSET_RESPONSE,
+    DELETE_ASSET_REQUEST,
+    DELETE_ASSET_RESPONSE,
 } from '../constants';
 
 const fetchAssetList = createFetchSaga({
@@ -39,6 +41,11 @@ const createAsset = createFetchSaga({
     responseKey: CREATE_ASSET_RESPONSE,
 });
 
+const deleteAsset = createFetchSaga({
+    apiCall: API.deleteAsset,
+    responseKey: DELETE_ASSET_RESPONSE,
+});
+
 function* patchAssetResponse(action) {
     if (!action.error) {
         const { id, name } = action.payload;
@@ -59,6 +66,16 @@ function* createAssetResponse(action) {
     }
 }
 
+function* deleteAssetResponse(action) {
+    const { id } = action.request;
+    if (!action.error) {
+        yield put(showNotification(`Deleted asset ${id}`));
+        browserHistory.push('/asset');
+    } else {
+        yield put(showErrorNotification(`Failed to delete asset ${id}`, action.payload));
+    }
+}
+
 export default function* assetSagas() {
     yield fork(takeLatest, FETCH_ASSET_REQUEST, fetchAsset);
     yield fork(takeLatest, FETCH_ASSET_LIST_REQUEST, fetchAssetList);
@@ -66,4 +83,6 @@ export default function* assetSagas() {
     yield fork(takeEvery, PATCH_ASSET_RESPONSE, patchAssetResponse);
     yield fork(takeEvery, CREATE_ASSET_REQUEST, createAsset);
     yield fork(takeEvery, CREATE_ASSET_RESPONSE, createAssetResponse);
+    yield fork(takeEvery, DELETE_ASSET_REQUEST, deleteAsset);
+    yield fork(takeEvery, DELETE_ASSET_RESPONSE, deleteAssetResponse);
 }
