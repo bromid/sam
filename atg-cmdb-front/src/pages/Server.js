@@ -56,12 +56,16 @@ const ServerContainer = React.createClass({
     },
 
     render() {
-        const { server, isLoading, patchIsPending, patchError } = this.props;
+        const {
+            server, isLoading, patchIsPending, patchError, fetchServer, deleteServer,
+        } = this.props;
 
         if (isLoading && isEmpty(server)) return <LoadingIndicator />;
         if (!server.hostname) return <p>No result</p>;
 
-        const { description = '', meta, network, os, deployments, attributes } = server;
+        const {
+            hostname, environment, description = '', meta, network, os, deployments, attributes,
+        } = server;
 
         const tabs = [
             {
@@ -93,6 +97,8 @@ const ServerContainer = React.createClass({
                 isLoading={isLoading}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
+                onRefresh={() => fetchServer(hostname, environment)}
+                onDelete={() => deleteServer(hostname, environment)}
             />
         );
     },
@@ -109,5 +115,7 @@ const mapStateToProps = (state) => ({
 
 const Actions = {
     patchServer: serverActions.patchServer,
+    fetchServer: serverActions.fetchServer,
+    deleteServer: serverActions.deleteServer,
 };
 export default connect(mapStateToProps, Actions)(ServerContainer);

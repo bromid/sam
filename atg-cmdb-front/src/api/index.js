@@ -50,14 +50,24 @@ const createOptions = (obj, method, headers, authenticated) => {
     };
 };
 
-const fetchJson = (url, params, options) => (
+const fetchText = (url, params, options) => (
     fetch(addParams(url, params), options)
         .then((response) => verifySuccessful(response, params, options))
         .then((response) =>
-            response.json().then((data) => ({
+            response.text().then((data) => ({
                 data,
                 response,
             }))
+        )
+);
+
+const fetchJson = (url, params, options) => (
+    fetchText(url, params, options)
+        .then(({ data, response }) =>
+            ({
+                data: (data) ? JSON.parse(data) : null,
+                response,
+            })
         )
 );
 
@@ -68,14 +78,7 @@ const getHtml = (url, params, options = {}) => {
         'If-None-Match': `"${hash}"`,
     } : TEXT_HTML.headers;
 
-    return fetch(addParams(url, params), { headers })
-        .then((response) => verifySuccessful(response, params, { headers }))
-        .then((response) =>
-            response.text().then((data) => ({
-                data,
-                response,
-            }))
-        );
+    return fetchText(url, params, { headers });
 };
 
 const getJson = (url, params, options = {}) => {
@@ -140,6 +143,9 @@ export const patchGroup = (params, auth) =>
 export const createGroup = (params, auth) =>
     createJson(`/services/group/${params.id}`, params, auth);
 
+export const deleteGroup = (params, auth) =>
+    deleteJson(`/services/group/${params.id}`, params, auth);
+
 export const addSubgroup = (params, auth) =>
     updateJson(`/services/group/${params.groupId}/group/${params.subGroupId}`, params, auth);
 
@@ -161,6 +167,9 @@ export const patchApplication = (params, auth) =>
 export const createApplication = (params, auth) =>
     createJson(`/services/application/${params.id}`, params, auth);
 
+export const deleteApplication = (params, auth) =>
+    deleteJson(`/services/application/${params.id}`, params, auth);
+
 export const fetchServerList = (params) => {
     if (params.environment) return getJson(`/services/server/${params.environment}`);
     return getJson('/services/server');
@@ -175,6 +184,9 @@ export const patchServer = (params, auth) =>
 export const createServer = (params, auth) =>
     createJson(`/services/server/${params.environment}/${params.hostname}`, params, auth);
 
+export const deleteServer = (params, auth) =>
+    deleteJson(`/services/server/${params.environment}/${params.hostname}`, params, auth);
+
 export const fetchAssetList = () =>
     getJson('/services/asset');
 
@@ -186,6 +198,9 @@ export const patchAsset = (params, auth) =>
 
 export const createAsset = (params, auth) =>
     createJson(`/services/asset/${params.id}`, params, auth);
+
+export const deleteAsset = (params, auth) =>
+    deleteJson(`/services/asset/${params.id}`, params, auth);
 
 export const fetchSearch = (searchQuery) =>
     getJson(`/services/search?q=${searchQuery}`);

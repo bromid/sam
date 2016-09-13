@@ -14,6 +14,8 @@ import {
     PATCH_APPLICATION_RESPONSE,
     CREATE_APPLICATION_REQUEST,
     CREATE_APPLICATION_RESPONSE,
+    DELETE_APPLICATION_REQUEST,
+    DELETE_APPLICATION_RESPONSE,
     FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
 } from '../constants';
 
@@ -40,6 +42,11 @@ const createApplication = createFetchSaga({
     responseKey: CREATE_APPLICATION_RESPONSE,
 });
 
+const deleteApplication = createFetchSaga({
+    apiCall: API.deleteApplication,
+    responseKey: DELETE_APPLICATION_RESPONSE,
+});
+
 const fetchApplicationDeployments = createFetchSaga({
     apiCall: API.fetchApplicationDeployments,
     responseKey: FETCH_APPLICATION_DEPLOYMENTS_RESPONSE,
@@ -54,7 +61,8 @@ function* patchApplicationResponse(action) {
         yield put(showNotification(`Updated application ${name}`));
         yield put(applicationActions.fetchApplication(id));
     } else {
-        yield put(showErrorNotification('Failed to update application', action.payload));
+        const { id } = action.request;
+        yield put(showErrorNotification(`Failed to update application ${id}`, action.payload));
     }
 }
 
@@ -65,6 +73,16 @@ function* createApplicationResponse(action) {
         browserHistory.push(`/application/${id}`);
     } else {
         yield put(showErrorNotification('Failed to create application', action.payload));
+    }
+}
+
+function* deleteApplicationResponse(action) {
+    const { id } = action.request;
+    if (!action.error) {
+        yield put(showNotification(`Deleted application ${id}`));
+        browserHistory.push('/application');
+    } else {
+        yield put(showErrorNotification(`Failed to delete application ${id}`, action.payload));
     }
 }
 
@@ -80,4 +98,6 @@ export default function* applicationSagas() {
     yield fork(takeEvery, PATCH_APPLICATION_RESPONSE, patchApplicationResponse);
     yield fork(takeEvery, CREATE_APPLICATION_REQUEST, createApplication);
     yield fork(takeEvery, CREATE_APPLICATION_RESPONSE, createApplicationResponse);
+    yield fork(takeEvery, DELETE_APPLICATION_REQUEST, deleteApplication);
+    yield fork(takeEvery, DELETE_APPLICATION_RESPONSE, deleteApplicationResponse);
 }

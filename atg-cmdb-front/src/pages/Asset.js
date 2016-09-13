@@ -28,7 +28,8 @@ const Details = ({ groupLink, attributes }) => (
 const Asset = (props) => {
     const {
         asset: { name, description = '', attributes, meta },
-        isLoading, patchIsPending, patchError, updateName, updateDescription, groupLink,
+        isLoading, patchIsPending, patchError, groupLink,
+        onUpdateName, onUpdateDescription, onRefresh, onDelete,
     } = props;
 
     const tabs = [
@@ -44,15 +45,17 @@ const Asset = (props) => {
         <ItemView
             tabs={tabs}
             headline={name}
-            updateHeadline={updateName}
+            updateHeadline={onUpdateName}
             validateHedline={assetValidators.name}
             description={description}
-            updateDescription={updateDescription}
+            updateDescription={onUpdateDescription}
             validateDescription={assetValidators.description}
             meta={meta}
             isLoading={isLoading}
             patchIsPending={patchIsPending}
             patchError={patchError}
+            onRefresh={onRefresh}
+            onDelete={onDelete}
         />
     );
 };
@@ -135,7 +138,10 @@ const AssetContainer = React.createClass({
     },
 
     render() {
-        const { asset, groupIds, isLoading, patchIsPending, patchError } = this.props;
+        const {
+            asset, groupIds, isLoading, patchIsPending, patchError,
+            fetchAsset, deleteAsset,
+        } = this.props;
 
         if (isLoading && isEmpty(asset)) return <LoadingIndicator />;
 
@@ -159,8 +165,10 @@ const AssetContainer = React.createClass({
                 patchIsPending={patchIsPending}
                 patchError={patchError}
                 groupLink={groupLink}
-                updateDescription={this.updateDescription}
-                updateName={this.updateName}
+                onUpdateDescription={this.updateDescription}
+                onUpdateName={this.updateName}
+                onRefresh={() => fetchAsset(asset.id)}
+                onDelete={() => deleteAsset(asset.id)}
             />
         );
     },
@@ -179,5 +187,7 @@ const mapStateToProps = (state) => ({
 
 const Actions = {
     patchAsset: assetActions.patchAsset,
+    fetchAsset: assetActions.fetchAsset,
+    deleteAsset: assetActions.deleteAsset,
 };
 export default connect(mapStateToProps, Actions)(AssetContainer);

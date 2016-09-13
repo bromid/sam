@@ -10,8 +10,22 @@ import Meta from '../Meta';
 import { Tags } from '../Tag';
 import PersistableDescription from './PersistableDescription';
 import PersistableHeadline from './PersistableHeadline';
-import { State } from '../EditState';
+import DeleteButton from './DeleteButton';
+import RefreshButton from './RefreshButton';
+import { State, isShowEditForm } from '../EditState';
 import * as StateMachine from '../EditStateMachine';
+
+const Buttons = ({ authenticated, headlineState, onRefresh, onDelete }) => {
+    if (isShowEditForm(headlineState)) {
+        return null;
+    }
+    return (
+        <div style={{ ...flexWrapperStyle, position: 'absolute', top: -10, right: 0 }}>
+            <RefreshButton onRefresh={onRefresh} />
+            {authenticated && <DeleteButton onDelete={onDelete} />}
+        </div>
+    );
+};
 
 const ItemViewContainer = React.createClass({
     propTypes: {
@@ -28,6 +42,8 @@ const ItemViewContainer = React.createClass({
         isLoading: PropTypes.bool,
         patchIsPending: PropTypes.bool,
         patchError: PropTypes.object,
+        onDelete: PropTypes.func,
+        onRefresh: PropTypes.func,
     },
 
     getInitialState() {
@@ -172,9 +188,10 @@ const ItemViewContainer = React.createClass({
 
     render() {
         const {
-            isLoading, tabs,
+            authenticated, isLoading, tabs,
             tags, onTagDelete,
             meta, metaOpen, toggleMeta,
+            onRefresh, onDelete,
         } = this.props;
 
         const {
@@ -183,7 +200,7 @@ const ItemViewContainer = React.createClass({
         } = this.state;
 
         return (
-            <div>
+            <div style={{ position: 'relative' }}>
                 {isLoading && <LoadingIndicator />}
                 <PersistableHeadline
                     value={headline}
@@ -193,6 +210,12 @@ const ItemViewContainer = React.createClass({
                     cancel={this.cancelEditHeadline}
                     save={this.saveHeadline}
                     change={this.changeHeadline}
+                />
+                <Buttons
+                    authenticated={authenticated}
+                    headlineState={headlineState}
+                    onRefresh={onRefresh}
+                    onDelete={onDelete}
                 />
                 <Tags tags={tags} onDelete={onTagDelete} />
                 <div style={flexWrapperStyle}>

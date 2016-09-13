@@ -3,6 +3,7 @@ import {
     FETCH_ASSET_REQUEST,
     PATCH_ASSET_REQUEST,
     CREATE_ASSET_REQUEST,
+    DELETE_ASSET_REQUEST,
 } from '../constants';
 
 export const fetchAssetList = () => ({
@@ -22,4 +23,9 @@ export const patchAsset = (id, obj, options) => ({
 export const createAsset = (obj, options) => ({
     type: CREATE_ASSET_REQUEST,
     payload: { id: obj.id, obj, options },
+});
+
+export const deleteAsset = (id, options) => ({
+    type: DELETE_ASSET_REQUEST,
+    payload: { id, options },
 });

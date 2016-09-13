@@ -23,8 +23,9 @@ const Group = (props) => {
             name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
-        updateName, updateDescription, onTagDelete, addSubGroup, removeSubGroup,
         isLoading, authenticated, patchIsPending, patchError,
+        onUpdateName, onUpdateDescription, onTagDelete,
+        onAddSubGroup, onRemoveSubGroup, onRefresh, onDelete,
     } = props;
 
     if (!name) return <p>No result</p>;
@@ -42,8 +43,8 @@ const Group = (props) => {
             node: <SubGroups
                 authenticated={authenticated}
                 groups={groups}
-                addGroup={addSubGroup}
-                removeGroup={removeSubGroup}
+                addGroup={onAddSubGroup}
+                removeGroup={onRemoveSubGroup}
             />,
         },
         {
@@ -54,10 +55,10 @@ const Group = (props) => {
     return (
         <ItemView
             headline={name}
-            updateHeadline={updateName}
+            updateHeadline={onUpdateName}
             validateHeadline={groupValidators.name}
             description={description}
-            updateDescription={updateDescription}
+            updateDescription={onUpdateDescription}
             validateDescription={groupValidators.description}
             tags={tags}
             onTagDelete={onTagDelete}
@@ -66,6 +67,8 @@ const Group = (props) => {
             isLoading={isLoading}
             patchIsPending={patchIsPending}
             patchError={patchError}
+            onRefresh={onRefresh}
+            onDelete={onDelete}
         />
     );
 };
@@ -97,7 +100,10 @@ const GroupContainer = React.createClass({
     },
 
     render() {
-        const { group, isLoading, authenticated, patchIsPending, patchError } = this.props;
+        const {
+            group, isLoading, authenticated, patchIsPending, patchError,
+            fetchGroup, deleteGroup,
+        } = this.props;
 
         if (isLoading && isEmpty(group)) return <LoadingIndicator />;
 
@@ -109,10 +115,12 @@ const GroupContainer = React.createClass({
                 patchIsPending={patchIsPending}
                 patchError={patchError}
                 onTagDelete={this.onTagDelete}
-                updateName={this.updateName}
-                updateDescription={this.updateDescription}
-                addSubGroup={this.addSubGroup}
-                removeSubGroup={this.removeSubGroup}
+                onUpdateName={this.updateName}
+                onUpdateDescription={this.updateDescription}
+                onAddSubGroup={this.addSubGroup}
+                onRemoveSubGroup={this.removeSubGroup}
+                onRefresh={() => fetchGroup(group.id)}
+                onDelete={() => deleteGroup(group.id)}
             />
         );
     },
@@ -130,6 +138,8 @@ const mapStateToProps = (state) => ({
 
 const Actions = {
     patchGroup: groupActions.patchGroup,
+    fetchGroup: groupActions.fetchGroup,
+    deleteGroup: groupActions.deleteGroup,
     addSubgroup: groupActions.addSubgroup,
     removeSubgroup: groupActions.removeSubgroup,
 };
