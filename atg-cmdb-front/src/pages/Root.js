@@ -11,6 +11,7 @@ import ApplicationList from './ApplicationList';
 import NewApplication from './NewApplication';
 import Server from './Server';
 import ServerList from './ServerList';
+import NewServer from './NewServer';
 import Asset from './Asset';
 import AssetList from './AssetList';
 import NewAsset from './NewAsset';
@@ -101,6 +102,10 @@ const Root = () => {
                         path="server"
                         component={ServerList}
                         onEnter={fetchServerList}
+                    />
+                    <Route
+                        path="server/new"
+                        component={NewServer}
                     />
                     <Route
                         path="server/:environment"
