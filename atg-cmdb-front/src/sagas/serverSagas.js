@@ -12,6 +12,8 @@ import {
     FETCH_SERVER_RESPONSE,
     PATCH_SERVER_REQUEST,
     PATCH_SERVER_RESPONSE,
+    CREATE_SERVER_REQUEST,
+    CREATE_SERVER_RESPONSE,
     DELETE_SERVER_REQUEST,
     DELETE_SERVER_RESPONSE,
 } from '../constants';
@@ -31,6 +33,11 @@ const patchServer = createFetchSaga({
     responseKey: PATCH_SERVER_RESPONSE,
 });
 
+const createServer = createFetchSaga({
+    apiCall: API.createServer,
+    responseKey: CREATE_SERVER_RESPONSE,
+});
+
 const deleteServer = createFetchSaga({
     apiCall: API.deleteServer,
     responseKey: DELETE_SERVER_RESPONSE,
@@ -44,6 +51,18 @@ function* patchServerResponse(action) {
         yield put(showNotification(`Updated server ${name}`));
     } else {
         yield put(showErrorNotification(`Failed to update server ${name}`, action.payload));
+    }
+}
+
+function* createServerResponse(action) {
+    const name = serverName(action.request);
+
+    if (!action.error) {
+        const { hostname, environment } = action.request;
+        yield put(showNotification(`Created server ${name}`));
+        browserHistory.push(`/server/${environment}/${hostname}`);
+    } else {
+        yield put(showErrorNotification(`Failed to create server ${name}`, action.payload));
     }
 }
 
@@ -63,6 +82,8 @@ export default function* serverSagas() {
     yield fork(takeLatest, FETCH_SERVER_LIST_REQUEST, fetchServerList);
     yield fork(takeEvery, PATCH_SERVER_REQUEST, patchServer);
     yield fork(takeEvery, PATCH_SERVER_RESPONSE, patchServerResponse);
+    yield fork(takeEvery, CREATE_SERVER_REQUEST, createServer);
+    yield fork(takeEvery, CREATE_SERVER_RESPONSE, createServerResponse);
     yield fork(takeEvery, DELETE_SERVER_REQUEST, deleteServer);
     yield fork(takeEvery, DELETE_SERVER_RESPONSE, deleteServerResponse);
 }
