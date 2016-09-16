@@ -1,3 +1,5 @@
+/vagrantrelease/
+/.vagrant/
 target/
 .settings/
 .project
@@ -5,4 +7,3 @@ target/
 dependency-reduced-pom.xml
 .idea
 .DS_Store
-
