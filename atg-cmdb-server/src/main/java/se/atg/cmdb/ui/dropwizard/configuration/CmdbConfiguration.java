@@ -1,4 +1,4 @@
-package se.atg.cmdb.ui.dropwizard;
+package se.atg.cmdb.ui.dropwizard.configuration;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -21,8 +21,16 @@ public class CmdbConfiguration extends Configuration {
   @JsonProperty
   private JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
 
+  @Valid
+  @NotNull
+  @JsonProperty
+  private OAuthConfiguration oauthConfig = new OAuthConfiguration();
+
   @JsonProperty
   private String testEndpoint;
+
+  @JsonProperty
+  private boolean logRequests = false;
 
   public MongoDatabaseConnectionFactory getDbConnectionFactory() {
     return this.dbConnectionFactory;
@@ -32,7 +40,15 @@ public class CmdbConfiguration extends Configuration {
     return jerseyClientConfig;
   }
 
+  public OAuthConfiguration getOAuthConfiguration() {
+    return oauthConfig;
+  }
+
   public String getTestEndpoint() {
     return testEndpoint;
+  }
+
+  public boolean isLogRequests() {
+    return logRequests;
   }
 }

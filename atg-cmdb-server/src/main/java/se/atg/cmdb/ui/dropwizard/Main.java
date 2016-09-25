@@ -5,8 +5,10 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Link;
 
+import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.linking.DeclarativeLinkingFeature;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
@@ -18,6 +20,7 @@ import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.AuthDynamicFeature;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
+import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
@@ -35,6 +38,7 @@ import se.atg.cmdb.model.User;
 import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthorizer;
+import se.atg.cmdb.ui.dropwizard.configuration.CmdbConfiguration;
 import se.atg.cmdb.ui.dropwizard.db.MongoDatabaseHealthCheck;
 import se.atg.cmdb.ui.dropwizard.render.HtmlViewRenderer;
 import se.atg.cmdb.ui.dropwizard.render.MarkdownViewRenderer;
@@ -43,11 +47,14 @@ import se.atg.cmdb.ui.rest.AssetResource;
 import se.atg.cmdb.ui.rest.GroupResource;
 import se.atg.cmdb.ui.rest.IndexResource;
 import se.atg.cmdb.ui.rest.InfoResource;
+import se.atg.cmdb.ui.rest.OAuth2Resource;
 import se.atg.cmdb.ui.rest.SearchResource;
 import se.atg.cmdb.ui.rest.ServerResource;
 import se.atg.cmdb.ui.rest.mapper.MongoServerExceptionMapper;
 
 public class Main extends Application<CmdbConfiguration> {
+
+  private static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
 
   public static void main(String[] args) throws Exception {
     new Main().run(args);
@@ -70,9 +77,13 @@ public class Main extends Application<CmdbConfiguration> {
     // Jackson configuration
     final ObjectMapper objectMapper = JsonHelper.configureObjectMapper(environment.getObjectMapper(), View.Api.class);
 
+    // REST Client
+    final Client restClient = createRestClient(environment, configuration, "default_client");
+
     // REST Resources
     environment.jersey().register(new InfoResource());
     environment.jersey().register(new IndexResource());
+    environment.jersey().register(new OAuth2Resource(restClient, configuration.getOAuthConfiguration()));
     environment.jersey().register(new ServerResource(database, objectMapper));
     environment.jersey().register(new ApplicationResource(database, objectMapper));
     environment.jersey().register(new GroupResource(database, objectMapper));
@@ -121,5 +132,14 @@ public class Main extends Application<CmdbConfiguration> {
     config.setVersion(getClass().getPackage().getImplementationVersion());
     config.setResourcePackage("se.atg.cmdb.ui.rest");
     config.setScan(true);
+  }
+
+  private static Client createRestClient(Environment environment, CmdbConfiguration configuration, String name) {
+
+    final JerseyClientBuilder builder = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration());
+    if (configuration.isLogRequests()) {
+      builder.withProvider(new LoggingFilter(HTTP_LOGGER, true));
+    }
+    return builder.build(name);
   }
 }

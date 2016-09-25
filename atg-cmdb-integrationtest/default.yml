@@ -6,21 +6,28 @@ mongoDatabase:
     - host: localhost
       port: 27017
 
+oauthConfig:
+  clientId: <client id>
+  clientSecret: <client secret>
+  accessTokenEndpoint: Not requried for tests
+  userEndpoint: Not requried for tests
+  idTokenIssuer: https://sam.hh.atg.se
+  idTokenSignKey: topsecret
+
+testEndpoint: http://localhost:8080/services/
+
+logRequests: false
+jerseyClientConfig:
+  gzipEnabled: true
+  gzipEnabledForRequests: true
+  timeout: 1s
+  connectionTimeout: 1s
+  connectionRequestTimeout: 1s
+
 logging:
   level: INFO
   loggers:
     se.atg: INFO
     org.mongodb: INFO
-    org.glassfish.jersey.filter.LoggingFilter: ERROR
   appenders:
     - type: console
-
-jerseyClientConfig:
-  gzipEnabled: false
-  gzipEnabledForRequests: false
-  timeout: 1s
-  connectionTimeout: 1s
-  connectionRequestTimeout: 1s
-
-testEndpoint: http://localhost:8080/services/
-    
