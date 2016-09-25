@@ -1,6 +1,6 @@
 import React from 'react';
-import LoadingIndicator from '../components/LoadingIndicator';
 import { connect } from 'react-redux';
+import LoadingIndicator from '../components/LoadingIndicator';
 import isString from 'lodash/isString';
 import { fromReleaseNotes } from '../reducers';
 

@@ -1,51 +1,76 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { white } from 'material-ui/styles/colors';
 import AppBar from 'material-ui/AppBar';
 import RaisedButton from 'material-ui/RaisedButton';
+import RefreshIndicator from 'material-ui/RefreshIndicator';
 import SearchField from './SearchField';
 import * as searchActions from '../actions/searchActions';
 import * as authActions from '../actions/authActions';
 import { flexWrapperStyle } from '../style';
-import { fromSearchResults, getAuthenticated } from '../reducers';
+import { fromSearchResults, fromAuth } from '../reducers';
+
+const LoginPendingIcon = () => (
+    <RefreshIndicator
+        left={24}
+        top={0}
+        size={38}
+        status="loading"
+        style={{ boxShadow: 'inherit' }}
+    />
+);
+
+const SignedInUser = ({ user, onSignOut }) => (
+    <span style={{ color: '#fff', marginBottom: 3, display: 'inline-block' }}>
+        {user.uid} {" "}
+        (<a href="#" onTouchTap={onSignOut} style={{ color: '#fff' }}>Sign out</a>)
+    </span>
+);
 
 const TopBarContainer = (props) => {
     const {
-        authenticated, login, logout, openMenu, mdPlus,
-        fetchSearch, searchResults, searchResultsIsLoading,
+        authenticatedUser, authenticationIsPending, signInAction, signOutAction, searchAction,
+        openMenu, mdPlus, searchResults, searchResultsIsLoading,
     } = props;
 
-    const onLogout = (event) => {
+    const handleSignOut = (event) => {
         event.preventDefault();
-        logout();
+        signOutAction();
+    };
+
+    const handleSignIn = (event) => {
+        event.preventDefault();
+        signInAction();
     };
 
     const wrapperStyle = {
         ...flexWrapperStyle,
         marginRight: 16,
-        marginTop: (authenticated) ? -17 : 0,
+        marginTop: (authenticatedUser) ? -17 : 0,
     };
 
     const elementRight = (
         <div style={wrapperStyle}>
             <div style={{ flex: 1, textAlign: 'right' }}>
-                {(authenticated) &&
-                    <span style={{ color: '#fff', marginBottom: 3, display: 'inline-block' }}>
-                        {authenticated.uid} {" "}
-                        (<a href="#" onTouchTap={onLogout} style={{ color: '#fff' }}>Sign out</a>)
-                    </span>
+                {(authenticatedUser) &&
+                    <SignedInUser user={authenticatedUser} onSignOut={handleSignOut} />
                 }
                 <SearchField
-                    fetchSearch={fetchSearch}
+                    fetchSearch={searchAction}
                     searchResults={searchResults}
                     searchResultsIsLoading={searchResultsIsLoading}
                 />
             </div>
-            {(!authenticated) &&
+            {(!authenticatedUser) &&
                 <RaisedButton
                     style={{ borderRadius: 3, marginLeft: 16 }}
                     labelStyle={{ fontSize: 12 }}
-                    onTouchTap={login}
+                    onTouchTap={handleSignIn}
                     label="Sign in"
+                    disabled={authenticationIsPending}
+                    disabledBackgroundColor={white}
+                    disabledLabelColor={white}
+                    icon={(authenticationIsPending) ? <LoginPendingIcon /> : undefined}
                 />
             }
         </div>
@@ -63,14 +88,15 @@ const TopBarContainer = (props) => {
 };
 
 const mapStateToProps = (state) => ({
-    authenticated: getAuthenticated(state),
+    authenticatedUser: fromAuth.getAuthenticatedUser(state),
+    authenticationIsPending: fromAuth.getIsPending(state),
     searchResults: fromSearchResults.getData(state),
     searchResultsIsLoading: fromSearchResults.getIsPending(state),
 });
 
 const Actions = {
-    login: authActions.login,
-    logout: authActions.logout,
-    fetchSearch: searchActions.fetchSearch,
+    signInAction: authActions.login,
+    signOutAction: authActions.logout,
+    searchAction: searchActions.fetchSearch,
 };
 export default connect(mapStateToProps, Actions)(TopBarContainer);

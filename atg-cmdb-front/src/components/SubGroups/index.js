@@ -6,13 +6,13 @@ import GroupList from '../GroupList';
 import { flexWrapperStyle } from '../../style';
 import * as groupValidators from '../../validators/groupValidators';
 
-const SubGroupsList = ({ authenticated, groups, onAddGroup, onRemoveGroup }) => (
+const SubGroupsList = ({ isAuthenticated, groups, onAddGroup, onRemoveGroup }) => (
     <div>
         <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
                 <h3>Sub groups</h3>
             </div>
-            {authenticated &&
+            {isAuthenticated &&
                 <RaisedButton
                     label="Add group"
                     onTouchTap={onAddGroup}
@@ -22,7 +22,7 @@ const SubGroupsList = ({ authenticated, groups, onAddGroup, onRemoveGroup }) => 
         </div>
         <GroupList
             groups={groups}
-            remove={(authenticated) ? onRemoveGroup : undefined}
+            remove={(isAuthenticated) ? onRemoveGroup : undefined}
             listItem={GroupListItem}
         />
     </div>
@@ -33,7 +33,7 @@ const SubGroups = React.createClass({
         groups: PropTypes.array,
         addGroup: PropTypes.func,
         removeGroup: PropTypes.func,
-        authenticated: PropTypes.object,
+        isAuthenticated: PropTypes.bool,
     },
 
     getInitialState() {
@@ -64,7 +64,7 @@ const SubGroups = React.createClass({
     },
 
     render() {
-        const { authenticated, groups, removeGroup } = this.props;
+        const { isAuthenticated, groups, removeGroup } = this.props;
         const { isAddingGroup, groupId, groupIdErrorText } = this.state;
         return (
             (isAddingGroup) ?
@@ -77,7 +77,7 @@ const SubGroups = React.createClass({
                 /> :
                 <SubGroupsList
                     groups={groups}
-                    authenticated={authenticated}
+                    isAuthenticated={isAuthenticated}
                     onAddGroup={this.startAddGroup}
                     onRemoveGroup={removeGroup}
                 />

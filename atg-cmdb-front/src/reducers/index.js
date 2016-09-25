@@ -9,7 +9,7 @@ import metaOpen from './meta';
 import searchResults, { fromSearchResults as _fromSearchResults } from './search';
 import info, { fromInfo as _fromInfo } from './info';
 import releaseNotes, { fromReleaseNotes as _fromReleaseNotes } from './releaseNotes';
-import authenticated from './auth';
+import auth, { fromAuth as _fromAuth } from './auth';
 import notification from './notification';
 
 export default combineReducers({
@@ -19,7 +19,7 @@ export default combineReducers({
     asset,
     menuOpen,
     metaOpen,
-    authenticated,
+    auth,
     notification,
     searchResults,
     info,
@@ -38,7 +38,8 @@ export const fromSearchResults = supplyStateSlice(_fromSearchResults, 'searchRes
 export const fromInfo = supplyStateSlice(_fromInfo, 'info');
 export const fromReleaseNotes = supplyStateSlice(_fromReleaseNotes, 'releaseNotes');
 
+export const fromAuth = supplyStateSlice(_fromAuth, 'auth');
+
 export const getIsMenuOpen = (state) => state.menuOpen;
 export const getIsMetaOpen = (state) => state.metaOpen;
-export const getAuthenticated = (state) => state.authenticated;
 export const getNotification = (state) => state.notification;

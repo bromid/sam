@@ -9,7 +9,7 @@ import ItemView from '../components/ItemView';
 import EditableGroupLink from '../components/EditableGroupLink';
 import { State } from '../components/EditState';
 import * as StateMachine from '../components/EditStateMachine';
-import { fromAsset, fromGroup, getAuthenticated } from '../reducers';
+import { fromAsset, fromGroup, fromAuth } from '../reducers';
 
 const groupId = (group) => (
     (group) ? group.id : ''
@@ -63,17 +63,17 @@ const Asset = (props) => {
 const AssetContainer = React.createClass({
 
     getInitialState() {
-        const { authenticated, asset: { group } = { } } = this.props;
+        const { isAuthenticated, asset: { group } = { } } = this.props;
         return {
             group: groupId(group),
             groupErrorText: '',
-            groupState: StateMachine.mapState(authenticated, this.updateGroup),
+            groupState: StateMachine.mapState(isAuthenticated, this.updateGroup),
         };
     },
 
     componentWillReceiveProps(newProps) {
         const {
-            authenticated, patchError, patchIsPending,
+            isAuthenticated, patchError, patchIsPending,
             asset: { group } = { },
         } = newProps;
         const { groupState } = this.state;
@@ -82,7 +82,7 @@ const AssetContainer = React.createClass({
 
         const newGroupState = StateMachine.mapStateFromCurrent(
             groupState,
-            authenticated,
+            isAuthenticated,
             this.updateGroup,
             patchIsPending,
             error.isError
@@ -110,8 +110,8 @@ const AssetContainer = React.createClass({
     },
 
     editGroup(edit = true) {
-        const { authenticated } = this.props;
-        const groupState = StateMachine.mapState(authenticated, this.updateGroup, edit);
+        const { isAuthenticated } = this.props;
+        const groupState = StateMachine.mapState(isAuthenticated, this.updateGroup, edit);
         this.setState({ groupState });
     },
 
@@ -182,7 +182,7 @@ const mapStateToProps = (state) => ({
     patchIsPending: fromAsset.getPatchResultIsPending(state),
     groupIds: fromGroup.getIds(state),
     isLoading: fromAsset.getCurrentIsPending(state),
-    authenticated: getAuthenticated(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
 });
 
 const Actions = {

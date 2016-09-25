@@ -16,10 +16,10 @@ export const parseError = (error) => {
     return { isError: false };
 };
 
-export const mapState = (authenticated, editFunction, editing = false, disable = false) => {
+export const mapState = (isAuthenticated, editFunction, editing = false, disable = false) => {
     if (disable) return State.readonly;
     if (editing) return State.editing;
-    if (authenticated && isFunction(editFunction)) return State.editable;
+    if (isAuthenticated && isFunction(editFunction)) return State.editable;
     return State.readonly;
 };
 
@@ -56,7 +56,7 @@ export const changeState = (name, value, errorText) => {
     };
 };
 
-export const mapStateFromCurrent = (currentState, authenticated, editFunction, saving, error) => {
+export const mapStateFromCurrent = (currentState, isAuthenticated, editFunction, saving, error) => {
     if (currentState === State.saving || currentState === State.saveFailed) {
         if (error) return State.saveFailed;
     }
@@ -64,5 +64,5 @@ export const mapStateFromCurrent = (currentState, authenticated, editFunction, s
         if (saving) return State.saving;
         return State.editing;
     }
-    return mapState(authenticated, editFunction);
+    return mapState(isAuthenticated, editFunction);
 };
