@@ -14,15 +14,16 @@ import DeleteButton from './DeleteButton';
 import RefreshButton from './RefreshButton';
 import { State, isShowEditForm } from '../EditState';
 import * as StateMachine from '../EditStateMachine';
+import { fromAuth, getIsMetaOpen } from '../../reducers';
 
-const Buttons = ({ authenticated, headlineState, onRefresh, onDelete }) => {
+const Buttons = ({ isAuthenticated, headlineState, onRefresh, onDelete }) => {
     if (isShowEditForm(headlineState)) {
         return null;
     }
     return (
         <div style={{ ...flexWrapperStyle, position: 'absolute', top: -10, right: 0 }}>
             <RefreshButton onRefresh={onRefresh} />
-            {authenticated && <DeleteButton onDelete={onDelete} />}
+            {isAuthenticated && <DeleteButton onDelete={onDelete} />}
         </div>
     );
 };
@@ -48,7 +49,7 @@ const ItemViewContainer = React.createClass({
 
     getInitialState() {
         const {
-            authenticated,
+            isAuthenticated,
             description, updateDescription,
             headline, updateHeadline,
         } = this.props;
@@ -57,16 +58,16 @@ const ItemViewContainer = React.createClass({
             selectedTab: 0,
             headline,
             headlineErrorText: '',
-            headlineState: StateMachine.mapState(authenticated, updateHeadline),
+            headlineState: StateMachine.mapState(isAuthenticated, updateHeadline),
             description,
             descriptionErrorText: '',
-            descriptionState: StateMachine.mapState(authenticated, updateDescription),
+            descriptionState: StateMachine.mapState(isAuthenticated, updateDescription),
         };
     },
 
     componentWillReceiveProps(newProps) {
         const {
-            authenticated, patchIsPending, patchError,
+            isAuthenticated, patchIsPending, patchError,
             description, updateDescription,
             headline, updateHeadline,
         } = newProps;
@@ -79,7 +80,7 @@ const ItemViewContainer = React.createClass({
 
         const newHeadlineState = StateMachine.mapStateFromCurrent(
             headlineState,
-            authenticated,
+            isAuthenticated,
             updateHeadline,
             patchIsPending,
             error.isError
@@ -87,7 +88,7 @@ const ItemViewContainer = React.createClass({
 
         const newDescState = StateMachine.mapStateFromCurrent(
             descriptionState,
-            authenticated,
+            isAuthenticated,
             updateDescription,
             patchIsPending,
             error.isError
@@ -124,8 +125,8 @@ const ItemViewContainer = React.createClass({
     },
 
     editHeadline(edit = true, disable = null) {
-        const { authenticated, updateHeadline } = this.props;
-        const state = StateMachine.mapState(authenticated, updateHeadline, edit, disable);
+        const { isAuthenticated, updateHeadline } = this.props;
+        const state = StateMachine.mapState(isAuthenticated, updateHeadline, edit, disable);
         this.setState({ headlineState: state });
         if (disable === null) {
             this.editDescription(false, edit);
@@ -158,8 +159,8 @@ const ItemViewContainer = React.createClass({
     },
 
     editDescription(edit = true, disable = null) {
-        const { authenticated, updateDescription } = this.props;
-        const state = StateMachine.mapState(authenticated, updateDescription, edit, disable);
+        const { isAuthenticated, updateDescription } = this.props;
+        const state = StateMachine.mapState(isAuthenticated, updateDescription, edit, disable);
         this.setState({ descriptionState: state });
         if (disable === null) {
             this.editHeadline(false, edit);
@@ -188,7 +189,7 @@ const ItemViewContainer = React.createClass({
 
     render() {
         const {
-            authenticated, isLoading, tabs,
+            isAuthenticated, isLoading, tabs,
             tags, onTagDelete,
             meta, metaOpen, toggleMeta,
             onRefresh, onDelete,
@@ -212,7 +213,7 @@ const ItemViewContainer = React.createClass({
                     change={this.changeHeadline}
                 />
                 <Buttons
-                    authenticated={authenticated}
+                    isAuthenticated={isAuthenticated}
                     headlineState={headlineState}
                     onRefresh={onRefresh}
                     onDelete={onDelete}
@@ -244,10 +245,11 @@ const ItemViewContainer = React.createClass({
     },
 });
 
-const mapStateToProps = (state) => {
-    const { metaOpen, authenticated } = state;
-    return { metaOpen, authenticated };
-};
+const mapStateToProps = (state) => ({
+    metaOpen: getIsMetaOpen(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
+});
+
 const Actions = {
     toggleMeta: metaActions.toggleMeta,
 };

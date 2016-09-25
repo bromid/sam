@@ -5,15 +5,15 @@ import RaisedButton from 'material-ui/RaisedButton';
 import { flexWrapperStyle } from '../style';
 import LoadingIndicator from '../components/LoadingIndicator';
 import { AssetList } from '../components/AssetList';
-import { fromAsset, getAuthenticated } from '../reducers';
+import { fromAsset, fromAuth } from '../reducers';
 
-const AssetListPage = ({ assets, authenticated }) => (
+const AssetListPage = ({ assets, isAuthenticated }) => (
     <div>
         <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
                 <h2>Assets</h2>
             </div>
-            {authenticated &&
+            {isAuthenticated &&
                 <Link to="/asset/new">
                     <RaisedButton
                         label="Add asset"
@@ -26,12 +26,12 @@ const AssetListPage = ({ assets, authenticated }) => (
     </div>
 );
 
-const AssetListPageContainer = ({ isLoading, authenticated, assets }) => {
+const AssetListPageContainer = ({ isLoading, isAuthenticated, assets }) => {
     if (isLoading) return <LoadingIndicator />;
     return (
         <AssetListPage
             assets={assets}
-            authenticated={authenticated}
+            isAuthenticated={isAuthenticated}
         />
     );
 };
@@ -39,6 +39,6 @@ const AssetListPageContainer = ({ isLoading, authenticated, assets }) => {
 const mapStateToProps = (state) => ({
     assets: fromAsset.getList(state),
     isLoading: fromAsset.getListIsPending(state),
-    authenticated: getAuthenticated(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
 });
 export default connect(mapStateToProps)(AssetListPageContainer);

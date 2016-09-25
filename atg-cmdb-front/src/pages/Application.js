@@ -10,7 +10,7 @@ import ApplicationDeployments from '../components/ApplicationDeployment';
 import EditableGroupLink from '../components/EditableGroupLink';
 import { State } from '../components/EditState';
 import * as StateMachine from '../components/EditStateMachine';
-import { fromApplication, fromGroup, getAuthenticated } from '../reducers';
+import { fromApplication, fromGroup, fromAuth } from '../reducers';
 
 const groupId = (group) => (
     (group) ? group.id : ''
@@ -68,17 +68,17 @@ const Application = (props) => {
 const ApplicationContainer = React.createClass({
 
     getInitialState() {
-        const { authenticated, application: { group } = { } } = this.props;
+        const { isAuthenticated, application: { group } = { } } = this.props;
         return {
             group: groupId(group),
             groupErrorText: '',
-            groupState: StateMachine.mapState(authenticated, this.updateGroup),
+            groupState: StateMachine.mapState(isAuthenticated, this.updateGroup),
         };
     },
 
     componentWillReceiveProps(newProps) {
         const {
-            authenticated, patchError, patchIsPending,
+            isAuthenticated, patchError, patchIsPending,
             application: { group } = { },
         } = newProps;
         const { groupState } = this.state;
@@ -87,7 +87,7 @@ const ApplicationContainer = React.createClass({
 
         const newGroupState = StateMachine.mapStateFromCurrent(
             groupState,
-            authenticated,
+            isAuthenticated,
             this.updateGroup,
             patchIsPending,
             error.isError
@@ -115,8 +115,8 @@ const ApplicationContainer = React.createClass({
     },
 
     editGroup(edit = true) {
-        const { authenticated } = this.props;
-        const groupState = StateMachine.mapState(authenticated, this.updateGroup, edit);
+        const { isAuthenticated } = this.props;
+        const groupState = StateMachine.mapState(isAuthenticated, this.updateGroup, edit);
         this.setState({ groupState });
     },
 
@@ -187,7 +187,7 @@ const mapStateToProps = (state) => ({
     patchIsPending: fromApplication.getPatchResultIsPending(state),
     groupIds: fromGroup.getIds(state),
     isLoading: fromApplication.getCurrentIsPending(state),
-    authenticated: getAuthenticated(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
 });
 
 const Actions = {

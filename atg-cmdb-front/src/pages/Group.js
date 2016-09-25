@@ -10,7 +10,7 @@ import ItemView from '../components/ItemView';
 import SubGroups from '../components/SubGroups';
 import { AssetList } from '../components/AssetList';
 import { ApplicationList } from '../components/ApplicationList';
-import { fromGroup, getAuthenticated } from '../reducers';
+import { fromGroup, fromAuth } from '../reducers';
 
 const collectionSize = (collection) => {
     if (!collection) return ' (0)';
@@ -23,7 +23,7 @@ const Group = (props) => {
             name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
-        isLoading, authenticated, patchIsPending, patchError,
+        isLoading, isAuthenticated, patchIsPending, patchError,
         onUpdateName, onUpdateDescription, onTagDelete,
         onAddSubGroup, onRemoveSubGroup, onRefresh, onDelete,
     } = props;
@@ -41,7 +41,7 @@ const Group = (props) => {
         {
             name: `Sub groups ${collectionSize(groups)}`,
             node: <SubGroups
-                authenticated={authenticated}
+                isAuthenticated={isAuthenticated}
                 groups={groups}
                 addGroup={onAddSubGroup}
                 removeGroup={onRemoveSubGroup}
@@ -101,7 +101,7 @@ const GroupContainer = React.createClass({
 
     render() {
         const {
-            group, isLoading, authenticated, patchIsPending, patchError,
+            group, isLoading, isAuthenticated, patchIsPending, patchError,
             fetchGroup, deleteGroup,
         } = this.props;
 
@@ -111,7 +111,7 @@ const GroupContainer = React.createClass({
             <Group
                 group={group}
                 isLoading={isLoading}
-                authenticated={authenticated}
+                isAuthenticated={isAuthenticated}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
                 onTagDelete={this.onTagDelete}
@@ -133,7 +133,7 @@ const mapStateToProps = (state) => ({
     patchError: fromGroup.getPatchResultError(state),
     patchIsPending: fromGroup.getPatchResultIsPending(state),
     isLoading: fromGroup.getCurrentIsPending(state),
-    authenticated: getAuthenticated(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
 });
 
 const Actions = {

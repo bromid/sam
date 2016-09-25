@@ -8,7 +8,7 @@ import { toArray } from '../helpers';
 import LoadingIndicator from '../components/LoadingIndicator';
 import { TagFilter } from '../components/Tag';
 import { GroupList, GroupText } from '../components/GroupList';
-import { fromGroup, getAuthenticated } from '../reducers';
+import { fromGroup, fromAuth } from '../reducers';
 
 const GroupListItem = ({ group, nestedItems, nestedLevel }) => (
     <ListItem
@@ -22,7 +22,7 @@ const GroupListItem = ({ group, nestedItems, nestedLevel }) => (
 
 const GroupListPage = (props) => {
     const {
-        authenticated, groups, groupTags = [],
+        isAuthenticated, groups, groupTags = [],
         addFilter, removeFilter, activeFilter, isLoading,
     } = props;
 
@@ -39,7 +39,7 @@ const GroupListPage = (props) => {
                         activeFilter={activeFilter}
                     />
                 </div>
-                {authenticated &&
+                {isAuthenticated &&
                     <Link to="/group/new">
                         <RaisedButton
                             label="Add group"
@@ -82,12 +82,12 @@ const GroupListPageContainer = React.createClass({
     },
 
     render() {
-        const { isLoading, authenticated, groups, groupTags, activeFilter } = this.props;
+        const { isLoading, isAuthenticated, groups, groupTags, activeFilter } = this.props;
 
         return (
             <GroupListPage
                 isLoading={isLoading}
-                authenticated={authenticated}
+                isAuthenticated={isAuthenticated}
                 groups={groups}
                 groupTags={groupTags}
                 activeFilter={activeFilter}
@@ -103,6 +103,6 @@ const mapStateToProps = (state, { location: { query } }) => ({
     groupTags: fromGroup.getTags(state),
     activeFilter: query.tags && query.tags.split(','),
     isLoading: fromGroup.getListIsPending(state),
-    authenticated: getAuthenticated(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
 });
 export default withRouter(connect(mapStateToProps)(GroupListPageContainer));

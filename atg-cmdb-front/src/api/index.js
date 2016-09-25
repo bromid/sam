@@ -37,10 +37,10 @@ const addParams = (url, params) => {
     return `${url}?${query}`;
 };
 
-const createOptions = (obj, method, headers, authenticated) => {
-    const optionsHeaders = (authenticated) ? {
+const createOptions = (obj, method, headers, authenticatedUser) => {
+    const optionsHeaders = (authenticatedUser) ? {
         ...headers,
-        Authorization: `Basic ${btoa(`${authenticated.uid}:secret`)}`,
+        Authorization: `Basic ${btoa(`${authenticatedUser.uid}:secret`)}`,
     } : headers;
 
     return {
@@ -91,37 +91,43 @@ const getJson = (url, params, options = {}) => {
     return fetchJson(url, params, { headers });
 };
 
-const patchJson = (url, apiParams, authenticated) => {
+const patchJson = (url, apiParams, authenticatedUser) => {
     const { obj, options: { hash, params } = {} } = apiParams;
     const headers = (hash) ? {
         ...APPLICATION_JSON.headers,
         'If-Match': `"${hash}"`,
     } : APPLICATION_JSON.headers;
 
-    const options = createOptions(obj, 'PATCH', headers, authenticated);
+    const options = createOptions(obj, 'PATCH', headers, authenticatedUser);
     return fetchJson(url, params, options);
 };
 
-const updateJson = (url, apiParams, authenticated) => {
+const updateJson = (url, apiParams, authenticatedUser) => {
     const { obj, options: { params } = {} } = apiParams;
-    const options = createOptions(obj, 'PUT', APPLICATION_JSON.headers, authenticated);
+    const options = createOptions(obj, 'PUT', APPLICATION_JSON.headers, authenticatedUser);
     return fetchJson(url, params, options);
 };
 
-const deleteJson = (url, apiParams, authenticated) => {
+const deleteJson = (url, apiParams, authenticatedUser) => {
     const { obj, options: { params } = {} } = apiParams;
-    const options = createOptions(obj, 'DELETE', APPLICATION_JSON.headers, authenticated);
+    const options = createOptions(obj, 'DELETE', APPLICATION_JSON.headers, authenticatedUser);
     return fetchJson(url, params, options);
 };
 
-const createJson = (url, apiParams, authenticated) => {
+const createJson = (url, apiParams, authenticatedUser) => {
     const { obj, options: { params } = {} } = apiParams;
     const headers = {
         ...APPLICATION_JSON.headers,
         'If-None-Match': '*',
     };
 
-    const options = createOptions(obj, 'PUT', headers, authenticated);
+    const options = createOptions(obj, 'PUT', headers, authenticatedUser);
+    return fetchJson(url, params, options);
+};
+
+const postJson = (url, apiParams, authenticatedUser) => {
+    const { obj, options: { params } = {} } = apiParams;
+    const options = createOptions(obj, 'POST', APPLICATION_JSON.headers, authenticatedUser);
     return fetchJson(url, params, options);
 };
 
@@ -210,3 +216,6 @@ export const fetchInfo = () =>
 
 export const fetchReleaseNotes = () =>
     getHtml('/services/info/release-notes');
+
+export const verifyOAuthCode = (params) =>
+    postJson('/services/oauth2/token', params);

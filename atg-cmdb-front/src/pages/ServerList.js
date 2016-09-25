@@ -5,15 +5,15 @@ import RaisedButton from 'material-ui/RaisedButton';
 import { flexWrapperStyle } from '../style';
 import LoadingIndicator from '../components/LoadingIndicator';
 import { ServerList } from '../components/ServerList';
-import { fromServer, getAuthenticated } from '../reducers';
+import { fromServer, fromAuth } from '../reducers';
 
-const ServerListPage = ({ servers, authenticated }) => (
+const ServerListPage = ({ servers, isAuthenticated }) => (
     <div>
         <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
                 <h2>Servers</h2>
             </div>
-            {authenticated &&
+            {isAuthenticated &&
                 <Link to="/server/new">
                     <RaisedButton
                         label="Add server"
@@ -26,14 +26,14 @@ const ServerListPage = ({ servers, authenticated }) => (
     </div>
 );
 
-const ServerListPageContainer = ({ isLoading, authenticated, servers }) => {
+const ServerListPageContainer = ({ isLoading, isAuthenticated, servers }) => {
     if (isLoading) return <LoadingIndicator />;
-    return <ServerListPage servers={servers} authenticated={authenticated} />;
+    return <ServerListPage servers={servers} isAuthenticated={isAuthenticated} />;
 };
 
 const mapStateToProps = (state) => ({
     servers: fromServer.getList(state),
     isLoading: fromServer.getListIsPending(state),
-    authenticated: getAuthenticated(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
 });
 export default connect(mapStateToProps)(ServerListPageContainer);

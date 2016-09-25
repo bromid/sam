@@ -5,15 +5,15 @@ import RaisedButton from 'material-ui/RaisedButton';
 import { flexWrapperStyle } from '../style';
 import LoadingIndicator from '../components/LoadingIndicator';
 import { ApplicationList } from '../components/ApplicationList';
-import { fromApplication, getAuthenticated } from '../reducers';
+import { fromApplication, fromAuth } from '../reducers';
 
-const ApplicationListPage = ({ applications, authenticated }) => (
+const ApplicationListPage = ({ applications, isAuthenticated }) => (
     <div>
         <div style={{ ...flexWrapperStyle, alignItems: 'center' }}>
             <div style={{ flex: 1 }}>
                 <h2>Applications</h2>
             </div>
-            {authenticated &&
+            {isAuthenticated &&
                 <Link to="/application/new">
                     <RaisedButton
                         label="Add application"
@@ -26,12 +26,12 @@ const ApplicationListPage = ({ applications, authenticated }) => (
     </div>
 );
 
-const ApplicationListPageContainer = ({ isLoading, authenticated, applications }) => {
+const ApplicationListPageContainer = ({ isLoading, isAuthenticated, applications }) => {
     if (isLoading) return <LoadingIndicator />;
     return (
         <ApplicationListPage
             applications={applications}
-            authenticated={authenticated}
+            isAuthenticated={isAuthenticated}
         />
     );
 };
@@ -39,6 +39,6 @@ const ApplicationListPageContainer = ({ isLoading, authenticated, applications }
 const mapStateToProps = (state) => ({
     applications: fromApplication.getList(state),
     isLoading: fromApplication.getListIsPending(state),
-    authenticated: getAuthenticated(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
 });
 export default connect(mapStateToProps)(ApplicationListPageContainer);
