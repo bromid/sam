@@ -7,7 +7,7 @@ import org.junit.runner.Description;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import se.atg.cmdb.ui.dropwizard.CmdbConfiguration;
+import se.atg.cmdb.ui.dropwizard.configuration.CmdbConfiguration;
 import se.atg.cmdb.ui.rest.ApplicationIntegrationTest;
 import se.atg.cmdb.ui.rest.AssetIntegrationTest;
 import se.atg.cmdb.ui.rest.GroupIntegrationTest;

@@ -29,7 +29,7 @@ import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.View;
-import se.atg.cmdb.ui.dropwizard.CmdbConfiguration;
+import se.atg.cmdb.ui.dropwizard.configuration.CmdbConfiguration;
 import se.atg.cmdb.ui.dropwizard.db.MongoDatabaseHealthCheck;
 import se.atg.cmdb.ui.text.CreateDatabase;
 
@@ -59,11 +59,7 @@ public class TestCommand extends EnvironmentCommand<CmdbConfiguration> {
     final ObjectMapper objectMapper = JsonHelper.configureObjectMapper(environment.getObjectMapper(), View.Api.class);
 
     // Jersey client configuration
-    final Client client = new JerseyClientBuilder(environment)
-      .using(configuration.getJerseyClientConfiguration())
-      .withProvider(new LoggingFilter(HTTP_LOGGER, true))
-      .withProvider(HttpAuthenticationFeature.basic("integration-test", "secret"))
-      .build("atg_cmdb_integrationtest");
+    final Client client = createRestClient(environment, configuration, "atg_cmdb_integrationtest");
 
     // Guice injection
     final MongoDatabase database = configuration.getDbConnectionFactory().getDatabase(environment.lifecycle());
@@ -108,5 +104,16 @@ public class TestCommand extends EnvironmentCommand<CmdbConfiguration> {
     } else {
       return junit.run(testRequest);
     }
+  }
+
+  private static Client createRestClient(Environment environment, CmdbConfiguration configuration, String name) {
+
+    final JerseyClientBuilder builder = new JerseyClientBuilder(environment)
+      .using(configuration.getJerseyClientConfiguration())
+      .withProvider(HttpAuthenticationFeature.basic("integration-test", "secret"));
+    if (configuration.isLogRequests()) {
+      builder.withProvider(new LoggingFilter(HTTP_LOGGER, true));
+    }
+    return builder.build(name);
   }
 }
