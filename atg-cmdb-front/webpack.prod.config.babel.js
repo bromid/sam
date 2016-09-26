@@ -1,5 +1,6 @@
 import path from 'path';
 import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import validate from 'webpack-validator';
 
@@ -16,10 +17,19 @@ const config = {
     entry: Paths.APP_ENTRY,
     output: {
         path: Paths.DIST,
-        filename: 'bundle.js',
+        filename: '[name].[chunkhash].js',
         publicPath: Paths.PUBLIC,
     },
     plugins: [
+        new HtmlWebpackPlugin({
+            minify: {
+                removeComments: true,
+                collapseWhitespace: true,
+                minifyJS: true,
+            },
+            filename: 'index.mustache',
+            template: 'index.mustache',
+        }),
         new CopyWebpackPlugin([
             {
                 from: Paths.ICONS,

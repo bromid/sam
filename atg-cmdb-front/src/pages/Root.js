@@ -16,17 +16,21 @@ import Asset from './Asset';
 import AssetList from './AssetList';
 import NewAsset from './NewAsset';
 import ReleaseNotes from './ReleaseNotes';
+import OAuth from './OAuth';
 import * as ApplicationActions from '../actions/applicationActions';
 import * as AssetActions from '../actions/assetActions';
 import * as GroupActions from '../actions/groupActions';
 import * as ServerActions from '../actions/serverActions';
 import * as InfoActions from '../actions/infoActions';
+import * as AuthActions from '../actions/authActions';
 
 export const store = configureStore();
 
 const Root = () => {
-    const initApp = () =>
+    const initApp = () => {
         store.dispatch(InfoActions.fetchInfo());
+        store.dispatch(AuthActions.signin(true));
+    };
 
     const fetchGroupList = ({ location: { query } }) => {
         store.dispatch(GroupActions.fetchGroupList(query.tags));
@@ -63,6 +67,10 @@ const Root = () => {
     return (
         <Provider store={store}>
             <Router history={browserHistory}>
+                <Route
+                    path="oauth"
+                    component={OAuth}
+                />
                 <Route
                     path="/"
                     component={App}

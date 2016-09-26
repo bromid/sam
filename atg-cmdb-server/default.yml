@@ -9,8 +9,8 @@ mongoDatabase:
 oauthConfig:
   clientId: <client id>
   clientSecret: <client secret>
-  accessTokenEndpoint: https://github.com/login/oauth/access_token
-  userEndpoint: https://api.github.com/user
+  accessTokenEndpoint: https://github.hh.atg.se/login/oauth/access_token
+  userEndpoint: https://github.hh.atg.se/api/v3/user
   idTokenIssuer: https://sam.hh.atg.se
   idTokenSignKey: topsecret
 

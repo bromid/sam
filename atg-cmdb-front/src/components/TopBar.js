@@ -95,8 +95,8 @@ const mapStateToProps = (state) => ({
 });
 
 const Actions = {
-    signInAction: authActions.login,
-    signOutAction: authActions.logout,
+    signInAction: authActions.signin,
+    signOutAction: authActions.signout,
     searchAction: searchActions.fetchSearch,
 };
 export default connect(mapStateToProps, Actions)(TopBarContainer);

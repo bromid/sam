@@ -4,6 +4,7 @@ import { blue800 } from 'material-ui/styles/colors';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import MainMenu from '../components/MainMenu';
+import Signin from '../components/Signin';
 import matchMedia from '../components/matchMediaHOC';
 import * as menuActions from '../actions/menuActions';
 import { getIsMenuOpen, getNotification } from '../reducers';
@@ -63,6 +64,7 @@ function App(props) {
                     </div>
                 </div>
                 <Notifier notification={notification} />
+                <Signin />
             </div>
         </MuiThemeProvider>
     );

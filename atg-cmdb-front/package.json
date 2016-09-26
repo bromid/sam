@@ -7,7 +7,7 @@
     "startFancy": "webpack-dashboard -- babel-node devServer.js",
     "prebuild": "rm -rf dist",
     "build": "webpack --config webpack.prod.config.babel.js -p",
-    "postbuild": "cp index.html dist/static/",
+    "buildTest": "webpack --config webpack.config.babel.js",
     "lint": "eslint ."
   },
   "repository": {
@@ -17,6 +17,7 @@
   "dependencies": {
     "babel-polyfill": "^6.9.1",
     "isomorphic-fetch": "^2.2.1",
+    "jwt-decode": "^2.1.0",
     "lodash": "^4.13.1",
     "material-ui": "^0.15.4",
     "moment": "^2.14.1",
@@ -54,8 +55,11 @@
     "eslint-plugin-react": "^5.1.1",
     "express": "^4.13.4",
     "file-loader": "^0.8.5",
+    "hogan.js": "^3.0.2",
+    "html-webpack-plugin": "^2.22.0",
     "http-proxy": "^1.14.0",
     "json-loader": "^0.5.4",
+    "mustache-loader": "^0.3.3",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1",
     "webpack-dashboard": "^0.1.8",

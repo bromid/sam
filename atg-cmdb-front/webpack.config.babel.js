@@ -1,7 +1,9 @@
 import path from 'path';
 import webpack from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import validate from 'webpack-validator';
+import envVarConfig from './dev-env-vars';
 
 const Paths = {
     SRC: path.resolve('src'),
@@ -20,6 +22,10 @@ const config = {
         publicPath: Paths.PUBLIC,
     },
     plugins: [
+        new HtmlWebpackPlugin({
+            template: 'index.mustache',
+            env: envVarConfig,
+        }),
         new CopyWebpackPlugin([
             {
                 from: Paths.ICONS,
@@ -30,6 +36,10 @@ const config = {
     ],
     module: {
         loaders: [
+            {
+                test: /\.mustache/,
+                loaders: ['mustache'],
+            },
             {
                 test: /\.js$/,
                 loaders: ['babel'],

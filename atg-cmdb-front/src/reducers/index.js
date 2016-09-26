@@ -37,7 +37,6 @@ export const fromAsset = supplyStateSlice(_fromAsset, 'asset');
 export const fromSearchResults = supplyStateSlice(_fromSearchResults, 'searchResults');
 export const fromInfo = supplyStateSlice(_fromInfo, 'info');
 export const fromReleaseNotes = supplyStateSlice(_fromReleaseNotes, 'releaseNotes');
-
 export const fromAuth = supplyStateSlice(_fromAuth, 'auth');
 
 export const getIsMenuOpen = (state) => state.menuOpen;
