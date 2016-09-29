@@ -20,6 +20,7 @@ app.use(webpackDevMiddleware(compiler, {
         assets: false,
     },
     publicPath: config.output.publicPath,
+    contentBase: path.join(__dirname, '/dist'),
 }));
 
 app.use('/services/*', (req, res) => {
@@ -33,7 +34,12 @@ app.use('/services/*', (req, res) => {
 });
 
 app.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    const filename = path.join(__dirname, '/dist/static/index.html');
+    compiler.outputFileSystem.readFile(filename, (err, result) => {
+        res.set('content-type', 'text/html');
+        res.send((err) ? 'Bundle not finished' : result);
+        res.end();
+    });
 });
 
 app.listen(port, (error) => {
