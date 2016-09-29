@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Link;
@@ -24,6 +25,8 @@ import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
+import io.dropwizard.views.ViewRenderer;
+import io.dropwizard.views.mustache.MustacheViewRenderer;
 import io.swagger.converter.ModelConverter;
 import io.swagger.converter.ModelConverterContext;
 import io.swagger.converter.ModelConverters;
@@ -62,8 +65,9 @@ public class Main extends Application<CmdbConfiguration> {
 
   @Override
   public void initialize(Bootstrap<CmdbConfiguration> bootstrap) {
-    bootstrap.addBundle(new ViewBundle<CmdbConfiguration>(Arrays.asList(new MarkdownViewRenderer(), new HtmlViewRenderer())));
-    bootstrap.addBundle(new AssetsBundle("/static", "/static", "index.html", "static"));
+    final List<ViewRenderer> renderers = Arrays.asList(new MarkdownViewRenderer(), new HtmlViewRenderer(), new MustacheViewRenderer());
+    bootstrap.addBundle(new ViewBundle<CmdbConfiguration>(renderers));
+    bootstrap.addBundle(new AssetsBundle("/static", "/static", "index.mustache", "static"));
     bootstrap.addBundle(new AssetsBundle("/docs", "/docs", "index.html", "docs"));
   }
 
@@ -82,7 +86,7 @@ public class Main extends Application<CmdbConfiguration> {
 
     // REST Resources
     environment.jersey().register(new InfoResource());
-    environment.jersey().register(new IndexResource());
+    environment.jersey().register(new IndexResource(objectMapper, configuration.getOAuthConfiguration()));
     environment.jersey().register(new OAuth2Resource(restClient, configuration.getOAuthConfiguration()));
     environment.jersey().register(new ServerResource(database, objectMapper));
     environment.jersey().register(new ApplicationResource(database, objectMapper));
@@ -118,10 +122,10 @@ public class Main extends Application<CmdbConfiguration> {
         final JavaType javaType = objectMapper.constructType(type);
         if (javaType.isTypeOrSubTypeOf(Link.class)) {
           return new ModelImpl()
-              .name("link")
-              .type("object")
-              .property("rel", new StringProperty())
-              .property("href", new StringProperty(StringProperty.Format.URL));
+            .name("link")
+            .type("object")
+            .property("rel", new StringProperty())
+            .property("href", new StringProperty(StringProperty.Format.URL));
         }
         return chain.next().resolve(type, context, chain);
       }
