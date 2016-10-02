@@ -6,6 +6,16 @@ import Root from './pages/Root';
 
 injectTapEventPlugin();
 
+if (module.hot) {
+    module.hot.accept('./pages/Root', () => {
+        const NextRoot = require('./pages/Root'); // eslint-disable-line global-require
+        render(
+            <NextRoot />,
+            document.getElementById('root')
+        );
+    });
+}
+
 render(
     <Root />,
     document.getElementById('root')
