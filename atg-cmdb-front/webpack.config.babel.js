@@ -7,7 +7,7 @@ import envVarConfig from './dev-env-vars';
 
 const Paths = {
     SRC: path.resolve('src'),
-    APP_ENTRY: path.resolve('src/index'),
+    APP_ENTRY: ['webpack-hot-middleware/client', path.resolve('src/index')],
     ICONS: path.resolve('src/icons'),
     DIST: path.resolve('dist/static'),
     PUBLIC: '/static/',
@@ -32,6 +32,8 @@ const config = {
                 to: 'icons',
             },
         ]),
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoErrorsPlugin(),
         new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
     ],
     module: {
