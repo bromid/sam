@@ -9,10 +9,12 @@ mongoDatabase:
 oauthConfig:
   clientId: <client id>
   clientSecret: <client secret>
+  authorizeEndpoint: Not requried for tests
   accessTokenEndpoint: Not requried for tests
   userEndpoint: Not requried for tests
   idTokenIssuer: https://sam.hh.atg.se
   idTokenSignKey: topsecret
+  origin: Not required for tests
 
 testEndpoint: http://localhost:8080/services/
 
