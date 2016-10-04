@@ -4,6 +4,8 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import validate from 'webpack-validator';
 
+process.env.NODE_ENV = 'production';
+
 const Paths = {
     SRC: path.resolve('src'),
     APP_ENTRY: path.resolve('src/index'),
