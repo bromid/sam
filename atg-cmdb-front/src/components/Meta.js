@@ -58,15 +58,19 @@ export default function Meta(props) {
 
     const listStyle = {
         overflow: 'hidden',
-        height: open ? 'auto' : 0,
+        maxHeight: open ? 300 : 0,
         margin: open ? '5px 16px' : '0 16px',
+        whiteSpace: open ? 'inherit' : 'nowrap',
+        transition: 'all 500ms ease-in-out 150ms',
     };
 
     const wrapperStyle = {
         ...borderStyle,
+        overflow: 'hidden',
         alignSelf: 'flex-start',
-        minWidth: 250,
+        width: (open) ? 270 : 120,
         margin: '15px 0 15px 15px',
+        transition: 'all 500ms ease-in-out 0ms',
     };
 
     return (
