@@ -81,12 +81,12 @@ function* windowSignin() {
 function* signin() {
     const { payload: { silent } } = yield take(SIGNIN_REQUEST);
 
-    const iframeResult = yield* iframeSignin();
-    if (iframeResult) {
-        return yield* signinResult(iframeResult);
-    }
-
-    if (!silent) {
+    if (silent) {
+        const iframeResult = yield* iframeSignin();
+        if (iframeResult) {
+            return yield* signinResult(iframeResult);
+        }
+    } else {
         const windowResult = yield* windowSignin();
         if (windowResult) {
             return yield* signinResult(windowResult);
