@@ -34,8 +34,7 @@ const Os = ({ os }) => (
     <div style={flexChildStyle}>
         <h3>Operative system</h3>
         <p>{os.name} ({os.version})</p>
-        <h4>Attributes</h4>
-        <Attributes attributes={os.attributes} />
+        <Attributes attributes={os.attributes} search={false} />
     </div>
 );
 
@@ -43,8 +42,7 @@ const Network = ({ network }) => (
     <div style={flexChildStyle}>
         <h3>Network</h3>
         <p>{network.ipv4Address}</p>
-        <h4>Attributes</h4>
-        <Attributes attributes={network.attributes} />
+        <Attributes attributes={network.attributes} search={false} />
     </div>
 );
 

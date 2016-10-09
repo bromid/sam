@@ -1,27 +1,40 @@
 import React from 'react';
-import isObject from 'lodash/isObject';
+import JSONEditor from 'jsoneditor';
+import '../../node_modules/jsoneditor/dist/jsoneditor.css';
 
-function getPaths(obj, prev = [], acc = []) {
-    Object.keys(obj).forEach((key) => {
-        const value = obj[key];
-        const path = prev.concat(key);
+const Attributes = React.createClass({
 
-        if (isObject(value)) {
-            getPaths(value, path, acc);
-        } else {
-            acc.push({ path: path.join('.'), value }); // eslint-disable-line no-param-reassign
+    componentWillUnmount() {
+        if (this.editor) {
+            this.editor.destroy();
         }
-    });
+    },
 
-    return acc;
-}
+    createEditor(container, attributes, search = true) {
+        if (container && !this.editor) {
+            const options = {
+                search,
+                mode: 'view',
+                name: 'Attributes',
+                history: false,
+            };
+            this.editor = new JSONEditor(container, options, attributes);
+        }
+    },
 
-export default function Attributes({ attributes }) {
-    if (!attributes) return <p>No attributes</p>;
+    render() {
+        const { attributes, search } = this.props;
+        if (!attributes) return <p>No attributes</p>;
+        return <div ref={(ref) => this.createEditor(ref, attributes, search)} />;
+    },
+});
 
-    return (
-        <ul>
-            {getPaths(attributes).map(({ path, value }) => <li key={path}>{path}: {value}</li>)}
-        </ul>
-    );
-}
+const AttributesContainer = ({ attributes, search }) => (
+    <dl>
+        <dt>Attributes</dt>
+        <dd>
+            <Attributes attributes={attributes} search={search} />
+        </dd>
+    </dl>
+);
+export default AttributesContainer;

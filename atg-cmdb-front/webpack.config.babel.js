@@ -34,7 +34,10 @@ const config = {
         ]),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoErrorsPlugin(),
+        // Only include english locale for moment
         new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(en)$/),
+        // Exclude ACE editor and AJV from jsoneditor since they are not needed
+        new webpack.IgnorePlugin(/(ajv|brace)$/, /jsoneditor/),
     ],
     module: {
         loaders: [
@@ -50,9 +53,11 @@ const config = {
                 test: /\.json$/,
                 loaders: ['json'],
             }, {
-                test: /\.(png|jpg)$/,
-                include: Paths.SRC,
+                test: /\.(png|jpg|svg)$/,
                 loader: 'url?name=img/[name]-[hash].[ext]&limit=25000',
+            }, {
+                test: /\.css$/,
+                loader: 'style?insertAt=top&singleton!css',
             },
         ],
     },
