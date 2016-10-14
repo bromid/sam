@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env sh
 mvn clean package -P local -pl \!atg-cmdb-release -T 1.5C || {
-    echo 'Build failed';
-    exit 1;
+  echo 'Build failed';
+  exit 1;
 }
 
 docker stop cmdb
