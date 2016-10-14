@@ -21,6 +21,13 @@ public class OAuth2AccessToken {
   @JsonProperty("scope")
   public String scope;
 
+  public OAuth2AccessToken() {}
+
+  public OAuth2AccessToken(String token, String type) {
+    this.token = token;
+    this.type = type;
+  }
+
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, Defaults.STYLE);

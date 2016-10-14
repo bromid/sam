@@ -16,7 +16,7 @@ public class OAuth2IdToken {
   public String token;
 
   @JsonProperty("token_type")
-  public String type = "bearer";
+  public String type = "Bearer";
 
   public OAuth2IdToken() {}
 

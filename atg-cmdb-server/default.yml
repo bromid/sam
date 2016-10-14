@@ -16,6 +16,8 @@ oauthConfig:
   idTokenSignKey: topsecret
   origin: http://localhost:8080
 
+authenticationCachePolicy: maximumSize=1000, expireAfterAccess=30m
+
 server:
   applicationConnectors:
     - type: http
@@ -35,8 +37,13 @@ jerseyClientConfig:
 logging:
   level: INFO
   loggers:
-    se.atg: TRACE
+    se.atg: DEBUG
     io.swagger: INFO
     org.mongodb: INFO
+    org.reflections: INFO
+    javax.management: INFO
+    org.eclipse.jetty: INFO
+    org.glassfish.jersey: INFO
+    org.hibernate.validator: INFO
   appenders:
     - type: console
