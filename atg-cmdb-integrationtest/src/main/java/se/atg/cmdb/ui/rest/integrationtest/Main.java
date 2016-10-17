@@ -17,6 +17,7 @@ import se.atg.cmdb.ui.rest.SmokeTest;
 
 public class Main extends Application<CmdbConfiguration> {
 
+  @Override
   public void run(CmdbConfiguration configuration, Environment environment) throws Exception {
   }
 

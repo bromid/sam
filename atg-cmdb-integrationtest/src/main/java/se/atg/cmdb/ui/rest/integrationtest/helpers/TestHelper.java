@@ -81,6 +81,20 @@ public abstract class TestHelper {
     }
   }
 
+  public static void assertUnauthenticated(Response response) {
+
+    final Status responseStatus = Response.Status.fromStatusCode(response.getStatusInfo().getStatusCode());
+    if (responseStatus != Response.Status.UNAUTHORIZED) {
+
+      final StringBuilder sb = new StringBuilder();
+      sb.append("Response ").append(responseStatus.getStatusCode()).append(" ").append(responseStatus.getReasonPhrase());
+      if (response.hasEntity()) {
+        sb.append(", Response: ").append(response.readEntity(String.class));
+      }
+      throw new AssertionError(sb);
+    }
+  }
+
   public static void assertValidationError(String expected, Response response) {
     Assert.assertEquals(422, response.getStatus());
     final String jsonResponse = response.readEntity(String.class);

@@ -5,10 +5,13 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
+import se.atg.cmdb.model.github.User;
 import se.atg.cmdb.ui.rest.InfoResource.Info;
 import se.atg.cmdb.ui.rest.integrationtest.helpers.TestHelper;
 
@@ -18,6 +21,10 @@ public class SmokeTest {
   private WebTarget testEndpoint;
   @Inject
   private Client client;
+  @Inject @Named("basic")
+  private Client basicAuthClient;
+  @Inject @Named("anonymous")
+  private Client anonymousAuthClient;
 
   @Test
   public void testStartPage() {
@@ -37,6 +44,7 @@ public class SmokeTest {
     TestHelper.assertSuccessful(response);
   }
 
+  @Test
   public void testInfo() {
 
     final Response infoResponse = testEndpoint.path("info")
@@ -49,5 +57,41 @@ public class SmokeTest {
       .request(MediaType.TEXT_HTML_TYPE)
       .get();
     TestHelper.assertSuccessful(releaseNotesResponse);
+  }
+
+  @Test
+  public void requireSigninForUserInformation() {
+
+    final Response response = anonymousAuthClient.target(testEndpoint.getUriBuilder())
+      .path("oauth2").path("user")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    TestHelper.assertUnauthenticated(response);
+  }
+
+  @Test
+  public void basicAuthentication() {
+
+    final Response response = basicAuthClient.target(testEndpoint.getUriBuilder())
+      .path("oauth2").path("user")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    TestHelper.assertSuccessful(response);
+
+    final User user = response.readEntity(User.class);
+    Assert.assertEquals("integration-test", user.login);
+  }
+
+  @Test
+  public void tokenAuthentication() {
+
+    final Response response = testEndpoint
+      .path("oauth2").path("user")
+      .request(MediaType.APPLICATION_JSON_TYPE)
+      .get();
+    TestHelper.assertSuccessful(response);
+
+    final User user = response.readEntity(User.class);
+    Assert.assertEquals("integration-test", user.login);
   }
 }
