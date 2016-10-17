@@ -13,6 +13,13 @@ public class OAuth2Code {
   public String code;
   public String state;
 
+  public OAuth2Code() {}
+
+  public OAuth2Code(String code, String state) {
+    this.code = code;
+    this.state = state;
+  }
+
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, Defaults.STYLE);

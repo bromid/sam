@@ -4,6 +4,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.cache.CacheBuilderSpec;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.client.JerseyClientConfiguration;
@@ -32,6 +33,9 @@ public class CmdbConfiguration extends Configuration {
   @JsonProperty
   private boolean logRequests = false;
 
+  @JsonProperty
+  private String authenticationCachePolicy;
+
   public MongoDatabaseConnectionFactory getDbConnectionFactory() {
     return this.dbConnectionFactory;
   }
@@ -50,5 +54,9 @@ public class CmdbConfiguration extends Configuration {
 
   public boolean isLogRequests() {
     return logRequests;
+  }
+
+  public CacheBuilderSpec getAuthenticationCachePolicy() {
+    return CacheBuilderSpec.parse(authenticationCachePolicy);
   }
 }

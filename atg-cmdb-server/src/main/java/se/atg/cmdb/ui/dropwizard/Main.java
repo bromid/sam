@@ -15,12 +15,16 @@ import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.mongodb.client.MongoDatabase;
 
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.auth.AuthDynamicFeature;
+import io.dropwizard.auth.CachingAuthenticator;
 import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
+import io.dropwizard.auth.chained.ChainedAuthFilter;
+import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -36,12 +40,16 @@ import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
+import se.atg.cmdb.auth.OAuth2Service;
 import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.User;
 import se.atg.cmdb.model.View;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.cmdb.ui.dropwizard.auth.BasicAuthorizer;
+import se.atg.cmdb.ui.dropwizard.auth.IdTokenAuthenticator;
+import se.atg.cmdb.ui.dropwizard.auth.OAuth2Command;
 import se.atg.cmdb.ui.dropwizard.configuration.CmdbConfiguration;
+import se.atg.cmdb.ui.dropwizard.configuration.OAuthConfiguration;
 import se.atg.cmdb.ui.dropwizard.db.MongoDatabaseHealthCheck;
 import se.atg.cmdb.ui.dropwizard.render.HtmlViewRenderer;
 import se.atg.cmdb.ui.dropwizard.render.MarkdownViewRenderer;
@@ -65,10 +73,13 @@ public class Main extends Application<CmdbConfiguration> {
 
   @Override
   public void initialize(Bootstrap<CmdbConfiguration> bootstrap) {
+
     final List<ViewRenderer> renderers = Arrays.asList(new MarkdownViewRenderer(), new HtmlViewRenderer(), new MustacheViewRenderer());
     bootstrap.addBundle(new ViewBundle<CmdbConfiguration>(renderers));
     bootstrap.addBundle(new AssetsBundle("/static", "/static", "index.mustache", "static"));
     bootstrap.addBundle(new AssetsBundle("/docs", "/docs", "index.html", "docs"));
+
+    bootstrap.addCommand(new OAuth2Command());
   }
 
   @Override
@@ -84,10 +95,14 @@ public class Main extends Application<CmdbConfiguration> {
     // REST Client
     final Client restClient = createRestClient(environment, configuration, "default_client");
 
+    // OAuth2 service
+    final OAuthConfiguration oAuthConfiguration = configuration.getOAuthConfiguration();
+    final OAuth2Service oauth2Service = new OAuth2Service(oAuthConfiguration);
+
     // REST Resources
     environment.jersey().register(new InfoResource());
-    environment.jersey().register(new IndexResource(objectMapper, configuration.getOAuthConfiguration()));
-    environment.jersey().register(new OAuth2Resource(restClient, configuration.getOAuthConfiguration()));
+    environment.jersey().register(new IndexResource(objectMapper, oAuthConfiguration));
+    environment.jersey().register(new OAuth2Resource(restClient, oauth2Service, oAuthConfiguration));
     environment.jersey().register(new ServerResource(database, objectMapper));
     environment.jersey().register(new ApplicationResource(database, objectMapper));
     environment.jersey().register(new GroupResource(database, objectMapper));
@@ -96,19 +111,37 @@ public class Main extends Application<CmdbConfiguration> {
 
     // Authentication
     environment.jersey().register(RolesAllowedDynamicFeature.class);
-    environment.jersey().register(new AuthDynamicFeature(new BasicCredentialAuthFilter.Builder<User>()
-        .setAuthenticator(new BasicAuthenticator())
-        .setAuthorizer(new BasicAuthorizer())
-        .setPrefix("Basic")
-        .buildAuthFilter())
-    );
+    environment.jersey().register(new AuthDynamicFeature(
+      new ChainedAuthFilter<>(
+       ImmutableList.of(
+        new BasicCredentialAuthFilter.Builder<User>()
+          .setAuthenticator(new CachingAuthenticator<>(
+            environment.metrics(),
+            new BasicAuthenticator(),
+            configuration.getAuthenticationCachePolicy()
+          ))
+          .setAuthorizer(new BasicAuthorizer())
+          .setPrefix("Basic")
+          .buildAuthFilter(),
+        new OAuthCredentialAuthFilter.Builder<User>()
+          .setAuthenticator(new CachingAuthenticator<>(
+            environment.metrics(),
+            new IdTokenAuthenticator(oauth2Service),
+            configuration.getAuthenticationCachePolicy()
+          ))
+          .setAuthorizer(new BasicAuthorizer())
+          .setPrefix("Bearer")
+          .buildAuthFilter()
+        )
+      )
+    ));
 
     // Core resources
-    environment.jersey().register(ApiListingResource.class);
     environment.jersey().register(DeclarativeLinkingFeature.class);
     environment.jersey().register(MongoServerExceptionMapper.class);
 
     // Init Swagger
+    environment.jersey().register(ApiListingResource.class);
     ModelConverters.getInstance().addConverter(new ModelConverter() {
 
       @Override
@@ -132,10 +165,10 @@ public class Main extends Application<CmdbConfiguration> {
     });
 
     final BeanConfig config = new BeanConfig();
-    config.setTitle("ATG Configuration Management Database");
+    config.setTitle("ATG SAM - Simple Asset Management");
     config.setVersion(getClass().getPackage().getImplementationVersion());
     config.setResourcePackage("se.atg.cmdb.ui.rest");
-    config.setScan(true);
+    config.setScan();
   }
 
   private static Client createRestClient(Environment environment, CmdbConfiguration configuration, String name) {

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import com.mongodb.client.MongoDatabase;
 
 import io.dropwizard.Application;
@@ -29,6 +30,7 @@ import io.dropwizard.setup.Environment;
 import net.sourceforge.argparse4j.inf.Namespace;
 import se.atg.cmdb.helpers.JsonHelper;
 import se.atg.cmdb.model.View;
+import se.atg.cmdb.ui.dropwizard.auth.ClientTokenFilter;
 import se.atg.cmdb.ui.dropwizard.configuration.CmdbConfiguration;
 import se.atg.cmdb.ui.dropwizard.db.MongoDatabaseHealthCheck;
 import se.atg.cmdb.ui.text.CreateDatabase;
@@ -58,8 +60,16 @@ public class TestCommand extends EnvironmentCommand<CmdbConfiguration> {
     // Jackson configuration
     final ObjectMapper objectMapper = JsonHelper.configureObjectMapper(environment.getObjectMapper(), View.Api.class);
 
-    // Jersey client configuration
-    final Client client = createRestClient(environment, configuration, "atg_cmdb_integrationtest");
+    // Jersey clients
+    final String username = "integration-test";
+    final Client anonymousClient = createRestClientBuilder(environment, configuration)
+      .build("integrationtest-anonymous-client");
+    final Client tokenAuthClient = createRestClientBuilder(environment, configuration)
+      .withProvider(ClientTokenFilter.feature(username, configuration.getOAuthConfiguration()))
+      .build("integrationtest-token-client");
+    final Client basicAuthClient = createRestClientBuilder(environment, configuration)
+      .withProvider(HttpAuthenticationFeature.basic(username, "secret"))
+      .build("integrationtest-basic-client");
 
     // Guice injection
     final MongoDatabase database = configuration.getDbConnectionFactory().getDatabase(environment.lifecycle());
@@ -67,8 +77,10 @@ public class TestCommand extends EnvironmentCommand<CmdbConfiguration> {
       protected void configure() {
         bind(ObjectMapper.class).toInstance(objectMapper);
         bind(MongoDatabase.class).toInstance(database);
-        bind(Client.class).toInstance(client);
-        bind(WebTarget.class).toInstance(client.target(configuration.getTestEndpoint()));
+        bind(Client.class).toInstance(tokenAuthClient);
+        bind(Client.class).annotatedWith(Names.named("basic")).toInstance(basicAuthClient);
+        bind(Client.class).annotatedWith(Names.named("anonymous")).toInstance(anonymousClient);
+        bind(WebTarget.class).toInstance(tokenAuthClient.target(configuration.getTestEndpoint()));
       }
     });
 
@@ -106,14 +118,12 @@ public class TestCommand extends EnvironmentCommand<CmdbConfiguration> {
     }
   }
 
-  private static Client createRestClient(Environment environment, CmdbConfiguration configuration, String name) {
+  private static JerseyClientBuilder createRestClientBuilder(Environment environment, CmdbConfiguration configuration) {
 
-    final JerseyClientBuilder builder = new JerseyClientBuilder(environment)
-      .using(configuration.getJerseyClientConfiguration())
-      .withProvider(HttpAuthenticationFeature.basic("integration-test", "secret"));
+    final JerseyClientBuilder builder = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration());
     if (configuration.isLogRequests()) {
       builder.withProvider(new LoggingFilter(HTTP_LOGGER, true));
     }
-    return builder.build(name);
+    return builder;
   }
 }

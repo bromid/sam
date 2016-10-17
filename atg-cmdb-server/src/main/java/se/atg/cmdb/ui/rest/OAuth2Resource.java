@@ -1,28 +1,28 @@
 package se.atg.cmdb.ui.rest;
 
-import java.util.Map;
-
+import javax.annotation.security.PermitAll;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
-import org.joda.time.Weeks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.auth0.jwt.JWTSigner;
-import com.auth0.jwt.JWTSigner.Options;
-import com.google.common.collect.ImmutableMap;
-
+import io.dropwizard.jersey.caching.CacheControl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import se.atg.cmdb.auth.OAuth2Service;
+import se.atg.cmdb.helpers.RestHelper;
 import se.atg.cmdb.model.auth.OAuth2AccessToken;
 import se.atg.cmdb.model.auth.OAuth2Code;
 import se.atg.cmdb.model.auth.OAuth2IdToken;
@@ -34,18 +34,30 @@ import se.atg.cmdb.ui.dropwizard.configuration.OAuthConfiguration;
 @Produces(Defaults.MEDIA_TYPE_JSON)
 public class OAuth2Resource {
 
-  private static final int EXPIRY = Weeks.ONE.toStandardSeconds().getSeconds();
-  private static final Options JWT_OPTIONS = new Options().setIssuedAt(true).setJwtId(true).setExpirySeconds(EXPIRY);
   private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2Resource.class);
 
   private final Client restClient;
   private final OAuthConfiguration config;
-  private final JWTSigner signer;
+  private final OAuth2Service service;
 
-  public OAuth2Resource(Client restClient, OAuthConfiguration config) {
+  public OAuth2Resource(Client restClient, OAuth2Service service, OAuthConfiguration config) {
     this.restClient = restClient;
     this.config = config;
-    this.signer = new JWTSigner(config.getIdTokenSignKey());
+    this.service = service;
+  }
+
+  @GET
+  @PermitAll
+  @Path("/services/oauth2/user")
+  @CacheControl(noCache = true)
+  @ApiOperation("Get authenticated user.")
+  public User getAuthenticatedUser(
+    @Context SecurityContext securityContext
+  ) {
+    final se.atg.cmdb.model.User user = RestHelper.getUser(securityContext);
+    return new User() {{
+      this.login = user.name;
+    }};
   }
 
   @POST
@@ -59,7 +71,7 @@ public class OAuth2Resource {
 
       final OAuth2AccessToken accesstoken = requestAccessToken(code);
       final User user = requestAuthenticatedUser(accesstoken);
-      final OAuth2IdToken idToken = createIdToken(user.login);
+      final OAuth2IdToken idToken = service.createIdToken(user.login);
 
       LOGGER.info("Issued {} for {}", idToken, user);
       return idToken;
@@ -70,11 +82,15 @@ public class OAuth2Resource {
   }
 
   private OAuth2AccessToken requestAccessToken(OAuth2Code code) {
+    return requestAccessToken(code.code, code.state, config.getClientId(), config.getClientSecret());
+  }
+
+  private OAuth2AccessToken requestAccessToken(String code, String state, String clientId, String clientSecret) {
     return restClient.target(config.getAccessTokenEndpoint())
-      .queryParam("client_id", config.getClientId())
-      .queryParam("client_secret", config.getClientSecret())
-      .queryParam("code", code.code)
-      .queryParam("state", code.state)
+      .queryParam("client_id", clientId)
+      .queryParam("client_secret", clientSecret)
+      .queryParam("code", code)
+      .queryParam("state", state)
       .request(MediaType.APPLICATION_JSON_TYPE)
       .post(Entity.form(new Form()), OAuth2AccessToken.class);
   }
@@ -84,17 +100,5 @@ public class OAuth2Resource {
       .request(MediaType.APPLICATION_JSON_TYPE)
       .header(HttpHeaders.AUTHORIZATION, "token " + accessToken.token)
       .get(User.class);
-  }
-
-  private OAuth2IdToken createIdToken(final String subject) {
-
-    final Map<String,Object> claims = new ImmutableMap.Builder<String,Object>()
-      .put("iss", config.getIdTokenIssuer())
-      .put("aud", config.getIdTokenIssuer())
-      .put("sub", subject)
-      .build();
-
-    final String token = signer.sign(claims, JWT_OPTIONS);
-    return new OAuth2IdToken(token);
   }
 }
