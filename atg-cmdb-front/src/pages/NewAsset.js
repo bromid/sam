@@ -1,7 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import isEmpty from 'lodash/isEmpty';
 import RaisedButton from 'material-ui/RaisedButton';
+import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
 import AutoComplete from 'material-ui/AutoComplete';
 import { removeEmptyFields } from '../helpers';
@@ -69,6 +71,10 @@ const NewAssetContainer = React.createClass({
             const assetNoEmptyFields = removeEmptyFields(asset);
             this.props.createAsset(assetNoEmptyFields);
         }
+    },
+
+    onCancel() {
+        this.props.router.goBack();
     },
 
     addField(id, ref) {
@@ -139,6 +145,11 @@ const NewAssetContainer = React.createClass({
                     />
                     <div style={{ display: 'flex', marginTop: 16 }}>
                         <span style={{ flex: 1 }}>* indicates required field</span>
+                        <FlatButton
+                            label="Cancel"
+                            secondary={false}
+                            onTouchTap={this.onCancel}
+                        />
                         <RaisedButton
                             label="Create asset"
                             secondary={true}
@@ -158,4 +169,4 @@ const mapStateToProps = (state) => ({
 const Actions = {
     createAsset: assetActions.createAsset,
 };
-export default connect(mapStateToProps, Actions)(NewAssetContainer);
+export default connect(mapStateToProps, Actions)(withRouter(NewAssetContainer));

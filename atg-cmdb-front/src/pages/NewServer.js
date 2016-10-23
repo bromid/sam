@@ -1,7 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import isEmpty from 'lodash/isEmpty';
 import RaisedButton from 'material-ui/RaisedButton';
+import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
 import { removeEmptyFields } from '../helpers';
 import * as serverActions from '../actions/serverActions';
@@ -68,6 +70,10 @@ const NewServerContainer = React.createClass({
         }
     },
 
+    onCancel() {
+        this.props.router.goBack();
+    },
+
     addField(id, ref) {
         if (ref) {
             if (isEmpty(this.refs)) {
@@ -132,6 +138,11 @@ const NewServerContainer = React.createClass({
                     />
                     <div style={{ display: 'flex', marginTop: 16 }}>
                         <span style={{ flex: 1 }}>* indicates required field</span>
+                        <FlatButton
+                            label="Cancel"
+                            secondary={false}
+                            onTouchTap={this.onCancel}
+                        />
                         <RaisedButton
                             label="Create server"
                             secondary={true}
@@ -147,4 +158,4 @@ const NewServerContainer = React.createClass({
 const Actions = {
     createServer: serverActions.createServer,
 };
-export default connect(null, Actions)(NewServerContainer);
+export default connect(null, Actions)(withRouter(NewServerContainer));
