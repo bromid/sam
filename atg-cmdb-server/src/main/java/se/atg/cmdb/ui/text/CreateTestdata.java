@@ -268,7 +268,9 @@ public final class CreateTestdata {
             .append("Param1", "Value1")
             .append("Param2", new Document()
               .append("Param3", "Value3")
-          )).append("meta", defaultMeta())
+            ).append("env-id", env)
+            .append("server-id", server)
+            ).append("meta", defaultMeta())
         );
       }
     }

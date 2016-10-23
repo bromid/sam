@@ -4,6 +4,13 @@ import '../../node_modules/jsoneditor/dist/jsoneditor.css';
 
 const Attributes = React.createClass({
 
+    componentWillReceiveProps(nextProps) {
+        const { attributes } = nextProps;
+        if (this.editor) {
+            this.editor.set(attributes);
+        }
+    },
+
     componentWillUnmount() {
         if (this.editor) {
             this.editor.destroy();
