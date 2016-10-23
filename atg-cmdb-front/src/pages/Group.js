@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import size from 'lodash/size';
 import isEmpty from 'lodash/isEmpty';
+import { collectionSize } from '../helpers';
 import * as groupActions from '../actions/groupActions';
 import * as groupValidators from '../validators/groupValidators';
 import LoadingIndicator from '../components/LoadingIndicator';
@@ -11,11 +11,6 @@ import SubGroups from '../components/SubGroups';
 import { AssetList } from '../components/AssetList';
 import { ApplicationList } from '../components/ApplicationList';
 import { fromGroup, fromAuth } from '../reducers';
-
-const collectionSize = (collection) => {
-    if (!collection) return ' (0)';
-    return ` (${size(collection)})`;
-};
 
 const Group = (props) => {
     const {
