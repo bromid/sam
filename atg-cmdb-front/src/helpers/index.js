@@ -3,6 +3,7 @@ import isArrayLike from 'lodash/isArrayLike';
 import isObjectLike from 'lodash/isObjectLike';
 import isEmpty from 'lodash/isEmpty';
 import pickBy from 'lodash/pickBy';
+import size from 'lodash/size';
 
 export const toArray = (item) => (
     isArray(item) ? item : [item]
@@ -21,3 +22,8 @@ export const removeEmptyFields = (obj) => (
 export const containsWhitespace = (val) => (
     /\s/.test(val)
 );
+
+export const collectionSize = (collection, defaultValue = '(0)') => {
+    if (!collection) return defaultValue;
+    return `(${size(collection)})`;
+};

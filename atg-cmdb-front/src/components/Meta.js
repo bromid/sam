@@ -61,7 +61,7 @@ export default function Meta(props) {
         maxHeight: open ? 300 : 0,
         margin: open ? '5px 16px' : '0 16px',
         whiteSpace: open ? 'inherit' : 'nowrap',
-        transition: 'all 500ms ease-in-out 150ms',
+        transition: 'all 350ms ease-in-out 100ms',
     };
 
     const wrapperStyle = {
@@ -70,7 +70,7 @@ export default function Meta(props) {
         alignSelf: 'flex-start',
         width: (open) ? 270 : 120,
         margin: '15px 0 15px 15px',
-        transition: 'all 500ms ease-in-out 0ms',
+        transition: 'all 350ms ease-in-out 0ms',
     };
 
     return (
