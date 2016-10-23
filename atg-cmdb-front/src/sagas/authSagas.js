@@ -24,14 +24,14 @@ function* verifyOAuthCode(codeRequest, loginRequest) {
         const { code, state } = codeRequest.response;
         const requestState = loginRequest.payload.state;
         if (state !== requestState) {
-            throw new Error(
-                `Invalid state in authorization response. Expected ${requestState} got ${state}`
-            );
+            LOG.error(`Invalid state in auth response. Expected ${requestState} got ${state}`);
+            return false;
         }
 
         const apiCall = call(API.verifyOAuthCode, { obj: { code, state } });
-        const verifyCode = yield timeout(apiCall, 1000);
+        const verifyCode = yield timeout(apiCall, 1500);
         if (verifyCode.cancelled) {
+            LOG.debug('Verify oauth code timed out.');
             return false;
         }
 
