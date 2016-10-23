@@ -8,7 +8,7 @@ injectTapEventPlugin();
 
 if (module.hot) {
     module.hot.accept('./pages/Root', () => {
-        const NextRoot = require('./pages/Root'); // eslint-disable-line global-require
+        const NextRoot = require('./pages/Root').default; // eslint-disable-line global-require
         render(
             <NextRoot />,
             document.getElementById('root')

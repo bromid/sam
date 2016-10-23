@@ -40,7 +40,7 @@ const addParams = (url, params) => {
 const createOptions = (obj, method, headers, authenticatedUser) => {
     const optionsHeaders = (authenticatedUser) ? {
         ...headers,
-        Authorization: `Basic ${btoa(`${authenticatedUser.uid}:secret`)}`,
+        Authorization: `Bearer ${authenticatedUser.idToken}`,
     } : headers;
 
     return {
