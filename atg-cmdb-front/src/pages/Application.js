@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
+import { collectionSize } from '../helpers';
 import * as applicationValidators from '../validators/applicationValidators';
 import * as applicationActions from '../actions/applicationActions';
 import LoadingIndicator from '../components/LoadingIndicator';
@@ -16,7 +17,7 @@ const groupId = (group) => (
     (group) ? group.id : ''
 );
 
-const Details = ({ attributes, groupLink }) => (
+const Details = ({ groupLink }) => (
     <div>
         <dl>
             <dt>Group</dt>
@@ -24,14 +25,13 @@ const Details = ({ attributes, groupLink }) => (
                 {groupLink}
             </dd>
         </dl>
-        <Attributes attributes={attributes} />
     </div>
 );
 
 const Application = (props) => {
     const {
-        application: { id, name, description = '', attributes, meta },
-        isLoading, patchIsPending, patchError, groupLink,
+        application: { name, description = '', attributes, meta },
+        deployments, isLoading, patchIsPending, patchError, groupLink,
         onUpdateName, onUpdateDescription, onRefresh, onDelete,
     } = props;
 
@@ -41,8 +41,12 @@ const Application = (props) => {
             node: <Details attributes={attributes} groupLink={groupLink} />,
         },
         {
-            name: 'Deployments',
-            node: <ApplicationDeployments id={id} />,
+            name: `Deployments ${collectionSize(deployments, '')}`,
+            node: <ApplicationDeployments />,
+        },
+        {
+            name: `Attributes ${collectionSize(attributes)}`,
+            node: <Attributes attributes={attributes} />,
         },
     ];
 
@@ -144,7 +148,7 @@ const ApplicationContainer = React.createClass({
 
     render() {
         const {
-            application, groupIds, isLoading, patchIsPending, patchError,
+            application, groupIds, deployments, isLoading, patchIsPending, patchError,
             fetchApplication, deleteApplication,
         } = this.props;
 
@@ -166,6 +170,7 @@ const ApplicationContainer = React.createClass({
         return (
             <Application
                 application={application}
+                deployments={deployments}
                 isLoading={isLoading}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
@@ -186,6 +191,7 @@ const mapStateToProps = (state) => ({
     patchError: fromApplication.getPatchResultError(state),
     patchIsPending: fromApplication.getPatchResultIsPending(state),
     groupIds: fromGroup.getIds(state),
+    deployments: fromApplication.getDeployments(state),
     isLoading: fromApplication.getCurrentIsPending(state),
     isAuthenticated: fromAuth.getIsAuthenticated(state),
 });

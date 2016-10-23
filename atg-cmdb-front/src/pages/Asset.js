@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
+import { collectionSize } from '../helpers';
 import * as assetValidators from '../validators/assetValidators';
 import * as assetActions from '../actions/assetActions';
 import LoadingIndicator from '../components/LoadingIndicator';
@@ -15,13 +16,12 @@ const groupId = (group) => (
     (group) ? group.id : ''
 );
 
-const Details = ({ groupLink, attributes }) => (
+const Details = ({ groupLink }) => (
     <div>
         <dl>
             <dt>Group</dt>
             {groupLink}
         </dl>
-        <Attributes attributes={attributes} />
     </div>
 );
 
@@ -38,6 +38,10 @@ const Asset = (props) => {
             node: (
                 <Details groupLink={groupLink} attributes={attributes} />
             ),
+        },
+        {
+            name: `Attributes ${collectionSize(attributes)}`,
+            node: <Attributes attributes={attributes} />,
         },
     ];
 
