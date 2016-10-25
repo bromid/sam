@@ -12,6 +12,7 @@ import TopBar from '../components/TopBar';
 import Notifier from '../components/Notifier';
 
 const theme = {
+    fontFamily: 'Roboto, Helvetica Neue, Helvetica, Arial, sans-serif',
     spacing: {
         iconSize: 20,
         desktopGutter: 20,
