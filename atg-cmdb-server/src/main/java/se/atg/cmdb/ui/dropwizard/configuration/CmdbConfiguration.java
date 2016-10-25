@@ -15,26 +15,26 @@ public class CmdbConfiguration extends Configuration {
   @Valid
   @NotNull
   @JsonProperty("mongoDatabase")
-  private MongoDatabaseConnectionFactory dbConnectionFactory = new MongoDatabaseConnectionFactory();
+  protected MongoDatabaseConnectionFactory dbConnectionFactory = new MongoDatabaseConnectionFactory();
 
   @Valid
   @NotNull
   @JsonProperty
-  private JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
+  protected JerseyClientConfiguration jerseyClientConfig = new JerseyClientConfiguration();
 
   @Valid
   @NotNull
   @JsonProperty
-  private OAuthConfiguration oauthConfig = new OAuthConfiguration();
+  protected OAuthConfiguration oauthConfig = new OAuthConfiguration();
 
   @JsonProperty
-  private String testEndpoint;
+  protected String testEndpoint;
 
   @JsonProperty
-  private boolean logRequests = false;
+  protected boolean logRequests = false;
 
   @JsonProperty
-  private String authenticationCachePolicy;
+  protected String authenticationCachePolicy;
 
   public MongoDatabaseConnectionFactory getDbConnectionFactory() {
     return this.dbConnectionFactory;
