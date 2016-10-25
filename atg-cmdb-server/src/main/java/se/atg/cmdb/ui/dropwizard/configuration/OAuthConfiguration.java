@@ -8,35 +8,35 @@ public class OAuthConfiguration {
 
   @NotNull
   @JsonProperty
-  private String clientId;
+  protected String clientId;
 
   @NotNull
   @JsonProperty
-  private String clientSecret;
+  protected String clientSecret;
 
   @NotNull
   @JsonProperty
-  private String authorizeEndpoint;
+  protected String authorizeEndpoint;
 
   @NotNull
   @JsonProperty
-  private String accessTokenEndpoint;
+  protected String accessTokenEndpoint;
 
   @NotNull
   @JsonProperty
-  private String userEndpoint;
+  protected String userEndpoint;
 
   @NotNull
   @JsonProperty
-  private String idTokenIssuer;
+  protected String idTokenIssuer;
 
   @NotNull
   @JsonProperty
-  private String idTokenSignKey;
+  protected String idTokenSignKey;
 
   @NotNull
   @JsonProperty
-  private String origin;
+  protected String origin;
 
   public String getClientId() {
     return clientId;

@@ -3,6 +3,7 @@ package se.atg.cmdb.ui.dropwizard.auth;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.auth0.jwt.JWTVerifyException;
 import com.google.common.base.Splitter;
@@ -15,6 +16,10 @@ import net.sourceforge.argparse4j.inf.Subparsers;
 import se.atg.cmdb.auth.OAuth2Service;
 import se.atg.cmdb.model.auth.OAuth2IdToken;
 import se.atg.cmdb.ui.dropwizard.configuration.CmdbConfiguration;
+
+import static se.atg.cmdb.auth.OAuth2Service.JWT_EXPIRY;
+import static se.atg.cmdb.auth.OAuth2Service.JWT_NOT_VALID_BEFORE;
+import static se.atg.cmdb.auth.OAuth2Service.JWT_ISSUED_AT;
 
 public class OAuth2Command extends ConfiguredCommand<CmdbConfiguration> {
 
@@ -71,10 +76,29 @@ public class OAuth2Command extends ConfiguredCommand<CmdbConfiguration> {
     System.out.println("JSON Web Token for (" + subject + "): " + token.token);
   }
 
-  private void sign(String claims, OAuth2Service service) {
+  private void sign(String params, OAuth2Service service) {
 
-    final Map<String, ?> claimsMap = Splitter.on(',').withKeyValueSeparator('=').split(claims);
-    final OAuth2IdToken token = service.sign(claimsMap);
+    final Map<String, Object> claims = Splitter
+      .on(',')
+      .withKeyValueSeparator('=')
+      .split(params)
+      .entrySet().stream()
+      .collect(Collectors.toMap(
+        (entry) -> entry.getKey(),
+        (entry) -> {
+          final String value = entry.getValue();
+          switch (entry.getKey()) {
+            case JWT_EXPIRY:
+            case JWT_NOT_VALID_BEFORE:
+            case JWT_ISSUED_AT:
+              return Long.parseLong(value);
+            default:
+              return value;
+          }
+        }
+      ));
+
+    final OAuth2IdToken token = service.sign(claims);
     System.out.println("JSON Web Token: " + token.token);
   }
 

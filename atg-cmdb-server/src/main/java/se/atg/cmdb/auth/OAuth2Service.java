@@ -17,6 +17,13 @@ import se.atg.cmdb.ui.dropwizard.configuration.OAuthConfiguration;
 
 public class OAuth2Service {
 
+  public static final String JWT_ISSUER = "iss";
+  public static final String JWT_AUDIENCE = "aud";
+  public static final String JWT_SUBJECT = "sub";
+  public static final String JWT_EXPIRY = "exp";
+  public static final String JWT_ISSUED_AT = "iat";
+  public static final String JWT_NOT_VALID_BEFORE = "nbf";
+
   public static final int EXPIRY = Weeks.ONE.toStandardSeconds().getSeconds();
   private static final Options JWT_OPTIONS = new Options().setIssuedAt(true).setJwtId(true).setExpirySeconds(EXPIRY);
 
@@ -51,7 +58,8 @@ public class OAuth2Service {
   }
 
   public enum JwtField {
-    issuer("iss"), audience("aud"), subject("sub");
+    issuer(JWT_ISSUER), audience(JWT_AUDIENCE), subject(JWT_SUBJECT),
+    expiry(JWT_EXPIRY), issuedAt(JWT_ISSUED_AT), notValidBefore(JWT_NOT_VALID_BEFORE);
 
     public final String id;
     JwtField(String id) {
