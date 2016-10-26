@@ -12,7 +12,7 @@ import se.atg.cmdb.helpers.Mapper;
 
 public abstract class Base {
 
-  @Size(min = 1, max = 1000)
+  @Size(min = 1, max = 1500)
   public String description;
   @Null(groups = Validation.class)
   public Meta meta;
