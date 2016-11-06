@@ -20,11 +20,11 @@ const Group = (props) => {
     const {
         group: {
             id, name, description = '', applications, assets,
-            tags, attributes, meta, groups,
+            tags, attributes, meta, groups = [],
         },
         isLoading, isAuthenticated, patchIsPending, patchError,
         onUpdateName, onUpdateDescription, onTagDelete,
-        onAddSubGroup, onRemoveSubGroup, onRefresh, onDelete,
+        onAddSubGroup, onRemoveSubGroup, onCreateSubGroup, onRefresh, onDelete,
     } = props;
 
     if (!id) return <p>No group found</p>;
@@ -42,8 +42,9 @@ const Group = (props) => {
             node: <SubGroups
                 isAuthenticated={isAuthenticated}
                 groups={groups}
-                addGroup={onAddSubGroup}
-                removeGroup={onRemoveSubGroup}
+                onAddGroup={onAddSubGroup}
+                onRemoveGroup={onRemoveSubGroup}
+                onCreateGroup={onCreateSubGroup}
             />,
         },
         {
@@ -107,6 +108,10 @@ const GroupContainer = React.createClass({
         removeSubgroup(id, subGroupId);
     },
 
+    createSubGroup(group) {
+        this.props.createGroup(group);
+    },
+
     render() {
         const {
             group, isLoading, isAuthenticated, patchIsPending, patchError,
@@ -127,6 +132,7 @@ const GroupContainer = React.createClass({
                 onUpdateDescription={this.updateDescription}
                 onAddSubGroup={this.addSubGroup}
                 onRemoveSubGroup={this.removeSubGroup}
+                onCreateSubGroup={this.createSubGroup}
                 onRefresh={() => fetchGroup(group.id)}
                 onDelete={() => deleteGroup(group.id)}
             />
@@ -148,6 +154,7 @@ const Actions = {
     patchGroup: groupActions.patchGroup,
     fetchGroup: groupActions.fetchGroup,
     deleteGroup: groupActions.deleteGroup,
+    createGroup: groupActions.createGroup,
     addSubgroup: groupActions.addSubgroup,
     removeSubgroup: groupActions.removeSubgroup,
 };
