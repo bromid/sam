@@ -1,5 +1,7 @@
 package se.atg.cmdb.ui.dropwizard.configuration;
 
+import java.io.PrintStream;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -36,6 +38,10 @@ public class CmdbConfiguration extends Configuration {
   @JsonProperty
   protected String authenticationCachePolicy;
 
+  // May be reassigned for testing
+  protected PrintStream sysOut = System.out;
+  protected PrintStream sysErr = System.err;
+
   public MongoDatabaseConnectionFactory getDbConnectionFactory() {
     return this.dbConnectionFactory;
   }
@@ -58,5 +64,13 @@ public class CmdbConfiguration extends Configuration {
 
   public CacheBuilderSpec getAuthenticationCachePolicy() {
     return CacheBuilderSpec.parse(authenticationCachePolicy);
+  }
+
+  public PrintStream getSystemOut() {
+    return sysOut;
+  }
+
+  public PrintStream getSystemErr() {
+    return sysErr;
   }
 }

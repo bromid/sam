@@ -1,9 +1,16 @@
 package se.atg.cmdb.ui.dropwizard.auth;
 
-import org.junit.BeforeClass;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.util.Map;
+
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
+
 import net.sourceforge.argparse4j.inf.Namespace;
 import se.atg.cmdb.auth.OAuth2Service;
 import se.atg.cmdb.model.auth.OAuth2IdToken;
@@ -13,23 +20,27 @@ import se.atg.cmdb.ui.dropwizard.configuration.OAuthConfiguration;
 
 public class OAuth2CommandTest {
 
-  private static CmdbConfiguration configuration;
-  private static OAuth2Service oAuth2Service;
+  private ByteArrayOutputStream systemOutBuffer = new ByteArrayOutputStream();
+  private CmdbConfiguration configuration;
+  private OAuth2Service oAuth2Service;
 
-  @BeforeClass
-  public static void init() {
+  @Before
+  public void init() {
 
     configuration = new CmdbConfiguration() {{
       oauthConfig = new OAuthConfiguration() {{
         idTokenSignKey = "signKey";
         idTokenIssuer = "issuer";
       }};
+      sysOut = new PrintStream(systemOutBuffer);
     }};
     oAuth2Service = new OAuth2Service(configuration.getOAuthConfiguration());
   }
 
   @Test
   public void testCreate() throws Exception {
+
+    final String subject = "test-user";
 
     final Namespace args = new Namespace(ImmutableMap.of(
       "subcommand", Command.create,
@@ -38,12 +49,17 @@ public class OAuth2CommandTest {
 
     final OAuth2Command command = new OAuth2Command();
     command.run(null, args, configuration);
+
+    final String jwt = getSystemOut().split(": ")[1];
+    final Map<String, Object> claims = oAuth2Service.verify(jwt);
+    Assert.assertEquals(subject, claims.get("sub"));
   }
 
   @Test
   public void testVerify() throws Exception {
 
-    final OAuth2IdToken jwt = oAuth2Service.createIdToken("test-user");
+    final String subject = "test-user";
+    final OAuth2IdToken jwt = oAuth2Service.createIdToken(subject);
 
     final Namespace args = new Namespace(ImmutableMap.of(
       "subcommand", Command.verify,
@@ -52,10 +68,16 @@ public class OAuth2CommandTest {
 
     final OAuth2Command command = new OAuth2Command();
     command.run(null, args, configuration);
+
+    final String claims = getSystemOut().split("\n")[1];
+    Assert.assertTrue(claims.contains("sub=" + subject));
   }
 
   @Test
   public void testSign() throws Exception {
+
+    final String subject = "test-user";
+    final String roles = "edit admin";
 
     final Namespace args = new Namespace(ImmutableMap.of(
       "subcommand", Command.sign,
@@ -64,17 +86,36 @@ public class OAuth2CommandTest {
 
     final OAuth2Command command = new OAuth2Command();
     command.run(null, args, configuration);
+
+    final String jwt = getSystemOut().split(": ")[1];
+    final Map<String, Object> claims = oAuth2Service.verify(jwt);
+    Assert.assertEquals(roles, claims.get("scope"));
+    Assert.assertEquals(subject, claims.get("sub"));
   }
 
   @Test
   public void testSignWithExpiry() throws Exception {
 
+    final String subject = "test-user";
+    final String roles = "edit admin";
+    final long expiry = System.currentTimeMillis() + 60*1000;
+
     final Namespace args = new Namespace(ImmutableMap.of(
       "subcommand", Command.sign,
-      "claims", "sub=test-user,scope=edit admin,exp=1477913990"
+      "claims", "sub=" + subject + ",scope=" + roles + ",exp=" + expiry
     ));
 
     final OAuth2Command command = new OAuth2Command();
     command.run(null, args, configuration);
+
+    final String jwt = getSystemOut().split(": ")[1];
+    final Map<String, Object> claims = oAuth2Service.verify(jwt);
+    Assert.assertEquals(expiry, claims.get("exp"));
+    Assert.assertEquals(roles, claims.get("scope"));
+    Assert.assertEquals(subject, claims.get("sub"));
+  }
+
+  private String getSystemOut() {
+    return systemOutBuffer.toString(Charset.forName("UTF8"));
   }
 }

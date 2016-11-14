@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.auth0.jwt.JWTVerifyException;
+import com.auth0.jwt.JWTSigner.Options;
 import com.google.common.base.Splitter;
 
 import io.dropwizard.cli.ConfiguredCommand;
@@ -14,14 +15,18 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
 import se.atg.cmdb.auth.OAuth2Service;
+import se.atg.cmdb.auth.OAuth2Service.JwtField;
 import se.atg.cmdb.model.auth.OAuth2IdToken;
 import se.atg.cmdb.ui.dropwizard.configuration.CmdbConfiguration;
+import se.atg.cmdb.ui.dropwizard.configuration.OAuthConfiguration;
 
 import static se.atg.cmdb.auth.OAuth2Service.JWT_EXPIRY;
 import static se.atg.cmdb.auth.OAuth2Service.JWT_NOT_VALID_BEFORE;
 import static se.atg.cmdb.auth.OAuth2Service.JWT_ISSUED_AT;
 
 public class OAuth2Command extends ConfiguredCommand<CmdbConfiguration> {
+
+  private static final Options JWT_OPTIONS = new Options().setIssuedAt(true).setJwtId(true);
 
   public OAuth2Command() {
     super("oauth2", "Utility for handling OAuth2 tokens");
@@ -58,25 +63,25 @@ public class OAuth2Command extends ConfiguredCommand<CmdbConfiguration> {
     final Command command = namespace.get("subcommand");
     switch (command) {
       case create:
-        create(namespace.getString("subject"), service);
+        create(namespace.getString("subject"), service, configuration);
         break;
       case verify:
-        verify(namespace.getString("jwt"), service);
+        verify(namespace.getString("jwt"), service, configuration);
         break;
       case sign:
-        sign(namespace.getString("claims"), service);
+        sign(namespace.getString("claims"), service, configuration);
         break;
       default:
         throw new IllegalStateException("Unknown command");
     }
   }
 
-  private void create(String subject, OAuth2Service service) {
+  private void create(String subject, OAuth2Service service, CmdbConfiguration configuration) {
     final OAuth2IdToken token = service.createIdToken(subject);
-    System.out.println("JSON Web Token for (" + subject + "): " + token.token);
+    configuration.getSystemOut().println("JSON Web Token for (" + subject + "): " + token.token);
   }
 
-  private void sign(String params, OAuth2Service service) {
+  private void sign(String params, OAuth2Service service, CmdbConfiguration configuration) {
 
     final Map<String, Object> claims = Splitter
       .on(',')
@@ -98,20 +103,24 @@ public class OAuth2Command extends ConfiguredCommand<CmdbConfiguration> {
         }
       ));
 
-    final OAuth2IdToken token = service.sign(claims);
-    System.out.println("JSON Web Token: " + token.token);
+    final OAuthConfiguration oauthConfig = configuration.getOAuthConfiguration();
+    claims.put(JwtField.issuer.id, oauthConfig.getIdTokenIssuer());
+    claims.put(JwtField.audience.id, oauthConfig.getIdTokenIssuer());
+
+    final OAuth2IdToken token = service.sign(claims, JWT_OPTIONS);
+    configuration.getSystemOut().println("JSON Web Token: " + token.token);
   }
 
-  private void verify(String jwt, OAuth2Service service) {
+  private void verify(String jwt, OAuth2Service service, CmdbConfiguration configuration) {
     try {
       final Map<String, Object> claims = service.verify(jwt);
-      System.out.println("Valid JSON Web Token");
-      System.out.println(claims);
+      configuration.getSystemOut().println("Valid JSON Web Token");
+      configuration.getSystemOut().println(claims);
     } catch (RuntimeException | GeneralSecurityException | IOException exc) {
-      System.err.println("Failed to verify the token");
+      configuration.getSystemErr().println("Failed to verify the token");
       exc.printStackTrace();
     } catch (JWTVerifyException exc) {
-      System.out.println("The token is not valid: " + exc.getLocalizedMessage());
+      configuration.getSystemOut().println("The token is not valid: " + exc.getLocalizedMessage());
     }
   }
 
