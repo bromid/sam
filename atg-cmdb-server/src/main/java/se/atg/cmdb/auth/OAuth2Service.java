@@ -51,9 +51,13 @@ public class OAuth2Service {
     return verifier.verify(token);
   }
 
-  @SuppressWarnings("unchecked")
   public OAuth2IdToken sign(Map<String, ?> claims) {
-    final String token = signer.sign((Map<String,Object>) claims, JWT_OPTIONS);
+    return sign(claims, JWT_OPTIONS);
+  }
+
+  @SuppressWarnings("unchecked")
+  public OAuth2IdToken sign(Map<String, ?> claims, Options options) {
+    final String token = signer.sign((Map<String,Object>) claims, options);
     return new OAuth2IdToken(token);
   }
 
