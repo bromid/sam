@@ -10,7 +10,7 @@ const imageWidth = 98;
 const boxShadow = 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px';
 const logoBackground = 'linear-gradient(180deg,#0266b0 0,#09428f)';
 
-function MainMenu({ mdPlus, isOpen, setMenuOpen, closeMenu }) {
+function MainMenu({ docked, isOpen, setMenuOpen, closeMenu }) {
     const mediaStyle = {
         padding: 27,
         textAlign: 'center',
@@ -24,7 +24,7 @@ function MainMenu({ mdPlus, isOpen, setMenuOpen, closeMenu }) {
     };
 
     return (
-        <Drawer docked={mdPlus} open={isOpen} onRequestChange={setMenuOpen} width={200}>
+        <Drawer docked={docked} open={isOpen} onRequestChange={setMenuOpen} width={200}>
             <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <CardMedia mediaStyle={mediaStyle}>
                     <img src={atgLogo} style={logoStyle} alt="ATG logo" />

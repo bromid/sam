@@ -1,6 +1,9 @@
 import { combineReducers } from 'redux';
 const keyRequired = (key) => { throw new Error(`${key} must be specified!`); };
 
+/*
+ Creates three reducers for data, isPending and error.
+ */
 export default function createFetchReducer(options) {
     const {
         requestKey = keyRequired('requestKey'),

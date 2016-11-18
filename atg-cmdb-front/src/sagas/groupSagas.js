@@ -13,6 +13,8 @@ import {
     FETCH_GROUP_TAG_REQUEST,
     FETCH_GROUP_TAG_RESPONSE,
     FETCH_GROUP_ID_REQUEST,
+    FETCH_GROUP_DEPLOYMENTS_REQUEST,
+    FETCH_GROUP_DEPLOYMENTS_RESPONSE,
     FETCH_GROUP_ID_RESPONSE,
     PATCH_GROUP_REQUEST,
     PATCH_GROUP_RESPONSE,
@@ -47,6 +49,11 @@ const fetchGroupTags = createFetchSaga({
 const fetchGroupIds = createFetchSaga({
     apiCall: API.fetchGroupIds,
     responseKey: FETCH_GROUP_ID_RESPONSE,
+});
+
+const fetchGroupDeployments = createFetchSaga({
+    apiCall: API.fetchApplicationDeployments,
+    responseKey: FETCH_GROUP_DEPLOYMENTS_RESPONSE,
 });
 
 const patchGroup = createFetchSaga({
@@ -133,6 +140,7 @@ export default function* groupSagas() {
     yield fork(takeLatest, FETCH_GROUP_LIST_REQUEST, fetchGroupList);
     yield fork(takeLatest, FETCH_GROUP_TAG_REQUEST, fetchGroupTags);
     yield fork(takeLatest, FETCH_GROUP_ID_REQUEST, fetchGroupIds);
+    yield fork(takeEvery, FETCH_GROUP_DEPLOYMENTS_REQUEST, fetchGroupDeployments);
     yield fork(takeEvery, PATCH_GROUP_REQUEST, patchGroup);
     yield fork(takeEvery, PATCH_GROUP_RESPONSE, patchGroupResponse);
     yield fork(takeEvery, CREATE_GROUP_REQUEST, createGroup);

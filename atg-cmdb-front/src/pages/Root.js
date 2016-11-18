@@ -1,9 +1,11 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { Router, Route, browserHistory } from 'react-router';
+import isFunction from 'lodash/isFunction';
 import configureStore from '../configureStore';
 import App from './App';
 import Group from './Group';
+import GroupApplicationVersions from './GroupApplicationVersions';
 import GroupList from './GroupList';
 import NewGroup from './NewGroup';
 import Application from './Application';
@@ -23,6 +25,7 @@ import * as GroupActions from '../actions/groupActions';
 import * as ServerActions from '../actions/serverActions';
 import * as InfoActions from '../actions/infoActions';
 import * as AuthActions from '../actions/authActions';
+import * as MenuActions from '../actions/menuActions';
 
 export const store = configureStore();
 
@@ -64,6 +67,16 @@ const Root = () => {
     const fetchReleaseNotes = () =>
         store.dispatch(InfoActions.fetchReleaseNotes());
 
+    const enterDashboardMode = (state, callback) => {
+        store.dispatch(MenuActions.enterDashboardMode());
+        if (isFunction(callback)) callback(state);
+    };
+
+    const exitDashboardMode = (state, callback) => {
+        store.dispatch(MenuActions.exitDashboardMode());
+        if (isFunction(callback)) callback(state);
+    };
+
     return (
         <Provider store={store}>
             <Router history={browserHistory}>
@@ -85,6 +98,12 @@ const Root = () => {
                     <Route
                         path="group/new"
                         component={NewGroup}
+                    />
+                    <Route
+                        path="group/:id/deployments"
+                        component={GroupApplicationVersions}
+                        onEnter={(state) => enterDashboardMode(state, fetchGroup)}
+                        onLeave={() => exitDashboardMode()}
                     />
                     <Route
                         path="group/:id"

@@ -7,12 +7,12 @@ import MainMenu from '../components/MainMenu';
 import Signin from '../components/Signin';
 import matchMedia from '../components/matchMediaHOC';
 import * as menuActions from '../actions/menuActions';
-import { getIsMenuOpen, getNotification } from '../reducers';
+import { getNotification, fromMenu } from '../reducers';
 import TopBar from '../components/TopBar';
 import Notifier from '../components/Notifier';
 
 const theme = {
-    fontFamily: 'Roboto, Helvetica Neue, Helvetica, Arial, sans-serif',
+    fontFamily: 'Roboto, Helvetica Neue, Helvetica, sans-serif',
     spacing: {
         iconSize: 20,
         desktopGutter: 20,
@@ -35,11 +35,11 @@ const theme = {
 
 function App(props) {
     const {
-        mdPlus, notification, children,
+        dashboardMode, mdPlus, notification, children,
         mainMenuOpen, openMenu, closeMenu, setMenuOpen,
     } = props;
 
-    const mdPlusStyle = {
+    const dockedMainMenuStyle = {
         marginLeft: 200,
         position: 'relative',
         height: '100vh',
@@ -49,17 +49,19 @@ function App(props) {
         margin: 20,
     };
 
+    const mainMenuDocked = mdPlus && !dashboardMode;
+
     return (
         <MuiThemeProvider muiTheme={getMuiTheme(theme)}>
             <div>
                 <MainMenu
-                    isOpen={mainMenuOpen}
-                    mdPlus={mdPlus}
+                    isOpen={mainMenuOpen || mainMenuDocked}
+                    docked={mainMenuDocked}
                     setMenuOpen={setMenuOpen}
                     closeMenu={closeMenu}
                 />
-                <div style={mdPlus ? mdPlusStyle : null}>
-                    <TopBar mdPlus={mdPlus} openMenu={openMenu} />
+                <div style={mainMenuDocked ? dockedMainMenuStyle : null}>
+                    <TopBar showMenuIcon={!mainMenuDocked} openMenu={openMenu} />
                     <div style={pageStyle}>
                         {children}
                     </div>
@@ -71,8 +73,9 @@ function App(props) {
     );
 }
 
-const mapStateToProps = (state, { mdPlus }) => ({
-    mainMenuOpen: getIsMenuOpen(state) || mdPlus,
+const mapStateToProps = (state) => ({
+    dashboardMode: fromMenu.getIsDashboardMode(state),
+    mainMenuOpen: fromMenu.getIsOpen(state),
     notification: getNotification(state),
 });
 
