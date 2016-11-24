@@ -244,8 +244,9 @@ public final class CreateTestdata {
   private static void createServers(MongoCollection<Document> servers) {
 
     for (int server = 1; server < 9; ++server) {
-      for (int env = 1; env < 3; ++env) {
-        servers.insertOne(Document.parse(
+      for (int env = 1; env < 5; ++env) {
+
+        final Document serverDoc = Document.parse(
           "{\"hostname\": \"vltma" + server + "\"," +
             "\"fqdn\": \"vltma" + server + ".test" + env + ".hh.atg.se\"," +
             "\"environment\": \"test" + env + "\"," +
@@ -270,14 +271,72 @@ public final class CreateTestdata {
               .append("Param3", "Value3")
             ).append("env-id", env)
             .append("server-id", server)
-            ).append("meta", defaultMeta())
-        );
+          ).append("meta", defaultMeta());
+
+          final int version = server % 3 + 1;
+          if (server % 2 == 0 && env % 2 != 0) {
+            serverDoc.append("deployments", Lists.newArrayList(
+              new Document().append("applicationId", "atg-service-betting").append("version", version + ".0.0"),
+              new Document().append("applicationId", "tillsammans-service").append("version", "0.0.1-patch" + version)
+            ));
+          } else if (env % 2 == 0) {
+            serverDoc.append("deployments", Lists.newArrayList(
+              new Document().append("applicationId", "atg-web").append("version", version + ".0.0"),
+              new Document().append("applicationId", "tillsammans-web").append("version", "0.0.1-patch" + version)
+            ));
+          }
+        servers.insertOne(serverDoc);
       }
     }
+
+    final Document qaServer = createServer("qa");
+    qaServer.append("deployments", Lists.newArrayList(
+      new Document().append("applicationId", "tillsammans-web").append("version", "1.0.0"),
+      new Document().append("applicationId", "tillsammans-service").append("version", "2.0.0")
+    ));
+    servers.insertOne(qaServer);
+
+    final Document stageServer = createServer("stage");
+    stageServer.append("deployments", Lists.newArrayList(
+      new Document().append("applicationId", "tillsammans-web").append("version", "1.0.0"),
+      new Document().append("applicationId", "tillsammans-service").append("version", "2.0.0")
+    ));
+    servers.insertOne(stageServer);
+
+    final Document prodServer = createServer("prod");
+    prodServer.append("deployments", Lists.newArrayList(
+      new Document().append("applicationId", "tillsammans-web").append("version", "1.0.0"),
+      new Document().append("applicationId", "tillsammans-service").append("version", "2.0.0")
+    ));
+    servers.insertOne(prodServer);
+
+    final Document internalprodServer = createServer("internalprod");
+    internalprodServer.append("deployments", Lists.newArrayList(
+      new Document().append("applicationId", "tillsammans-web").append("version", "1.0.0"),
+      new Document().append("applicationId", "tillsammans-service").append("version", "2.0.0")
+    ));
+    servers.insertOne(internalprodServer);
+
     servers.updateOne(Filters.eq("fqdn", "vltma1.test1.hh.atg.se"), Updates.set("description", "Denna server tillhör Tillsammans."));
     servers.updateOne(Filters.eq("fqdn", "vltma2.test1.hh.atg.se"), Updates.set("description", "Kör både atg.se och atg-service precis som vltma1"));
     servers.updateOne(Filters.eq("fqdn", "vltma1.test2.hh.atg.se"), Updates.set("description", "POB, Jira och Tillsammans i test2 och test1"));
     servers.updateOne(Filters.eq("fqdn", "vltma2.test2.hh.atg.se"), Updates.set("description", "Go-servern är en del av leveranssystemet."));
+  }
+
+  private static Document createServer(String env) {
+    return Document.parse(
+      "{\"hostname\": \"vltma1\"," +
+        "\"fqdn\": \"vltma1." + env + ".hh.atg.se\"," +
+        "\"environment\": \"" + env + "\"," +
+        "\"os\": {" +
+          "\"name\": \"RedHat Enterprise Linux\"," +
+          "\"type\": \"Linux\"" +
+          "\"version\": \"6.2\"" +
+        "}," +
+        "\"network\": {" +
+          "\"ipv4Address\": \"10.0.0.1\"," +
+      "}}")
+      .append("meta", defaultMeta());
   }
 
   private static Document defaultMeta() {
