@@ -11,6 +11,8 @@ import ApplicationDeployments from '../components/ApplicationDeployment';
 import EditableGroupLink from '../components/EditableGroupLink';
 import { State } from '../components/EditState';
 import * as StateMachine from '../components/EditStateMachine';
+import RefreshButton from '../components/ItemView/RefreshButton';
+import DeleteButton from '../components/ItemView/DeleteButton';
 import { fromApplication, fromGroup, fromAuth } from '../reducers';
 
 const groupId = (group) => (
@@ -31,8 +33,8 @@ const Details = ({ groupLink }) => (
 const Application = (props) => {
     const {
         application: { name, description = '', attributes, meta },
-        deployments, isLoading, patchIsPending, patchError, groupLink,
-        onUpdateName, onUpdateDescription, onRefresh, onDelete,
+        deployments, patchIsPending, patchError, groupLink,
+        isLoading, isAuthenticated, onUpdateName, onUpdateDescription, onRefresh, onDelete,
     } = props;
 
     const tabs = [
@@ -50,6 +52,11 @@ const Application = (props) => {
         },
     ];
 
+    const buttons = [<RefreshButton key="refresh" onClick={onRefresh} />];
+    if (isAuthenticated) {
+        buttons.push(<DeleteButton key="delete" onClick={onDelete} />);
+    }
+
     return (
         <ItemView
             tabs={tabs}
@@ -63,8 +70,7 @@ const Application = (props) => {
             isLoading={isLoading}
             patchIsPending={patchIsPending}
             patchError={patchError}
-            onRefresh={onRefresh}
-            onDelete={onDelete}
+            buttons={buttons}
         />
     );
 };
@@ -148,8 +154,8 @@ const ApplicationContainer = React.createClass({
 
     render() {
         const {
-            application, groupIds, deployments, isLoading, patchIsPending, patchError,
-            fetchApplication, deleteApplication,
+            application, groupIds, deployments, patchIsPending, patchError,
+            isLoading, isAuthenticated, fetchApplication, deleteApplication,
         } = this.props;
 
         if (isLoading && isEmpty(application)) return <LoadingIndicator />;
@@ -172,6 +178,7 @@ const ApplicationContainer = React.createClass({
                 application={application}
                 deployments={deployments}
                 isLoading={isLoading}
+                isAuthenticated={isAuthenticated}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
                 groupLink={groupLink}

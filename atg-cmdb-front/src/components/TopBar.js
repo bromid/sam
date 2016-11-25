@@ -30,7 +30,7 @@ const SignedInUser = ({ user, onSignOut }) => (
 const TopBarContainer = (props) => {
     const {
         authenticatedUser, authenticationIsPending, signInAction, signOutAction, searchAction,
-        openMenu, mdPlus, searchResults, searchResultsIsLoading,
+        openMenu, showMenuIcon, searchResults, searchResultsIsLoading,
     } = props;
 
     const handleSignOut = (event) => {
@@ -79,7 +79,7 @@ const TopBarContainer = (props) => {
     return (
         <AppBar
             title="Simple Asset Management"
-            showMenuIconButton={!mdPlus}
+            showMenuIconButton={showMenuIcon}
             onLeftIconButtonTouchTap={openMenu}
             style={{ height: 100, padding: 20 }}
             iconElementRight={elementRight}

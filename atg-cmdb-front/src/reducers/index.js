@@ -4,7 +4,7 @@ import group, { fromGroup as _fromGroup } from './group';
 import application, { fromApplication as _fromApplication } from './application';
 import server, { fromServer as _fromServer } from './server';
 import asset, { fromAsset as _fromAsset } from './asset';
-import menuOpen from './menu';
+import menu, { fromMenu as _fromMenu } from './menu';
 import metaOpen from './meta';
 import searchResults, { fromSearchResults as _fromSearchResults } from './search';
 import info, { fromInfo as _fromInfo } from './info';
@@ -17,7 +17,7 @@ export default combineReducers({
     application,
     server,
     asset,
-    menuOpen,
+    menu,
     metaOpen,
     auth,
     notification,
@@ -38,7 +38,9 @@ export const fromSearchResults = supplyStateSlice(_fromSearchResults, 'searchRes
 export const fromInfo = supplyStateSlice(_fromInfo, 'info');
 export const fromReleaseNotes = supplyStateSlice(_fromReleaseNotes, 'releaseNotes');
 export const fromAuth = supplyStateSlice(_fromAuth, 'auth');
+export const fromMenu = supplyStateSlice(_fromMenu, 'menu');
 
-export const getIsMenuOpen = (state) => state.menuOpen;
+export const getIsMenuOpen = (state) => fromMenu.getIsOpen(state);
+
 export const getIsMetaOpen = (state) => state.metaOpen;
 export const getNotification = (state) => state.notification;

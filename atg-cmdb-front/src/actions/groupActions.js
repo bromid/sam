@@ -3,6 +3,7 @@ import {
     FETCH_GROUP_REQUEST,
     FETCH_GROUP_TAG_REQUEST,
     FETCH_GROUP_ID_REQUEST,
+    FETCH_GROUP_DEPLOYMENTS_REQUEST,
     PATCH_GROUP_REQUEST,
     CREATE_GROUP_REQUEST,
     DELETE_GROUP_REQUEST,
@@ -26,6 +27,11 @@ export const fetchGroupTags = () => ({
 
 export const fetchGroupIds = () => ({
     type: FETCH_GROUP_ID_REQUEST,
+});
+
+export const fetchGroupDeployments = (applicationId) => ({
+    type: FETCH_GROUP_DEPLOYMENTS_REQUEST,
+    payload: applicationId,
 });
 
 export const patchGroup = (id, obj, options) => ({
