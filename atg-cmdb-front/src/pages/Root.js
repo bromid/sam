@@ -5,7 +5,7 @@ import isFunction from 'lodash/isFunction';
 import configureStore from '../configureStore';
 import App from './App';
 import Group from './Group';
-import GroupApplicationVersions from './GroupApplicationVersions';
+import GroupApplicationDeployments from './GroupApplicationDeployments';
 import GroupList from './GroupList';
 import NewGroup from './NewGroup';
 import Application from './Application';
@@ -101,7 +101,7 @@ const Root = () => {
                     />
                     <Route
                         path="group/:id/deployments"
-                        component={GroupApplicationVersions}
+                        component={GroupApplicationDeployments}
                         onEnter={(state) => enterDashboardMode(state, fetchGroup)}
                         onLeave={() => exitDashboardMode()}
                     />

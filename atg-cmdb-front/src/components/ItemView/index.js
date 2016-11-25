@@ -10,20 +10,17 @@ import Meta from '../Meta';
 import { Tags } from '../Tag';
 import PersistableDescription from './PersistableDescription';
 import PersistableHeadline from './PersistableHeadline';
-import DeleteButton from './DeleteButton';
-import RefreshButton from './RefreshButton';
 import { State, isShowEditForm } from '../EditState';
 import * as StateMachine from '../EditStateMachine';
 import { fromAuth, getIsMetaOpen } from '../../reducers';
 
-const Buttons = ({ isAuthenticated, headlineState, onRefresh, onDelete }) => {
+const Buttons = ({ headlineState, buttons }) => {
     if (isShowEditForm(headlineState)) {
         return null;
     }
     return (
         <div style={{ ...flexWrapperStyle, position: 'absolute', top: -10, right: 0 }}>
-            <RefreshButton onRefresh={onRefresh} />
-            {isAuthenticated && <DeleteButton onDelete={onDelete} />}
+            {buttons}
         </div>
     );
 };
@@ -43,8 +40,7 @@ const ItemViewContainer = React.createClass({
         isLoading: PropTypes.bool,
         patchIsPending: PropTypes.bool,
         patchError: PropTypes.object,
-        onDelete: PropTypes.func,
-        onRefresh: PropTypes.func,
+        buttons: PropTypes.array,
     },
 
     getInitialState() {
@@ -189,10 +185,10 @@ const ItemViewContainer = React.createClass({
 
     render() {
         const {
-            isAuthenticated, isLoading, tabs,
+            isLoading, tabs,
             tags, onTagDelete,
             meta, metaOpen, toggleMeta,
-            onRefresh, onDelete,
+            buttons,
         } = this.props;
 
         const {
@@ -213,10 +209,8 @@ const ItemViewContainer = React.createClass({
                     change={this.changeHeadline}
                 />
                 <Buttons
-                    isAuthenticated={isAuthenticated}
                     headlineState={headlineState}
-                    onRefresh={onRefresh}
-                    onDelete={onDelete}
+                    buttons={buttons}
                 />
                 <Tags tags={tags} onDelete={onTagDelete} />
                 <div style={flexWrapperStyle}>

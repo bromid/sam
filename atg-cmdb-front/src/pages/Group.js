@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router';
 import isEmpty from 'lodash/isEmpty';
 import { collectionSize } from '../helpers';
 import * as groupActions from '../actions/groupActions';
@@ -10,12 +11,15 @@ import ItemView from '../components/ItemView';
 import SubGroups from '../components/SubGroups';
 import { AssetList } from '../components/AssetList';
 import { ApplicationList } from '../components/ApplicationList';
+import RefreshButton from '../components/ItemView/RefreshButton';
+import DeleteButton from '../components/ItemView/DeleteButton';
+import DashboardButton from '../components/ItemView/DashboardButton';
 import { fromGroup, fromAuth } from '../reducers';
 
 const Group = (props) => {
     const {
         group: {
-            name, description = '', applications, assets,
+            id, name, description = '', applications, assets,
             tags, attributes, meta, groups,
         },
         isLoading, isAuthenticated, patchIsPending, patchError,
@@ -47,6 +51,16 @@ const Group = (props) => {
             node: <Attributes attributes={attributes} />,
         },
     ];
+
+    const buttons = [<RefreshButton key="refresh" onClick={onRefresh} />];
+    if (isAuthenticated) {
+        buttons.push(<DeleteButton key="delete" onClick={onDelete} />);
+    }
+    buttons.push(
+        <Link key="dashboard" to={`/group/${id}/deployments`}>
+            <DashboardButton tooltip="Deployments dashboard" />
+        </Link>
+    );
     return (
         <ItemView
             headline={name}
@@ -62,8 +76,7 @@ const Group = (props) => {
             isLoading={isLoading}
             patchIsPending={patchIsPending}
             patchError={patchError}
-            onRefresh={onRefresh}
-            onDelete={onDelete}
+            buttons={buttons}
         />
     );
 };

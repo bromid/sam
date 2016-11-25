@@ -10,6 +10,8 @@ import ItemView from '../components/ItemView';
 import EditableGroupLink from '../components/EditableGroupLink';
 import { State } from '../components/EditState';
 import * as StateMachine from '../components/EditStateMachine';
+import RefreshButton from '../components/ItemView/RefreshButton';
+import DeleteButton from '../components/ItemView/DeleteButton';
 import { fromAsset, fromGroup, fromAuth } from '../reducers';
 
 const groupId = (group) => (
@@ -28,7 +30,7 @@ const Details = ({ groupLink }) => (
 const Asset = (props) => {
     const {
         asset: { name, description = '', attributes, meta },
-        isLoading, patchIsPending, patchError, groupLink,
+        isLoading, isAuthenticated, patchIsPending, patchError, groupLink,
         onUpdateName, onUpdateDescription, onRefresh, onDelete,
     } = props;
 
@@ -45,6 +47,11 @@ const Asset = (props) => {
         },
     ];
 
+    const buttons = [<RefreshButton key="refresh" onClick={onRefresh} />];
+    if (isAuthenticated) {
+        buttons.push(<DeleteButton key="delete" onClick={onDelete} />);
+    }
+
     return (
         <ItemView
             tabs={tabs}
@@ -58,8 +65,7 @@ const Asset = (props) => {
             isLoading={isLoading}
             patchIsPending={patchIsPending}
             patchError={patchError}
-            onRefresh={onRefresh}
-            onDelete={onDelete}
+            buttons={buttons}
         />
     );
 };
@@ -143,8 +149,8 @@ const AssetContainer = React.createClass({
 
     render() {
         const {
-            asset, groupIds, isLoading, patchIsPending, patchError,
-            fetchAsset, deleteAsset,
+            asset, groupIds, patchIsPending, patchError,
+            isLoading, isAuthenticated, fetchAsset, deleteAsset,
         } = this.props;
 
         if (isLoading && isEmpty(asset)) return <LoadingIndicator />;
@@ -166,6 +172,7 @@ const AssetContainer = React.createClass({
             <Asset
                 asset={asset}
                 isLoading={isLoading}
+                isAuthenticated={isAuthenticated}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
                 groupLink={groupLink}

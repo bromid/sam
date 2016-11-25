@@ -9,7 +9,9 @@ import Attributes from '../components/Attributes';
 import ItemView from '../components/ItemView';
 import { DeploymentList } from '../components/ServerDeployment';
 import { serverName } from '../components/ServerList';
-import { fromServer } from '../reducers';
+import RefreshButton from '../components/ItemView/RefreshButton';
+import DeleteButton from '../components/ItemView/DeleteButton';
+import { fromServer, fromAuth } from '../reducers';
 
 const flexChildStyle = {
     minWidth: 250,
@@ -55,7 +57,8 @@ const ServerContainer = React.createClass({
 
     render() {
         const {
-            server, isLoading, patchIsPending, patchError, fetchServer, deleteServer,
+            server, isAuthenticated, isLoading, patchIsPending, patchError,
+            fetchServer, deleteServer,
         } = this.props;
 
         if (isLoading && isEmpty(server)) return <LoadingIndicator />;
@@ -85,6 +88,14 @@ const ServerContainer = React.createClass({
                 node: <Attributes attributes={attributes} />,
             },
         ];
+
+        const onRefresh = () => fetchServer(hostname, environment);
+        const onDelete = () => deleteServer(hostname, environment);
+        const buttons = [<RefreshButton key="refresh" onClick={onRefresh} />];
+        if (isAuthenticated) {
+            buttons.push(<DeleteButton key="delete" onClick={onDelete} />);
+        }
+
         return (
             <ItemView
                 headline={serverName(server)}
@@ -95,8 +106,7 @@ const ServerContainer = React.createClass({
                 isLoading={isLoading}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
-                onRefresh={() => fetchServer(hostname, environment)}
-                onDelete={() => deleteServer(hostname, environment)}
+                buttons={buttons}
             />
         );
     },
@@ -109,6 +119,7 @@ const mapStateToProps = (state) => ({
     patchError: fromServer.getPatchResultError(state),
     patchIsPending: fromServer.getPatchResultIsPending(state),
     isLoading: fromServer.getCurrentIsPending(state),
+    isAuthenticated: fromAuth.getIsAuthenticated(state),
 });
 
 const Actions = {

@@ -2,24 +2,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import { grey100, grey300 } from 'material-ui/styles/colors';
+import HomeIcon from 'material-ui/svg-icons/action/home';
+import IconButton from 'material-ui/IconButton';
 import LoadingIndicator from '../components/LoadingIndicator';
 import * as groupActions from '../actions/groupActions';
 import { fromGroup } from '../reducers';
-import groupBy from 'lodash/groupBy';
-import mapValues from 'lodash/mapValues';
-import keys from 'lodash/keys';
-import flatMap from 'lodash/flatMap';
-import sortBy from 'lodash/sortBy';
-import sortedUniq from 'lodash/sortedUniq';
 import map from 'lodash/map';
 import capitalize from 'lodash/capitalize';
-
-const environmentOrder = {
-    qa: 1,
-    stage: 2,
-    internalprod: 3,
-    prod: 4,
-};
 
 const calculateStyles = (columns) => {
     const spacing = 50;
@@ -74,17 +63,27 @@ const calculateStyles = (columns) => {
     return styles;
 };
 
-const byVersion = (deploymentsMap) => mapValues(deploymentsMap, (list) => groupBy(list, 'version'));
-
-const byEnvironmentAndVersion = (deploymentsList) => {
-    const byEnvironment = groupBy(deploymentsList, 'environment');
-    return byVersion(byEnvironment);
-};
-
 const ServerInfo = ({ servers }) => {
     const label = (servers.length === 1) ? 'server' : 'servers';
     return <span style={{ whiteSpace: 'nowrap' }}>({servers.length} {label})</span>;
 };
+
+const Header = ({ group }) => (
+    <div style={{ position: 'relative', width: '100%' }}>
+        <h2>{group.name}</h2>
+        <Link to={`/group/${group.id}`}>
+            <IconButton style={{ position: 'absolute', right: -9, top: -9 }} tooltip="Group page">
+                <HomeIcon />
+            </IconButton>
+        </Link>
+    </div>
+);
+
+const EnvironmentLabel = ({ styles, environment }) => (
+    <div key={environment} style={styles.headerCell}>
+        <h4>{capitalize(environment)}</h4>
+    </div>
+);
 
 const ApplicationLabel = ({ styles, application, isLoading }) => (
     <div style={styles.labelCell}>
@@ -125,28 +124,16 @@ const ApplicationDeploymentsList = React.createClass({
         }
     },
 
-    fetchDeployments(applications, fetchDeployments) {
-        if (applications) {
-            applications.forEach((application) => fetchDeployments(application.id));
-        }
+    fetchDeployments(applications = [], fetchDeployments) {
+        applications.forEach((application) => fetchDeployments(application.id));
     },
 
     render() {
-        const { applications, deployments = {}, deploymentsIsLoading = {} } = this.props;
+        const {
+            applications, deployments = {}, deploymentsIsLoading = {}, environments = [],
+        } = this.props;
+
         if (!applications) return <p>No applications</p>;
-
-        const deploymentsMap = mapValues(deployments, (deploymentsList) =>
-            byEnvironmentAndVersion(deploymentsList.items)
-        );
-
-        const unsortedEnvironments = flatMap(deploymentsMap,
-            (value) => keys(value)
-        );
-
-        const environments = sortedUniq(sortBy(unsortedEnvironments, [(value) => {
-            const sortField = environmentOrder[value] && `z${environmentOrder[value]}`;
-            return sortField || value;
-        }]));
 
         const styles = calculateStyles(environments.length);
         return (
@@ -154,9 +141,7 @@ const ApplicationDeploymentsList = React.createClass({
 
                 <div style={styles.labelHeaderCell}></div>
                 {environments.map((environment) => (
-                    <div key={environment} style={styles.headerCell}>
-                        <h4>{capitalize(environment)}</h4>
-                    </div>
+                    <EnvironmentLabel styles={styles} environment={environment} />
                 ))}
 
                 {applications.map((application) => ([
@@ -170,7 +155,7 @@ const ApplicationDeploymentsList = React.createClass({
                             key={`${application.id}-${environment}`}
                             styles={styles}
                             environment={environment}
-                            deployments={deploymentsMap[application.id]}
+                            deployments={deployments[application.id]}
                         />
                     )),
                     <div style={styles.labelSpacer} />,
@@ -184,16 +169,21 @@ const ApplicationDeploymentsList = React.createClass({
     },
 });
 
-const ApplicationDeployments = ({ group, deployments, deploymentsIsLoading, fetchDeployments }) => {
+const ApplicationDeployments = (props) => {
+    const {
+        group, deployments, deploymentsIsLoading, environments, fetchDeployments,
+    } = props;
+
     if (!group.id) return null;
     return (
         <div>
-            <h2>{group.name}</h2>
+            <Header group={group} />
             <ApplicationDeploymentsList
                 groupId={group.id}
                 applications={group.applications}
                 deployments={deployments}
                 deploymentsIsLoading={deploymentsIsLoading}
+                environments={environments}
                 fetchDeployments={fetchDeployments}
             />
         </div>
@@ -201,7 +191,9 @@ const ApplicationDeployments = ({ group, deployments, deploymentsIsLoading, fetc
 };
 
 const GroupApplicationDeploymentsContainer = (props) => {
-    const { groupIsLoading, group, deployments, deploymentsIsLoading, fetchDeployments } = props;
+    const {
+        groupIsLoading, group, deployments, deploymentsIsLoading, environments, fetchDeployments
+    } = props;
     return (
         <div>
             {groupIsLoading && <LoadingIndicator />}
@@ -209,6 +201,7 @@ const GroupApplicationDeploymentsContainer = (props) => {
                 group={group}
                 deployments={deployments}
                 deploymentsIsLoading={deploymentsIsLoading}
+                environments={environments}
                 fetchDeployments={fetchDeployments}
             />}
         </div>
@@ -218,7 +211,8 @@ const GroupApplicationDeploymentsContainer = (props) => {
 const mapStateToProps = (state) => ({
     group: fromGroup.getCurrent(state),
     groupIsLoading: fromGroup.getCurrentIsPending(state),
-    deployments: fromGroup.getCurrentDeployments(state),
+    deployments: fromGroup.getCurrentDeploymentsByEnvironmentAndVersion(state),
+    environments: fromGroup.getCurrentDeploymentsEnvironments(state),
     deploymentsIsLoading: fromGroup.getCurrentDeploymentsIsPending(state),
 });
 
