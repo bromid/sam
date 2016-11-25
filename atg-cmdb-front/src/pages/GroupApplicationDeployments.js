@@ -4,11 +4,12 @@ import { Link } from 'react-router';
 import { grey100, grey300 } from 'material-ui/styles/colors';
 import HomeIcon from 'material-ui/svg-icons/action/home';
 import IconButton from 'material-ui/IconButton';
+import map from 'lodash/map';
+import capitalize from 'lodash/capitalize';
 import LoadingIndicator from '../components/LoadingIndicator';
 import * as groupActions from '../actions/groupActions';
 import { fromGroup } from '../reducers';
-import map from 'lodash/map';
-import capitalize from 'lodash/capitalize';
+import { flexWrapperStyle } from '../style';
 
 const calculateStyles = (columns) => {
     const spacing = 50;
@@ -87,14 +88,14 @@ const EnvironmentLabel = ({ styles, environment }) => (
 
 const ApplicationLabel = ({ styles, application, isLoading }) => (
     <div style={styles.labelCell}>
-        <Link to={`/application/${application.id}`}>{application.name}</Link>
-        {isLoading &&
-            <div style={{ position: 'absolute', display: 'inline' }}>
-                <div style={{ position: 'relative', width: 50, height: 30 }}>
-                    <LoadingIndicator size={0.4} />
+        <div style={flexWrapperStyle}>
+            <Link to={`/application/${application.id}`}>{application.name}</Link>
+            {isLoading &&
+                <div style={{ position: 'relative', top: 2, width: 25, height: 25, marginLeft: 5 }}>
+                    <LoadingIndicator size={20} />
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 );
 
@@ -137,7 +138,7 @@ const ApplicationDeploymentsList = React.createClass({
 
         const styles = calculateStyles(environments.length);
         return (
-            <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: 40 }}>
+            <div style={{ ...flexWrapperStyle, marginTop: 40 }}>
 
                 <div style={styles.labelHeaderCell}></div>
                 {environments.map((environment) => (
@@ -194,17 +195,16 @@ const GroupApplicationDeploymentsContainer = (props) => {
     const {
         groupIsLoading, group, deployments, deploymentsIsLoading, environments, fetchDeployments
     } = props;
+
+    if (groupIsLoading) return <LoadingIndicator />;
     return (
-        <div>
-            {groupIsLoading && <LoadingIndicator />}
-            {group && <ApplicationDeployments
-                group={group}
-                deployments={deployments}
-                deploymentsIsLoading={deploymentsIsLoading}
-                environments={environments}
-                fetchDeployments={fetchDeployments}
-            />}
-        </div>
+        <ApplicationDeployments
+            group={group}
+            deployments={deployments}
+            deploymentsIsLoading={deploymentsIsLoading}
+            environments={environments}
+            fetchDeployments={fetchDeployments}
+        />
     );
 };
 
