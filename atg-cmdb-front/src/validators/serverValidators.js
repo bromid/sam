@@ -68,8 +68,9 @@ export const fqdn = (param, fieldName = 'Qualified domain name') => {
 export const description = (param) => {
     const length = param.length;
 
-    if (length > 1000) {
-        return 'Description must be shorter than 1000 characters';
+    const MAX_LENGTH = 1500;
+    if (length > MAX_LENGTH) {
+        return `Description must be shorter than ${MAX_LENGTH} characters`;
     }
     return '';
 };
