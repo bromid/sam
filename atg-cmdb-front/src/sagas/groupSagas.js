@@ -1,6 +1,5 @@
 import { takeLatest, takeEvery } from 'redux-saga';
-import { fork, put } from 'redux-saga/effects';
-import { browserHistory } from 'react-router';
+import { fork, put, call } from 'redux-saga/effects';
 import * as API from '../api';
 import createFetchSaga from './helpers/createFetchSaga';
 import * as groupActions from '../actions/groupActions';
@@ -93,9 +92,9 @@ function* patchGroupResponse(action) {
 
 function* createGroupResponse(action) {
     if (!action.error) {
-        const { id, name } = action.payload;
+        const { name } = action.payload;
         yield put(showNotification(`Created group ${name}`));
-        browserHistory.push(`/group/${id}`);
+        yield call(action.callback, action);
     } else {
         yield put(showErrorNotification('Failed to create group', action.payload));
     }
@@ -105,7 +104,7 @@ function* deleteGroupResponse(action) {
     const { id } = action.request;
     if (!action.error) {
         yield put(showNotification(`Deleted group ${id}`));
-        browserHistory.push('/group');
+        yield call(action.callback, action);
     } else {
         yield put(showErrorNotification(`Failed to delete group ${id}`, action.payload));
     }

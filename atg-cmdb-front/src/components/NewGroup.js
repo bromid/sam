@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { withRouter } from 'react-router';
+import { withRouter, browserHistory } from 'react-router';
 import isEmpty from 'lodash/isEmpty';
 import { removeEmptyFields } from '../helpers';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -61,7 +61,7 @@ const NewGroup = React.createClass({
             this.setState(errors.text);
         } else {
             const groupNoEmptyFields = removeEmptyFields(group);
-            this.props.onCreate(groupNoEmptyFields);
+            this.props.onCreate(groupNoEmptyFields, () => browserHistory.push(`/group/${id}`));
         }
     },
 

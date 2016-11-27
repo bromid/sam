@@ -39,14 +39,16 @@ export const patchGroup = (id, obj, options) => ({
     payload: { id, obj, options },
 });
 
-export const createGroup = (obj, options) => ({
+export const createGroup = (obj, callback, options) => ({
     type: CREATE_GROUP_REQUEST,
     payload: { id: obj.id, obj, options },
+    callback,
 });
 
-export const deleteGroup = (id, options) => ({
+export const deleteGroup = (id, callback, options) => ({
     type: DELETE_GROUP_REQUEST,
     payload: { id, options },
+    callback,
 });
 
 export const addSubgroup = (groupId, subGroupId, options) => ({

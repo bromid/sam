@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
+import { Link, browserHistory } from 'react-router';
 import isEmpty from 'lodash/isEmpty';
 import { collectionSize } from '../helpers';
 import * as groupActions from '../actions/groupActions';
@@ -84,7 +84,7 @@ const Group = (props) => {
 
 const GroupContainer = React.createClass({
 
-    onTagDelete(name) {
+    deleteTag(name) {
         return name;
     },
 
@@ -96,6 +96,16 @@ const GroupContainer = React.createClass({
     updateDescription(description) {
         const { patchGroup, group: { id, meta } } = this.props;
         patchGroup(id, { description }, { hash: meta.hash });
+    },
+
+    deleteGroup() {
+        const { group, deleteGroup } = this.props;
+        deleteGroup(group.id, () => browserHistory.push('/group'));
+    },
+
+    refreshGroup() {
+        const { group, fetchGroup } = this.props;
+        fetchGroup(group.id);
     },
 
     addSubGroup(subGroupId) {
@@ -115,7 +125,6 @@ const GroupContainer = React.createClass({
     render() {
         const {
             group, isLoading, isAuthenticated, patchIsPending, patchError,
-            fetchGroup, deleteGroup,
         } = this.props;
 
         if (isLoading && isEmpty(group)) return <LoadingIndicator />;
@@ -127,14 +136,14 @@ const GroupContainer = React.createClass({
                 isAuthenticated={isAuthenticated}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
-                onTagDelete={this.onTagDelete}
+                onTagDelete={this.deleteTag}
                 onUpdateName={this.updateName}
                 onUpdateDescription={this.updateDescription}
                 onAddSubGroup={this.addSubGroup}
                 onRemoveSubGroup={this.removeSubGroup}
                 onCreateSubGroup={this.createSubGroup}
-                onRefresh={() => fetchGroup(group.id)}
-                onDelete={() => deleteGroup(group.id)}
+                onRefresh={this.refreshGroup}
+                onDelete={this.deleteGroup}
             />
         );
     },
