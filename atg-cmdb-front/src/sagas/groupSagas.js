@@ -94,7 +94,7 @@ function* createGroupResponse(action) {
     if (!action.error) {
         const { name } = action.payload;
         yield put(showNotification(`Created group ${name}`));
-        yield call(action.callback, action);
+        yield call(action.callback);
     } else {
         yield put(showErrorNotification('Failed to create group', action.payload));
     }
@@ -104,7 +104,7 @@ function* deleteGroupResponse(action) {
     const { id } = action.request;
     if (!action.error) {
         yield put(showNotification(`Deleted group ${id}`));
-        yield call(action.callback, action);
+        yield call(action.callback);
     } else {
         yield put(showErrorNotification(`Failed to delete group ${id}`, action.payload));
     }

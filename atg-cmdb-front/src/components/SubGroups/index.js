@@ -42,10 +42,17 @@ const SubGroups = React.createClass({
         onRemoveGroup: PropTypes.func.isRequired,
         onCreateGroup: PropTypes.func.isRequired,
         isAuthenticated: PropTypes.bool,
+        createError: PropTypes.object,
+        createIsPending: PropTypes.bool,
     },
 
     getInitialState() {
         return { groupId: '', groupIdErrorText: '', state: State.list };
+    },
+
+    onGroupCreated(groupId) {
+        this.setState({ state: State.addSubGroup });
+        this.handleChangeGroupId(groupId);
     },
 
     handleAddGroup(groupId) {
@@ -76,12 +83,11 @@ const SubGroups = React.createClass({
     },
 
     handleCreateGroup(group) {
-        this.props.onCreateGroup(group);
-        this.setState({ groupId: group.id, state: State.addSubGroup });
+        this.props.onCreateGroup(group, () => this.onGroupCreated(group.id));
     },
 
     render() {
-        const { isAuthenticated, groups, onRemoveGroup } = this.props;
+        const { isAuthenticated, groups, onRemoveGroup, createIsPending, createError } = this.props;
         const { state, groupId, groupIdErrorText } = this.state;
         switch (state) {
             case State.addSubGroup:
@@ -100,6 +106,8 @@ const SubGroups = React.createClass({
                     <CreateSubGroup
                         onCreate={this.handleCreateGroup}
                         onCancel={this.handleCancelAddOrCreateGroup}
+                        createIsPending={createIsPending}
+                        createError={createError}
                     />
                 );
             default:

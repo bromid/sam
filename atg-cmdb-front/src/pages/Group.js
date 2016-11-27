@@ -22,7 +22,7 @@ const Group = (props) => {
             id, name, description = '', applications, assets,
             tags, attributes, meta, groups = [],
         },
-        isLoading, isAuthenticated, patchIsPending, patchError,
+        isLoading, isAuthenticated, createIsPending, createError, patchIsPending, patchError,
         onUpdateName, onUpdateDescription, onTagDelete,
         onAddSubGroup, onRemoveSubGroup, onCreateSubGroup, onRefresh, onDelete,
     } = props;
@@ -45,6 +45,8 @@ const Group = (props) => {
                 onAddGroup={onAddSubGroup}
                 onRemoveGroup={onRemoveSubGroup}
                 onCreateGroup={onCreateSubGroup}
+                createIsPending={createIsPending}
+                createError={createError}
             />,
         },
         {
@@ -118,13 +120,14 @@ const GroupContainer = React.createClass({
         removeSubgroup(id, subGroupId);
     },
 
-    createSubGroup(group) {
-        this.props.createGroup(group);
+    createSubGroup(group, callback) {
+        this.props.createGroup(group, callback);
     },
 
     render() {
         const {
-            group, isLoading, isAuthenticated, patchIsPending, patchError,
+            group, isLoading, isAuthenticated,
+            createIsPending, createError, patchIsPending, patchError,
         } = this.props;
 
         if (isLoading && isEmpty(group)) return <LoadingIndicator />;
@@ -134,6 +137,8 @@ const GroupContainer = React.createClass({
                 group={group}
                 isLoading={isLoading}
                 isAuthenticated={isAuthenticated}
+                createIsPending={createIsPending}
+                createError={createError}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
                 onTagDelete={this.deleteTag}
@@ -152,6 +157,8 @@ const GroupContainer = React.createClass({
 const mapStateToProps = (state) => ({
     group: fromGroup.getCurrent(state),
     fetchError: fromGroup.getCurrentError(state),
+    createIsPending: fromGroup.getCreateResultIsPending(state),
+    createError: fromGroup.getCreateResultError(state),
     patchResult: fromGroup.getPatchResult(state),
     patchError: fromGroup.getPatchResultError(state),
     patchIsPending: fromGroup.getPatchResultIsPending(state),

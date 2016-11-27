@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { List } from 'material-ui/List';
 import Badge from 'material-ui/Badge';
+import { empty } from '../helpers';
 
 const CountBadge = ({ children, title, primary, secondary }) => {
     const style = { padding: '12px' };
@@ -51,7 +52,7 @@ const Group = ({ group, GroupListItem, remove, nestedLevel = 0 }) => {
 };
 
 export const GroupList = ({ groups, listItem, remove }) => {
-    if (!groups) return <p>No groups</p>;
+    if (empty(groups)) return <p>No groups</p>;
     return (
         <List>
             {groups.map((group) =>

@@ -13,7 +13,7 @@ const AddSubGroup = (props) => {
             <SaveCancelForm columnStyle={true} cancel={onCancel} save={onSave}>
                 <AutoComplete
                     id="group-id"
-                    value={value}
+                    searchText={value}
                     dataSource={groupIds}
                     errorText={errorText}
                     floatingLabelText="Group id"
@@ -37,7 +37,6 @@ const AddSubGroupContainer = React.createClass({
         onCancel: PropTypes.func.isRequired,
         onSave: PropTypes.func.isRequired,
         onCreate: PropTypes.func.isRequired,
-
     },
 
     componentWillMount() {
