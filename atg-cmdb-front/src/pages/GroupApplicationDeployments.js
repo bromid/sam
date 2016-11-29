@@ -81,7 +81,7 @@ const Header = ({ group }) => (
 );
 
 const EnvironmentLabel = ({ styles, environment }) => (
-    <div key={environment} style={styles.headerCell}>
+    <div style={styles.headerCell}>
         <h4>{capitalize(environment)}</h4>
     </div>
 );
@@ -142,7 +142,7 @@ const ApplicationDeploymentsList = React.createClass({
 
                 <div style={styles.labelHeaderCell}></div>
                 {environments.map((environment) => (
-                    <EnvironmentLabel styles={styles} environment={environment} />
+                    <EnvironmentLabel key={environment} styles={styles} environment={environment} />
                 ))}
 
                 {applications.map((application) => ([

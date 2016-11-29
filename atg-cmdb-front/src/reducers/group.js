@@ -14,6 +14,7 @@ import keys from 'lodash/keys';
 import flatMap from 'lodash/flatMap';
 import sortBy from 'lodash/sortBy';
 import sortedUniq from 'lodash/sortedUniq';
+import toLower from 'lodash/toLower';
 import createFetchReducer from './helpers/createFetchReducer';
 import createCRUDReducers from './helpers/createCRUDReducers';
 import createFetchReducerTest from './helpers/createMultiRequestFetchReducer';
@@ -54,8 +55,11 @@ const byEnvironmentAndVersion = (deploymentsList) => {
 };
 
 const sortEnvironments = (environments) => sortBy(environments, [(value) => {
-    const sortField = environmentOrder[value] && `z${environmentOrder[value]}`;
-    return sortField || value;
+    const order = environmentOrder[toLower(value)];
+    if (order) {
+        return `z${order}`;
+    }
+    return value;
 }]);
 
 const getCurrentDeployments = (state) => fromCurrentDeployments.getData(state.currentDeployments);
