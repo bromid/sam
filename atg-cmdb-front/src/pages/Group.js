@@ -27,7 +27,7 @@ const Group = (props) => {
         onAddSubGroup, onRemoveSubGroup, onRefresh, onDelete,
     } = props;
 
-    if (!name) return <p>No result</p>;
+    if (!id) return <p>No group found</p>;
     const tabs = [
         {
             name: `Applications ${collectionSize(applications)}`,
