@@ -5,7 +5,11 @@ import { grey100, grey300 } from 'material-ui/styles/colors';
 import HomeIcon from 'material-ui/svg-icons/action/home';
 import IconButton from 'material-ui/IconButton';
 import map from 'lodash/map';
+import flatMap from 'lodash/flatMap';
 import capitalize from 'lodash/capitalize';
+import toLower from 'lodash/toLower';
+import isEqual from 'lodash/isEqual';
+import intersection from 'lodash/intersection';
 import LoadingIndicator from '../components/LoadingIndicator';
 import * as groupActions from '../actions/groupActions';
 import { fromGroup } from '../reducers';
@@ -64,6 +68,20 @@ const calculateStyles = (columns) => {
     return styles;
 };
 
+const applicationsFromGroupAndSubgroups = (group) => {
+    if (group.groups) {
+        return flatMap(group.groups, (subGroup) => applicationsFromGroupAndSubgroups(subGroup));
+    }
+    return group.applications || [];
+};
+
+const applicationsFromGroup = (group, filter) => {
+    if (filter.includeSubgroups) {
+        return applicationsFromGroupAndSubgroups(group);
+    }
+    return group.applications || [];
+};
+
 const ServerInfo = ({ servers }) => {
     const label = (servers.length === 1) ? 'server' : 'servers';
     return <span style={{ whiteSpace: 'nowrap' }}>({servers.length} {label})</span>;
@@ -114,27 +132,28 @@ const DeploymentVersions = ({ styles, environment, deployments }) => {
 const ApplicationDeploymentsList = React.createClass({
 
     componentWillMount() {
-        const { applications, fetchDeployments } = this.props;
-        this.fetchDeployments(applications, fetchDeployments);
+        const { group, filter, fetchDeployments } = this.props;
+        this.fetchDeployments(group, filter, fetchDeployments);
     },
 
     componentWillReceiveProps(nextProps) {
-        const { groupId, applications, fetchDeployments } = nextProps;
-        if (groupId !== this.props.groupId) {
-            this.fetchDeployments(applications, fetchDeployments);
+        const { group, filter, fetchDeployments } = nextProps;
+        if (group.id !== this.props.group.id || !isEqual(filter, this.props.filter)) {
+            this.fetchDeployments(group, filter, fetchDeployments);
         }
     },
 
-    fetchDeployments(applications = [], fetchDeployments) {
+    fetchDeployments(group, filter, fetchDeployments) {
+        const applications = applicationsFromGroup(group, filter);
         applications.forEach((application) => fetchDeployments(application.id));
+        this.setState({ applications });
     },
 
     render() {
-        const {
-            applications, deployments = {}, deploymentsIsLoading = {}, environments = [],
-        } = this.props;
+        const { deployments = {}, deploymentsIsLoading = {}, environments = [] } = this.props;
+        const { applications } = this.state;
 
-        if (!applications) return <p>No applications</p>;
+        if (applications.length === 0) return <p>No applications</p>;
 
         const styles = calculateStyles(environments.length);
         return (
@@ -172,7 +191,7 @@ const ApplicationDeploymentsList = React.createClass({
 
 const ApplicationDeployments = (props) => {
     const {
-        group, deployments, deploymentsIsLoading, environments, fetchDeployments,
+        group, deployments, deploymentsIsLoading, environments, fetchDeployments, filter,
     } = props;
 
     if (!group.id) return null;
@@ -180,12 +199,12 @@ const ApplicationDeployments = (props) => {
         <div>
             <Header group={group} />
             <ApplicationDeploymentsList
-                groupId={group.id}
-                applications={group.applications}
+                group={group}
                 deployments={deployments}
                 deploymentsIsLoading={deploymentsIsLoading}
                 environments={environments}
                 fetchDeployments={fetchDeployments}
+                filter={filter}
             />
         </div>
     );
@@ -193,8 +212,17 @@ const ApplicationDeployments = (props) => {
 
 const GroupApplicationDeploymentsContainer = (props) => {
     const {
-        groupIsLoading, group, deployments, deploymentsIsLoading, environments, fetchDeployments
+        groupIsLoading, group, deployments, deploymentsIsLoading, environments, fetchDeployments,
+        includeSubgroups, environmentsFilter,
     } = props;
+
+    const filter = {
+        includeSubgroups,
+        environments: environmentsFilter || [],
+    };
+
+    const filteredEnvironments = environmentsFilter ?
+        intersection(environments, environmentsFilter) : environments;
 
     if (groupIsLoading) return <LoadingIndicator />;
     return (
@@ -202,13 +230,16 @@ const GroupApplicationDeploymentsContainer = (props) => {
             group={group}
             deployments={deployments}
             deploymentsIsLoading={deploymentsIsLoading}
-            environments={environments}
+            environments={filteredEnvironments}
             fetchDeployments={fetchDeployments}
+            filter={filter}
         />
     );
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state, { location: { query } }) => ({
+    environmentsFilter: query.environments && query.environments.split(','),
+    includeSubgroups: query.includeSubgroups && toLower(query.includeSubgroups) === 'true',
     group: fromGroup.getCurrent(state),
     groupIsLoading: fromGroup.getCurrentIsPending(state),
     deployments: fromGroup.getCurrentDeploymentsByEnvironmentAndVersion(state),
