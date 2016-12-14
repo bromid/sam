@@ -1,10 +1,7 @@
 import React from 'react';
-import { white } from 'material-ui/styles/colors';
 import AppBar from 'material-ui/AppBar';
-import IconButton from 'material-ui/IconButton';
-import ExpandMoreIcon from 'material-ui/svg-icons/navigation/expand-more';
-import ExpandLessIcon from 'material-ui/svg-icons/navigation/expand-less';
 import moment from 'moment';
+import Icon from './ExpandCollapseIcon';
 import { borderStyle } from '../style';
 
 const appBarStyle = {
@@ -24,26 +21,6 @@ const appBarTitleStyle = {
 const timeSince = (time) => {
     if (!time) return null;
     return ` (${moment(time).toNow(true)} ago)`;
-};
-
-const Icon = ({ open, toggleState }) => {
-    if (open) {
-        return (
-            <IconButton
-                tooltip="Collapse"
-                onTouchTap={toggleState}
-                children={<ExpandLessIcon color={white} />}
-            />
-        );
-    }
-
-    return (
-        <IconButton
-            tooltip="Expand"
-            onTouchTap={toggleState}
-            children={<ExpandMoreIcon color={white} />}
-        />
-    );
 };
 
 export default function Meta(props) {
