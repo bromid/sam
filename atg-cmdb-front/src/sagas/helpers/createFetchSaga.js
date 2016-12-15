@@ -1,4 +1,5 @@
 import identity from 'lodash/identity';
+import noop from 'lodash/noop';
 import { call, put, select } from 'redux-saga/effects';
 import { fromAuth } from '../../reducers';
 
@@ -21,6 +22,7 @@ export default function createFetchSaga(options) {
             yield put({
                 type: responseKey,
                 request: action.payload,
+                callback: action.callback || noop,
                 payload: payloadTransform(payload.data, payload.response),
             });
         } catch (error) {
@@ -32,6 +34,7 @@ export default function createFetchSaga(options) {
                 type: responseKey,
                 error: true,
                 request: action.payload,
+                callback: action.callback || noop,
                 payload: errorTransform(error, error.response),
             });
         }

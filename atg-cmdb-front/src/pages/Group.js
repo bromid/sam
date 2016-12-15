@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
+import { Link, browserHistory } from 'react-router';
 import isEmpty from 'lodash/isEmpty';
 import { collectionSize } from '../helpers';
 import * as groupActions from '../actions/groupActions';
@@ -20,11 +20,11 @@ const Group = (props) => {
     const {
         group: {
             id, name, description = '', applications, assets,
-            tags, attributes, meta, groups,
+            tags, attributes, meta, groups = [],
         },
-        isLoading, isAuthenticated, patchIsPending, patchError,
+        isLoading, isAuthenticated, createIsPending, createError, patchIsPending, patchError,
         onUpdateName, onUpdateDescription, onTagDelete,
-        onAddSubGroup, onRemoveSubGroup, onRefresh, onDelete,
+        onAddSubGroup, onRemoveSubGroup, onCreateSubGroup, onRefresh, onDelete,
     } = props;
 
     if (!id) return <p>No group found</p>;
@@ -42,8 +42,11 @@ const Group = (props) => {
             node: <SubGroups
                 isAuthenticated={isAuthenticated}
                 groups={groups}
-                addGroup={onAddSubGroup}
-                removeGroup={onRemoveSubGroup}
+                onAddGroup={onAddSubGroup}
+                onRemoveGroup={onRemoveSubGroup}
+                onCreateGroup={onCreateSubGroup}
+                createIsPending={createIsPending}
+                createError={createError}
             />,
         },
         {
@@ -83,7 +86,7 @@ const Group = (props) => {
 
 const GroupContainer = React.createClass({
 
-    onTagDelete(name) {
+    deleteTag(name) {
         return name;
     },
 
@@ -97,6 +100,16 @@ const GroupContainer = React.createClass({
         patchGroup(id, { description }, { hash: meta.hash });
     },
 
+    deleteGroup() {
+        const { group, deleteGroup } = this.props;
+        deleteGroup(group.id, () => browserHistory.push('/group'));
+    },
+
+    refreshGroup() {
+        const { group, fetchGroup } = this.props;
+        fetchGroup(group.id);
+    },
+
     addSubGroup(subGroupId) {
         const { group: { id }, addSubgroup } = this.props;
         addSubgroup(id, subGroupId);
@@ -107,10 +120,14 @@ const GroupContainer = React.createClass({
         removeSubgroup(id, subGroupId);
     },
 
+    createSubGroup(group, callback) {
+        this.props.createGroup(group, callback);
+    },
+
     render() {
         const {
-            group, isLoading, isAuthenticated, patchIsPending, patchError,
-            fetchGroup, deleteGroup,
+            group, isLoading, isAuthenticated,
+            createIsPending, createError, patchIsPending, patchError,
         } = this.props;
 
         if (isLoading && isEmpty(group)) return <LoadingIndicator />;
@@ -120,15 +137,18 @@ const GroupContainer = React.createClass({
                 group={group}
                 isLoading={isLoading}
                 isAuthenticated={isAuthenticated}
+                createIsPending={createIsPending}
+                createError={createError}
                 patchIsPending={patchIsPending}
                 patchError={patchError}
-                onTagDelete={this.onTagDelete}
+                onTagDelete={this.deleteTag}
                 onUpdateName={this.updateName}
                 onUpdateDescription={this.updateDescription}
                 onAddSubGroup={this.addSubGroup}
                 onRemoveSubGroup={this.removeSubGroup}
-                onRefresh={() => fetchGroup(group.id)}
-                onDelete={() => deleteGroup(group.id)}
+                onCreateSubGroup={this.createSubGroup}
+                onRefresh={this.refreshGroup}
+                onDelete={this.deleteGroup}
             />
         );
     },
@@ -137,6 +157,8 @@ const GroupContainer = React.createClass({
 const mapStateToProps = (state) => ({
     group: fromGroup.getCurrent(state),
     fetchError: fromGroup.getCurrentError(state),
+    createIsPending: fromGroup.getCreateResultIsPending(state),
+    createError: fromGroup.getCreateResultError(state),
     patchResult: fromGroup.getPatchResult(state),
     patchError: fromGroup.getPatchResultError(state),
     patchIsPending: fromGroup.getPatchResultIsPending(state),
@@ -148,6 +170,7 @@ const Actions = {
     patchGroup: groupActions.patchGroup,
     fetchGroup: groupActions.fetchGroup,
     deleteGroup: groupActions.deleteGroup,
+    createGroup: groupActions.createGroup,
     addSubgroup: groupActions.addSubgroup,
     removeSubgroup: groupActions.removeSubgroup,
 };

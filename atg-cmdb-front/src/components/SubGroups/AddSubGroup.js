@@ -5,33 +5,38 @@ import SaveCancelForm from '../SaveCancelForm';
 import * as groupActions from '../../actions/groupActions';
 import { fromGroup } from '../../reducers';
 
-const AddSubGroup = ({ value, errorText, groupIds = [], change, cancel, save, addRef }) => (
-    <div>
-        <h3>Add sub group</h3>
-        <SaveCancelForm columnStyle={true} cancel={cancel} save={save}>
-            <AutoComplete
-                id="group-id"
-                value={value}
-                dataSource={groupIds}
-                errorText={errorText}
-                floatingLabelText="Group id"
-                onUpdateInput={change}
-                onNewRequest={change}
-                ref={(ref) => addRef(ref)}
-                fullWidth={true}
-            />
-        </SaveCancelForm>
-    </div>
-);
+const AddSubGroup = (props) => {
+    const { value, errorText, groupIds, onChange, onCancel, onCreate, onSave, addRef } = props;
+    return (
+        <div>
+            <h3>Add an existing group</h3>
+            <SaveCancelForm columnStyle={true} cancel={onCancel} save={onSave}>
+                <AutoComplete
+                    id="group-id"
+                    searchText={value}
+                    dataSource={groupIds}
+                    errorText={errorText}
+                    floatingLabelText="Group id"
+                    onUpdateInput={onChange}
+                    onNewRequest={onChange}
+                    ref={(ref) => addRef(ref)}
+                    fullWidth={true}
+                />
+            </SaveCancelForm>
+            or <a href="#" onTouchTap={onCreate}>create a new group</a>
+        </div>
+    );
+};
 
 const AddSubGroupContainer = React.createClass({
     propTypes: {
         value: PropTypes.string,
         errorText: PropTypes.string,
         groupIds: PropTypes.array,
-        change: PropTypes.func,
-        cancel: PropTypes.func,
-        save: PropTypes.func,
+        onChange: PropTypes.func.isRequired,
+        onCancel: PropTypes.func.isRequired,
+        onSave: PropTypes.func.isRequired,
+        onCreate: PropTypes.func.isRequired,
     },
 
     componentWillMount() {
@@ -40,11 +45,11 @@ const AddSubGroupContainer = React.createClass({
 
     onSave(event) {
         event.preventDefault();
-        const { value, errorText, save } = this.props;
+        const { value, errorText, onSave } = this.props;
         if (errorText.length > 1) {
             this.fieldRef.focus();
         } else {
-            save(value);
+            onSave(value);
         }
     },
 
@@ -56,15 +61,16 @@ const AddSubGroupContainer = React.createClass({
     },
 
     render() {
-        const { value, errorText, groupIds, change, cancel } = this.props;
+        const { value, errorText, groupIds = [], onChange, onCancel, onCreate } = this.props;
         return (
             <AddSubGroup
                 value={value}
                 errorText={errorText}
                 groupIds={groupIds}
-                change={change}
-                cancel={cancel}
-                save={this.onSave}
+                onChange={onChange}
+                onCancel={onCancel}
+                onCreate={onCreate}
+                onSave={this.onSave}
                 addRef={this.saveRefAndFocus}
             />
         );

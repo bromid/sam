@@ -1,16 +1,19 @@
 import React, { PropTypes } from 'react';
-import { withRouter } from 'react-router';
+import { withRouter, browserHistory } from 'react-router';
 import isEmpty from 'lodash/isEmpty';
 import { removeEmptyFields } from '../helpers';
 import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import TextField from 'material-ui/TextField';
+import LoadingIndicator from './LoadingIndicator';
 import * as groupValidators from '../validators/groupValidators';
 
 const NewGroup = React.createClass({
     propTypes: {
         onCreate: PropTypes.func.isRequired,
         onCancel: PropTypes.func,
+        createIsPending: PropTypes.bool,
+        createError: PropTypes.object,
     },
 
     getInitialState() {
@@ -61,7 +64,7 @@ const NewGroup = React.createClass({
             this.setState(errors.text);
         } else {
             const groupNoEmptyFields = removeEmptyFields(group);
-            this.props.onCreate(groupNoEmptyFields);
+            this.props.onCreate(groupNoEmptyFields, () => browserHistory.push(`/group/${id}`));
         }
     },
 
@@ -85,10 +88,9 @@ const NewGroup = React.createClass({
 
     render() {
         const {
-            id, idErrorText,
-            name, nameErrorText,
-            description, descriptionErrorText,
+            id, idErrorText, name, nameErrorText, description, descriptionErrorText,
         } = this.state;
+        const { createIsPending } = this.props;
 
         const formStyle = {
             flex: 1,
@@ -99,6 +101,9 @@ const NewGroup = React.createClass({
 
         return (
             <form style={formStyle}>
+                {createIsPending &&
+                    <LoadingIndicator />
+                }
                 <TextField
                     value={id}
                     errorText={idErrorText}
