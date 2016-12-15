@@ -1,5 +1,5 @@
-# atg_cmdb
-ATG Configuration Management DB for asset management.
+# SAM
+Simple Asset Management tool
 
 ### Getting started
 
@@ -12,4 +12,4 @@ ATG Configuration Management DB for asset management.
 
 ### Change configuration
 
-All configuration is found in [default.yml](atg-cmdb-server/default.yml) when run locally. When deployed with Ansible the configuration is a merge between [configuration/default.yml](atg-cmdb-release/src/ansible/configuration/default.yml) and [ansible/group_vars](atg-cmdb-release/src/ansible/group_vars).
+All configuration is found in [default.yml](sam-server/default.yml).

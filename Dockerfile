@@ -1,21 +1,21 @@
 #
-# Cmdb Dockerfile in CentOS 7 image
+# SAM Dockerfile in CentOS 7 image
 #
 
 # Build:
-# docker build -t atg/cmdb .
+# docker build -t atg/sam .
 #
 # Create:
-# docker create -p 8080:8080 -p 27017:27017 --name cmdb atg/cmdb
+# docker create -p 8080:8080 -p 27017:27017 --name sam atg/sam
 #
 # Start:
-# docker start cmdb
+# docker start sam
 #
 # Connect with mongo
-# docker exec -it cmdb mongo
+# docker exec -it sam mongo
 #
 # Connect bash
-# docker exec -it cmdb bash
+# docker exec -it sam bash
 
 
 # Pull base image
@@ -37,9 +37,9 @@ RUN alternatives --install /usr/bin/javaws javaws /usr/java/latest/bin/javaws 20
 RUN alternatives --install /usr/bin/javac javac /usr/java/latest/bin/javac 200000
 
 ENV JAVA_HOME /usr/java/latest
+
 # Install MongoDB
 RUN echo -e "[mongodb]\nname=MongoDB Repository\nbaseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/3.2/`uname -m`/\ngpgcheck=0\nenabled=1" > /etc/yum.repos.d/mongodb.repo
-#RUN yum update -y
 RUN yum install -y mongodb-org
 RUN yum clean all
 RUN chown -R mongod:mongod /var/lib/mongo
@@ -47,10 +47,10 @@ RUN chown -R mongod:mongod /var/lib/mongo
 # Copy config mongodb
 ADD dockerconf/mongod.conf /etc/mongod.conf
 
-# Cmdb jar file
-ADD atg-cmdb-server/target/atg-cmdb-server-1.0-SNAPSHOT.jar /opt/cmdb.jar
-ADD atg-cmdb-server/default.yml /opt/default.yml
+# SAM jar file
+ADD sam-server/target/sam-server-1.0-SNAPSHOT.jar /opt/sam.jar
+ADD sam-server/default.yml /opt/default.yml
 
 # Expose ports.
 EXPOSE 8080
-CMD /bin/mongod -f /etc/mongod.conf && java -jar /opt/cmdb.jar server /opt/default.yml 
+CMD /bin/mongod -f /etc/mongod.conf && java -jar /opt/sam.jar server /opt/default.yml 
