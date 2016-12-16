@@ -13,10 +13,6 @@
   <artifactId>sam-front</artifactId>
   <packaging>pom</packaging>
 
-  <properties>
-    <npm.registry>http://nexus.hastsportenshus.atg.se/content/groups/npm-all/</npm.registry>
-  </properties>
-
   <build>
     <plugins>
       <plugin>
@@ -43,7 +39,6 @@
             </goals>
             <configuration>
               <arguments>install</arguments>
-              <npmRegistryURL>${npm.registry}</npmRegistryURL>
             </configuration>
           </execution>
           <execution>
