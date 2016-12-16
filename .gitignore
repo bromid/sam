@@ -1,5 +1,3 @@
-/vagrantrelease/
-/.vagrant/
 target/
 .settings/
 .project
