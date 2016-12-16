@@ -1,5 +1,6 @@
 package se.atg.sam.ui.dropwizard.db;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,8 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoDatabase;
 
@@ -24,6 +27,8 @@ public class MongoDatabaseConnectionFactory {
   @NotNull
   @JsonProperty
   private String name;
+  @JsonProperty
+  private String authDb;
   @JsonProperty
   private String username;
   @JsonProperty
@@ -49,15 +54,14 @@ public class MongoDatabaseConnectionFactory {
 
       logger.debug("Create client {}", connections);
 
-      //final MongoCredential credential = MongoCredential.createCredential(username, dbName, password.toCharArray());
-      //mongoClient = new MongoClient(getServerAddresses(), Arrays.asList(credential));
-
       final MongoClientOptions options = MongoClientOptions.builder()
-        .connectTimeout(1000)
-        .serverSelectionTimeout(5000)
+        .connectTimeout(5000)
+        .serverSelectionTimeout(10000)
         .maxWaitTime(5000)
         .build();
-      mongoClient = new MongoClient(getServerAddresses(), options);
+
+      mongoClient = createClient(options);
+
       lifecycle.manage(new Managed() {
 
         @Override
@@ -71,6 +75,21 @@ public class MongoDatabaseConnectionFactory {
       });
       return mongoClient;
     }
+  }
+
+  private MongoClient createClient(MongoClientOptions options) {
+
+    final List<ServerAddress> serverAddresses = getServerAddresses();
+    logger.info("Connecting to database {}", serverAddresses);
+
+    if (username != null) {
+      Preconditions.checkNotNull(password);
+      final List<MongoCredential> credentials = Arrays.asList(
+          MongoCredential.createCredential(username, (authDb != null) ? authDb : name, password.toCharArray())
+       );
+      return new MongoClient(serverAddresses, credentials, options);
+    }
+    return new MongoClient(serverAddresses, options);
   }
 
   private List<ServerAddress> getServerAddresses() {

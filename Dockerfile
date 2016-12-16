@@ -53,4 +53,4 @@ ADD sam-server/default.yml /opt/default.yml
 
 # Expose ports.
 EXPOSE 8080
-CMD /bin/mongod -f /etc/mongod.conf && java -jar /opt/sam.jar server /opt/default.yml 
+CMD /bin/mongod -f /etc/mongod.conf && java -jar /opt/sam.jar server /opt/default.yml

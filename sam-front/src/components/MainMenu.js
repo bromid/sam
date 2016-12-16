@@ -13,8 +13,7 @@ function MainMenu({ docked, isOpen, setMenuOpen, closeMenu }) {
         minHeight: 46,
         padding: 27,
         textAlign: 'center',
-        backgroundImage: logoBackground,
-        boxShadow,
+        backgroundImage: logoBackground, boxShadow,
     };
 
     return (

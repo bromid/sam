@@ -1,4 +1,4 @@
-package se.atg.sam.ui.dropwizard.auth;
+package se.atg.sam.ui.dropwizard.command;
 
 import static se.atg.sam.auth.OAuth2Service.JWT_EXPIRY;
 import static se.atg.sam.auth.OAuth2Service.JWT_ISSUED_AT;

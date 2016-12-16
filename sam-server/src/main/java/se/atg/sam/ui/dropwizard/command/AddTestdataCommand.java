@@ -1,54 +1,54 @@
-package se.atg.sam.ui.text;
+package se.atg.sam.ui.dropwizard.command;
 
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.Updates;
 
+import io.dropwizard.Application;
+import io.dropwizard.cli.EnvironmentCommand;
+import io.dropwizard.setup.Environment;
+import net.sourceforge.argparse4j.inf.Namespace;
 import se.atg.sam.dao.Collections;
 import se.atg.sam.helpers.JsonHelper;
+import se.atg.sam.ui.dropwizard.configuration.SamConfiguration;
 
-public final class CreateTestdata {
+public class AddTestdataCommand extends EnvironmentCommand<SamConfiguration> {
 
-  private static final Logger logger = LoggerFactory.getLogger(CreateTestdata.class);
+  private Application<SamConfiguration> application;
 
-  private CreateTestdata() {}
+  public AddTestdataCommand(Application<SamConfiguration> application) {
+    super(application, "dbtestdata", "Add testdata to the database");
+    this.application = application;
+  }
 
-  public static void main(String[] args) {
+  @Override
+  protected void run(Environment environment, Namespace namespace, SamConfiguration configuration) throws Exception {
 
-    logger.info("Start");
+    final MongoDatabase database = configuration.getDbConnectionFactory().getDatabase(environment.lifecycle());
 
-    try (final MongoClient mongoClient = new MongoClient()) {
+    final MongoCollection<Document> servers = database.getCollection(Collections.SERVERS);
+    servers.drop();
 
-      final MongoDatabase database = mongoClient.getDatabase("test");
+    final MongoCollection<Document> applications = database.getCollection(Collections.APPLICATIONS);
+    applications.drop();
 
-      final MongoCollection<Document> servers = database.getCollection(Collections.SERVERS);
-      servers.drop();
+    final MongoCollection<Document> groups = database.getCollection(Collections.GROUPS);
+    groups.drop();
 
-      final MongoCollection<Document> applications = database.getCollection(Collections.APPLICATIONS);
-      applications.drop();
+    final MongoCollection<Document> assets = database.getCollection(Collections.ASSETS);
+    assets.drop();
 
-      final MongoCollection<Document> groups = database.getCollection(Collections.GROUPS);
-      groups.drop();
+    // Add indexes
+    new CreateDatabaseCommand(application).run(environment, namespace, configuration);
 
-      final MongoCollection<Document> assets = database.getCollection(Collections.ASSETS);
-      assets.drop();
-
-      // Add indexes
-      CreateDatabase.initDatabase(database);
-
-      createServers(servers);
-      createApplications(applications);
-      createGroups(groups);
-      createAssets(assets);
-    }
-    logger.info("End");
+    createServers(servers);
+    createApplications(applications);
+    createGroups(groups);
+    createAssets(assets);
   }
 
   private static void createAssets(MongoCollection<Document> assets) {

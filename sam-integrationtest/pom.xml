@@ -53,9 +53,11 @@
               <artifact>se.atg.sam:sam-server</artifact>
               <includes>
                 <include>se/atg/**</include>
+                <include>META-INF/services/**</include>
               </includes>
             </filter>
           </filters>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
         </configuration>
         <executions>
           <execution>

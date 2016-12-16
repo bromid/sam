@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.junit.runner.Description;
 
 import io.dropwizard.Application;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import se.atg.sam.ui.dropwizard.configuration.SamConfiguration;
@@ -27,9 +29,17 @@ public class Main extends Application<SamConfiguration> {
 
   @Override
   public void initialize(Bootstrap<SamConfiguration> bootstrap) {
+
+    bootstrap.setConfigurationSourceProvider(
+      new SubstitutingSourceProvider(
+        bootstrap.getConfigurationSourceProvider(),
+        new EnvironmentVariableSubstitutor()
+      )
+    );
+
     bootstrap.addCommand(new TestCommand(this,
       Optional.empty(),
-      //testDescription(ApplicationIntegrationTest.class, "getApplication"),
+      //testDescription(AssetIntegrationTest.class, "newAssetMustHaveId"),
       SmokeTest.class,
       ServerIntegrationTest.class,
       GroupIntegrationTest.class,

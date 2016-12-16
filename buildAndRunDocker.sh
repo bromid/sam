@@ -1,8 +1,13 @@
 #!/usr/bin/env sh
-mvn clean package -T 1.5C || {
-  echo 'Build failed';
-  exit 1;
-}
+
+source ./common.sh
+
+if [ "$SKIP_BUILD" = false ]; then
+  mvn clean package -T 1.5C || {
+    echo 'Build failed';
+    exit 1;
+  }
+fi
 
 docker stop sam
 docker rm sam

@@ -3,13 +3,13 @@ package se.atg.sam.ui.dropwizard.auth;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.auth0.jwt.JWTExpiredException;
 import com.auth0.jwt.JWTVerifyException;
-import com.google.common.base.Optional;
 
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
@@ -37,7 +37,7 @@ public class IdTokenAuthenticator implements Authenticator<String, User> {
     } catch (JWTVerifyException exc) {
       LOGGER.info("Invalid JWT token supplied: {}. {}", token, exc.getLocalizedMessage());
     }
-    return Optional.absent();
+    return Optional.empty();
   }
 
   private Optional<User> verifyToken(String token) throws IOException, GeneralSecurityException, JWTVerifyException {
