@@ -1,0 +1,53 @@
+language: java
+jdk:
+  - oraclejdk8
+
+env:
+  global:
+    - ENCRYPTION_LABEL=bc4a16d63740
+    - VERSION_PATTERN="v[0-9]*\.[0-9]*\.[0-9]*"
+
+before_script: |
+    if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]
+    then
+        # Get semver version for HEAD if exists
+        VERSION=$(git tag --contains HEAD | grep "$VERSION_PATTERN")
+        if [ -z "$VERSION" ]
+        then
+            # Increment minor and set patch to 0
+            VERSION=$(git describe --tags --match "$VERSION_PATTERN" | awk -F. '{printf("%s.%s.0", $1, $2+1)}')
+
+            # Set user for tag
+            git config user.name "Travis CI"
+            git config user.email "travis@travis.org"
+
+            # Create new version tag
+            git tag -a "$VERSION" -m "Version $VERSION"
+            echo "Tagged new version, $VERSION"
+        else
+            echo "HEAD already tagged, $VERSION"
+        fi
+    fi
+
+after_script: |
+    if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]
+    then
+        # Get semver version for HEAD
+        VERSION=$(git tag --contains HEAD | grep "$VERSION_PATTERN")
+
+        # Push tag if not present on origin
+        git ls-remote --exit-code origin refs/tags/$VERSION || {
+            ENCRYPTED_KEY_VAR="encrypted_${ENCRYPTION_LABEL}_key"
+            ENCRYPTED_IV_VAR="encrypted_${ENCRYPTION_LABEL}_iv"
+            ENCRYPTED_KEY=${!ENCRYPTED_KEY_VAR}
+            ENCRYPTED_IV=${!ENCRYPTED_IV_VAR}
+            openssl aes-256-cbc -K $ENCRYPTED_KEY -iv $ENCRYPTED_IV -in sam_deploy_key.enc -out deploy_key -d
+            chmod 600 deploy_key
+            eval $(ssh-agent -s)
+            ssh-add deploy_key
+
+            # Now that we're all set up, we can push.
+            git push --quiet --tags origin > /dev/null 2>&1
+            echo "Pushed tag, $VERSION"
+        }
+    fi
