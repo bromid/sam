@@ -8,8 +8,8 @@ env:
     - VERSION_PATTERN="v[0-9]*\.[0-9]*\.[0-9]*"
 
 before_script: |
-    #if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]
-    #then
+    if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]
+    then
         # Get semver version for HEAD if exists
         VERSION=$(git tag --contains HEAD | grep "$VERSION_PATTERN")
         if [ -z "$VERSION" ]
@@ -27,11 +27,11 @@ before_script: |
         else
             echo "HEAD already tagged, $VERSION"
         fi
-    #fi
+    fi
 
 after_script: |
-    #if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]
-    #then
+    if [ "$TRAVIS_PULL_REQUEST" = "false" -a "$TRAVIS_BRANCH" = "master" ]
+    then
         # Get semver version for HEAD
         VERSION=$(git tag --contains HEAD | grep "$VERSION_PATTERN")
 
@@ -50,4 +50,4 @@ after_script: |
             git push --tags "git@github.com:${TRAVIS_REPO_SLUG}.git"
             echo "Pushed tag, $VERSION"
         }
-    #fi
+    fi
