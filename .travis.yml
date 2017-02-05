@@ -46,8 +46,8 @@ after_script: |
             eval $(ssh-agent -s)
             ssh-add deploy_key
 
-            # Now that we're all set up, we can push.
-            git push --quiet --tags origin > /dev/null 2>&1
+            # Now that we're all set up, we can push to github
+            git push --tags "git@github.com:${TRAVIS_REPO_SLUG}.git"
             echo "Pushed tag, $VERSION"
         }
     fi
