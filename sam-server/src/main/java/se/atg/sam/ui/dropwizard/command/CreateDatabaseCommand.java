@@ -1,40 +1,34 @@
-package se.atg.sam.ui.text;
+package se.atg.sam.ui.dropwizard.command;
 
 import static com.mongodb.client.model.Indexes.ascending;
 import static com.mongodb.client.model.Indexes.compoundIndex;
 
 import org.bson.Document;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.IndexModel;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 
+import io.dropwizard.Application;
+import io.dropwizard.cli.EnvironmentCommand;
+import io.dropwizard.setup.Environment;
+import net.sourceforge.argparse4j.inf.Namespace;
 import se.atg.sam.dao.Collections;
+import se.atg.sam.ui.dropwizard.configuration.SamConfiguration;
 
-public final class CreateDatabase {
+public class CreateDatabaseCommand extends EnvironmentCommand<SamConfiguration> {
 
-  private static final Logger logger = LoggerFactory.getLogger(CreateDatabase.class);
-
-  private CreateDatabase() {}
-
-  public static void main(String[] args) {
-
-    logger.info("Start");
-    try (final MongoClient mongoClient = new MongoClient()) {
-
-      final MongoDatabase database = mongoClient.getDatabase("test");
-      initDatabase(database);
-    }
-    logger.info("Done");
+  public CreateDatabaseCommand(Application<SamConfiguration> application) {
+    super(application, "dbcreate", "Create or update the db structure");
   }
 
-  public static void initDatabase(MongoDatabase database) {
+  @Override
+  public void run(Environment environment, Namespace namespace, SamConfiguration configuration) throws Exception {
+
+    final MongoDatabase database = configuration.getDbConnectionFactory().getDatabase(environment.lifecycle());
 
     final MongoCollection<Document> servers = database.getCollection(Collections.SERVERS);
     servers.createIndexes(Lists.newArrayList(

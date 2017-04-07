@@ -1,0 +1,2 @@
+se.atg.sam.ui.dropwizard.logging.JsonLogAppender
+se.atg.sam.ui.dropwizard.logging.JsonAccessLogAppender

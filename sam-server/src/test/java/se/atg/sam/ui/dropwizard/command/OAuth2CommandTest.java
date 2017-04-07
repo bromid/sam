@@ -1,4 +1,4 @@
-package se.atg.sam.ui.dropwizard.auth;
+package se.atg.sam.ui.dropwizard.command;
 
 import java.io.PrintStream;
 import java.nio.charset.Charset;
@@ -14,9 +14,9 @@ import com.google.common.collect.ImmutableMap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import se.atg.sam.auth.OAuth2Service;
 import se.atg.sam.model.auth.OAuth2IdToken;
-import se.atg.sam.ui.dropwizard.auth.OAuth2Command;
-import se.atg.sam.ui.dropwizard.auth.OAuth2Command.Command;
 import se.atg.sam.ui.dropwizard.configuration.SamConfiguration;
+import se.atg.sam.ui.dropwizard.command.OAuth2Command;
+import se.atg.sam.ui.dropwizard.command.OAuth2Command.Command;
 import se.atg.sam.ui.dropwizard.configuration.OAuthConfiguration;
 
 public class OAuth2CommandTest {

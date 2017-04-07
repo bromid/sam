@@ -21,15 +21,14 @@
 # Pull base image
 FROM centos:centos7
 
-#Install Java
-ENV JAVA_VERSION 8u31
-ENV BUILD_VERSION b13
-
 RUN yum -y upgrade
-RUN yum -y install wget
-# Downloading Java
-RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-$BUILD_VERSION/jdk-$JAVA_VERSION-linux-x64.rpm" -O /tmp/jdk-8-linux-x64.rpm
+RUN yum -y install wget && yum -y install gettext
 
+# Install java from oracle website
+ARG JAVA_VERSION=8u31
+ARG BUILD_VERSION=b13
+
+RUN wget --no-cookies --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/$JAVA_VERSION-$BUILD_VERSION/jdk-$JAVA_VERSION-linux-x64.rpm" -O /tmp/jdk-8-linux-x64.rpm
 RUN yum -y install /tmp/jdk-8-linux-x64.rpm
 
 RUN alternatives --install /usr/bin/java jar /usr/java/latest/bin/java 200000
@@ -51,6 +50,10 @@ ADD dockerconf/mongod.conf /etc/mongod.conf
 ADD sam-server/target/sam-server-1.0-SNAPSHOT.jar /opt/sam.jar
 ADD sam-server/default.yml /opt/default.yml
 
+ARG OAUTH_CLIENT_ID
+ARG OAUTH_CLIENT_SECRET
+RUN envsubst < /opt/default.yml > /opt/default.yml
+
 # Expose ports.
 EXPOSE 8080
-CMD /bin/mongod -f /etc/mongod.conf && java -jar /opt/sam.jar server /opt/default.yml 
+CMD /bin/mongod -f /etc/mongod.conf && java -jar /opt/sam.jar server /opt/default.yml

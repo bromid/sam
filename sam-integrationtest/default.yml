@@ -1,18 +1,16 @@
 mongoDatabase:
   name: test
-  username: uid
-  password: pwd
   connections:
-    - host: localhost
+    - host: 127.0.0.1
       port: 27017
 
 oauthConfig:
-  clientId: <client id>
-  clientSecret: <client secret>
+  clientId: ${OAUTH_CLIENT_ID}
+  clientSecret: ${OAUTH_CLIENT_SECRET}
   authorizeEndpoint: Not requried for tests
   accessTokenEndpoint: Not requried for tests
   userEndpoint: Not requried for tests
-  idTokenIssuer: https://sam.hh.atg.se
+  idTokenIssuer: https://sam.atg.se
   idTokenSignKey: topsecret
   origin: Not required for tests
 
@@ -31,5 +29,3 @@ logging:
   loggers:
     se.atg: INFO
     org.mongodb: INFO
-  appenders:
-    - type: console

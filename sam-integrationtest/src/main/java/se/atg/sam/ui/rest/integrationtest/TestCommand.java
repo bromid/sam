@@ -31,9 +31,9 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import se.atg.sam.helpers.JsonHelper;
 import se.atg.sam.model.View;
 import se.atg.sam.ui.dropwizard.auth.ClientTokenFilter;
+import se.atg.sam.ui.dropwizard.command.CreateDatabaseCommand;
 import se.atg.sam.ui.dropwizard.configuration.SamConfiguration;
 import se.atg.sam.ui.dropwizard.db.MongoDatabaseHealthCheck;
-import se.atg.sam.ui.text.CreateDatabase;
 
 public class TestCommand extends EnvironmentCommand<SamConfiguration> {
 
@@ -42,11 +42,13 @@ public class TestCommand extends EnvironmentCommand<SamConfiguration> {
 
   private Class<?>[] testClasses;
   private Optional<Description> testFilter;
+  private Application<SamConfiguration> application;
 
   public TestCommand(Application<SamConfiguration> application, Optional<Description> testFilter, Class<?>... testClasses) {
     super(application, "test", "Runs junit tests");
     this.testFilter = testFilter;
     this.testClasses = testClasses;
+    this.application = application;
   }
 
   @Override
@@ -87,7 +89,7 @@ public class TestCommand extends EnvironmentCommand<SamConfiguration> {
     // Init database
     database.drop();
     verifyDatabaseHealth(database);
-    CreateDatabase.initDatabase(database);
+    new CreateDatabaseCommand(application).run(environment, namespace, configuration);
 
     // Run junit tests
     final Result result = runTests(injector, testClasses, testFilter);

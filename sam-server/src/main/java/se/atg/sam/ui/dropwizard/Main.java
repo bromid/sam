@@ -26,6 +26,8 @@ import io.dropwizard.auth.basic.BasicCredentialAuthFilter;
 import io.dropwizard.auth.chained.ChainedAuthFilter;
 import io.dropwizard.auth.oauth.OAuthCredentialAuthFilter;
 import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
@@ -47,7 +49,9 @@ import se.atg.sam.model.View;
 import se.atg.sam.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.sam.ui.dropwizard.auth.BasicAuthorizer;
 import se.atg.sam.ui.dropwizard.auth.IdTokenAuthenticator;
-import se.atg.sam.ui.dropwizard.auth.OAuth2Command;
+import se.atg.sam.ui.dropwizard.command.AddTestdataCommand;
+import se.atg.sam.ui.dropwizard.command.CreateDatabaseCommand;
+import se.atg.sam.ui.dropwizard.command.OAuth2Command;
 import se.atg.sam.ui.dropwizard.configuration.SamConfiguration;
 import se.atg.sam.ui.dropwizard.configuration.OAuthConfiguration;
 import se.atg.sam.ui.dropwizard.db.MongoDatabaseHealthCheck;
@@ -61,6 +65,7 @@ import se.atg.sam.ui.rest.InfoResource;
 import se.atg.sam.ui.rest.OAuth2Resource;
 import se.atg.sam.ui.rest.SearchResource;
 import se.atg.sam.ui.rest.ServerResource;
+import se.atg.sam.ui.rest.mapper.ConstraintViolationExceptionMapper;
 import se.atg.sam.ui.rest.mapper.MongoServerExceptionMapper;
 
 public class Main extends Application<SamConfiguration> {
@@ -79,7 +84,16 @@ public class Main extends Application<SamConfiguration> {
     bootstrap.addBundle(new AssetsBundle("/static", "/static", "index.mustache", "static"));
     bootstrap.addBundle(new AssetsBundle("/docs", "/docs", "index.html", "docs"));
 
+    bootstrap.setConfigurationSourceProvider(
+      new SubstitutingSourceProvider(
+        bootstrap.getConfigurationSourceProvider(),
+        new EnvironmentVariableSubstitutor()
+      )
+    );
+
     bootstrap.addCommand(new OAuth2Command());
+    bootstrap.addCommand(new CreateDatabaseCommand(this));
+    bootstrap.addCommand(new AddTestdataCommand(this));
   }
 
   @Override
@@ -139,6 +153,7 @@ public class Main extends Application<SamConfiguration> {
     // Core resources
     environment.jersey().register(DeclarativeLinkingFeature.class);
     environment.jersey().register(MongoServerExceptionMapper.class);
+    environment.jersey().register(ConstraintViolationExceptionMapper.class);
 
     // Init Swagger
     environment.jersey().register(ApiListingResource.class);
@@ -167,7 +182,7 @@ public class Main extends Application<SamConfiguration> {
     final BeanConfig config = new BeanConfig();
     config.setTitle("ATG SAM - Simple Asset Management");
     config.setVersion(getClass().getPackage().getImplementationVersion());
-    config.setResourcePackage("se.atg.cmdb.ui.rest");
+    config.setResourcePackage("se.atg.sam.ui.rest");
     config.setScan();
   }
 
