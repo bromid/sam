@@ -14,9 +14,10 @@ const oauthRequest = (state) => {
     const settings = window.samSettings.oauth;
     return [
         `${settings.url}?client_id=${settings.clientId}`,
-        'scope=user',
+        `scope=${settings.scopes}`,
         `state=${state}`,
-        'allow_signup=false',
+        `redirect_uri=${encodeURIComponent(settings.origin + '/oauth')}`,
+        'response_type=code',
     ].join('&');
 };
 

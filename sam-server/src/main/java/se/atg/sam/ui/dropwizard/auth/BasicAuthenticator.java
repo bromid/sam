@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import io.dropwizard.auth.basic.BasicCredentials;
-import se.atg.sam.model.User;
+import se.atg.sam.model.auth.User;
 
 public class BasicAuthenticator implements Authenticator<BasicCredentials, User> {
 
@@ -20,7 +20,7 @@ public class BasicAuthenticator implements Authenticator<BasicCredentials, User>
     final String username = credentials.getUsername();
     LOGGER.debug("Authenticating user {}", username);
     if ("secret".equals(credentials.getPassword())) {
-      return Optional.of(new User(username));
+      return Optional.of(new User(username, Optional.empty()));
     }
     return Optional.empty();
   }

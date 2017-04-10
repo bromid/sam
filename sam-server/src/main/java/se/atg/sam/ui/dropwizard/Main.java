@@ -5,12 +5,15 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Link;
 
-import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.linking.DeclarativeLinkingFeature;
+import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 
 import com.fasterxml.jackson.databind.JavaType;
@@ -44,8 +47,8 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
 import se.atg.sam.auth.OAuth2Service;
 import se.atg.sam.helpers.JsonHelper;
-import se.atg.sam.model.User;
 import se.atg.sam.model.View;
+import se.atg.sam.model.auth.User;
 import se.atg.sam.ui.dropwizard.auth.BasicAuthenticator;
 import se.atg.sam.ui.dropwizard.auth.BasicAuthorizer;
 import se.atg.sam.ui.dropwizard.auth.IdTokenAuthenticator;
@@ -70,7 +73,7 @@ import se.atg.sam.ui.rest.mapper.MongoServerExceptionMapper;
 
 public class Main extends Application<SamConfiguration> {
 
-  private static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
+  private static final Logger HTTP_LOGGER = Logger.getLogger(LoggingFeature.class.getName());
 
   public static void main(String[] args) throws Exception {
     new Main().run(args);
@@ -190,7 +193,7 @@ public class Main extends Application<SamConfiguration> {
 
     final JerseyClientBuilder builder = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration());
     if (configuration.isLogRequests()) {
-      builder.withProvider(new LoggingFilter(HTTP_LOGGER, true));
+      builder.withProvider(new LoggingFeature(HTTP_LOGGER, Level.INFO, Verbosity.PAYLOAD_ANY, LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
     }
     return builder.build(name);
   }

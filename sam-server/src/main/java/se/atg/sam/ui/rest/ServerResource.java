@@ -57,7 +57,7 @@ import se.atg.sam.model.Deployment;
 import se.atg.sam.model.PaginatedCollection;
 import se.atg.sam.model.Server;
 import se.atg.sam.model.ServerLink;
-import se.atg.sam.model.User;
+import se.atg.sam.model.auth.User;
 import se.atg.sam.ui.dropwizard.auth.Roles;
 
 @Path("/")

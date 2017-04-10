@@ -58,7 +58,7 @@ import se.atg.sam.model.Group;
 import se.atg.sam.model.GroupLink;
 import se.atg.sam.model.PaginatedCollection;
 import se.atg.sam.model.Tag;
-import se.atg.sam.model.User;
+import se.atg.sam.model.auth.User;
 import se.atg.sam.ui.dropwizard.auth.Roles;
 
 @Path("/")

@@ -27,6 +27,7 @@ public class IndexResource {
         url = oauthConfig.getAuthorizeEndpoint();
         clientId = oauthConfig.getClientId();
         origin = oauthConfig.getOrigin();
+        scopes = oauthConfig.getScopes();
       }};
     }};
 

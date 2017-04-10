@@ -1,5 +1,6 @@
 package se.atg.sam.ui.dropwizard.configuration;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,15 +17,15 @@ public class OAuthConfiguration {
 
   @NotNull
   @JsonProperty
+  protected String scopes;
+
+  @NotNull
+  @JsonProperty
   protected String authorizeEndpoint;
 
   @NotNull
   @JsonProperty
   protected String accessTokenEndpoint;
-
-  @NotNull
-  @JsonProperty
-  protected String userEndpoint;
 
   @NotNull
   @JsonProperty
@@ -38,6 +39,11 @@ public class OAuthConfiguration {
   @JsonProperty
   protected String origin;
 
+  @Valid
+  @NotNull
+  @JsonProperty
+  protected OAuthUserConfiguration userConfig = new OAuthUserConfiguration();
+
   public String getClientId() {
     return clientId;
   }
@@ -46,16 +52,16 @@ public class OAuthConfiguration {
     return clientSecret;
   }
 
+  public String getScopes() {
+    return scopes;
+  }
+
   public String getAuthorizeEndpoint() {
     return authorizeEndpoint;
   }
 
   public String getAccessTokenEndpoint() {
     return accessTokenEndpoint;
-  }
-
-  public String getUserEndpoint() {
-    return userEndpoint;
   }
 
   public String getIdTokenIssuer() {
@@ -68,5 +74,9 @@ public class OAuthConfiguration {
 
   public String getOrigin() {
     return origin;
+  }
+
+  public OAuthUserConfiguration getUserConfig() {
+    return userConfig;
   }
 }

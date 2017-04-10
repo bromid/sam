@@ -11,8 +11,7 @@ import org.junit.Test;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-import se.atg.sam.model.github.User;
-import se.atg.sam.ui.rest.InfoResource;
+import se.atg.sam.model.auth.User;
 import se.atg.sam.ui.rest.InfoResource.Info;
 import se.atg.sam.ui.rest.integrationtest.helpers.TestHelper;
 
@@ -80,7 +79,7 @@ public class SmokeTest {
     TestHelper.assertSuccessful(response);
 
     final User user = response.readEntity(User.class);
-    Assert.assertEquals("integration-test", user.login);
+    Assert.assertEquals("integration-test", user.name);
   }
 
   @Test
@@ -93,6 +92,6 @@ public class SmokeTest {
     TestHelper.assertSuccessful(response);
 
     final User user = response.readEntity(User.class);
-    Assert.assertEquals("integration-test", user.login);
+    Assert.assertEquals("integration-test", user.name);
   }
 }

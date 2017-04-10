@@ -7,12 +7,18 @@ mongoDatabase:
 oauthConfig:
   clientId: ${OAUTH_CLIENT_ID}
   clientSecret: ${OAUTH_CLIENT_SECRET}
-  authorizeEndpoint: https://github.com/login/oauth/authorize
-  accessTokenEndpoint: https://github.com/login/oauth/access_token
-  userEndpoint: https://api.github.com/user
+  scopes: ${OAUTH_SCOPES}
+  authorizeEndpoint: ${OAUTH_AUTHORIZE_ENDPOINT}
+  accessTokenEndpoint: ${OAUTH_ACCESSTOKEN_ENDPOINT}
+  origin: http://localhost:8080
   idTokenIssuer: https://sam.atg.se
   idTokenSignKey: topsecret
-  origin: http://localhost:8080
+  userConfig:
+    githubEndpoint: ${OAUTH_GITHUB_USER_ENDPOINT}
+    idTokenPublicKeyModulus: ${IDTOKEN_PUBLICKEY_MODULUS}
+    idTokenPublicKeyExponent: ${IDTOKEN_PUBLICKEY_EXPONENT}
+    idTokenIssuer: ${IDTOKEN_ISSUER}
+    idTokenAudience: ${IDTOKEN_AUDIENCE}
 
 authenticationCachePolicy: maximumSize=1000, expireAfterAccess=30m
 
@@ -27,15 +33,17 @@ server:
 logRequests: false
 jerseyClientConfig:
   gzipEnabled: true
-  gzipEnabledForRequests: true
+  gzipEnabledForRequests: false
   timeout: 2s
   connectionTimeout: 2s
   connectionRequestTimeout: 2s
+  tls:
+    trustSelfSignedCertificates: false
 
 logging:
   level: INFO
   loggers:
-    se.atg: DEBUG
+    se.atg: INFO
     io.swagger: INFO
     org.mongodb: INFO
     org.reflections: INFO

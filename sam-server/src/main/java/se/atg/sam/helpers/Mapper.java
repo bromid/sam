@@ -23,6 +23,13 @@ import com.google.common.collect.Maps;
 @SuppressWarnings("unchecked")
 public abstract class Mapper {
 
+  public static <T> Optional<T> singleEntry(List<T> list) {
+    if (list.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(list.get(0));
+  }
+
   public static <T,R> List<R> mapList(Document bson, String field, Function<? super T, ? extends R> mapper) {
 
     final List<T> list = (List<T>) bson.get(field);
