@@ -29,7 +29,7 @@ function* verifyOAuthCode(codeRequest, loginRequest) {
         }
 
         const apiCall = call(API.verifyOAuthCode, { obj: { code, state } });
-        const verifyCode = yield timeout(apiCall, 1500);
+        const verifyCode = yield timeout(apiCall, 2500);
         if (verifyCode.cancelled) {
             LOG.debug('Verify oauth code timed out.');
             return false;

@@ -9,4 +9,4 @@ if [ "$SKIP_BUILD" = false ]; then
   }
 fi
 
-java -jar sam-server/target/sam-server-1.0-SNAPSHOT.jar server sam-server/default.yml
+java -Djava.net.preferIPv4Stack=true -jar sam-server/target/sam-server-1.0-SNAPSHOT.jar server sam-server/default.yml

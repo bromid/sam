@@ -15,7 +15,7 @@ import io.dropwizard.auth.AuthenticationException;
 import io.dropwizard.auth.Authenticator;
 import se.atg.sam.auth.OAuth2Service;
 import se.atg.sam.auth.OAuth2Service.JwtField;
-import se.atg.sam.model.User;
+import se.atg.sam.model.auth.User;
 
 public class IdTokenAuthenticator implements Authenticator<String, User> {
 
@@ -45,6 +45,7 @@ public class IdTokenAuthenticator implements Authenticator<String, User> {
 
     final Map<String, Object> claims = service.verify(token);
     final String subject = (String) claims.get(JwtField.subject.id);
-    return Optional.of(new User(subject));
+    final String email = (String) claims.get(JwtField.email.id);
+    return Optional.of(new User(subject, Optional.ofNullable(email)));
   }
 }

@@ -23,5 +23,6 @@ public class IndexView extends View {
     public String url;
     public String clientId;
     public String origin;
+    public String scopes;
   }
 }

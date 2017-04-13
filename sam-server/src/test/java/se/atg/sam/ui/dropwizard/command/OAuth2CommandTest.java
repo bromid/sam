@@ -3,6 +3,7 @@ package se.atg.sam.ui.dropwizard.command;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Assert;
@@ -60,7 +61,7 @@ public class OAuth2CommandTest {
   public void testVerify() throws Exception {
 
     final String subject = "test-user";
-    final OAuth2IdToken jwt = oAuth2Service.createIdToken(subject);
+    final OAuth2IdToken jwt = oAuth2Service.createIdToken(subject, Optional.empty());
 
     final Namespace args = new Namespace(ImmutableMap.of(
       "subcommand", Command.verify,

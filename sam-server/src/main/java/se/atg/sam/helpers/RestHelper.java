@@ -32,8 +32,8 @@ import com.mongodb.client.model.Filters;
 import io.dropwizard.jersey.validation.Validators;
 import se.atg.sam.helpers.JsonHelper.UpdateMetaResult;
 import se.atg.sam.model.PaginatedCollection;
-import se.atg.sam.model.User;
 import se.atg.sam.model.View;
+import se.atg.sam.model.auth.User;
 
 public abstract class RestHelper {
 

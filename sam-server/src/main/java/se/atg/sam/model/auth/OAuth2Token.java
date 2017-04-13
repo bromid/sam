@@ -10,21 +10,33 @@ import io.swagger.annotations.ApiModel;
 import se.atg.sam.ui.rest.Defaults;
 
 @ApiModel(description = "OAuth2 access token")
-public class OAuth2AccessToken {
+public class OAuth2Token {
 
   @JsonProperty("access_token")
-  public String token;
+  public String accessToken;
+
+  @JsonProperty("refresh_token")
+  public String refreshToken;
+
+  @JsonProperty("id_token")
+  public String idToken;
 
   @JsonProperty("token_type")
   public String type;
 
+  @JsonProperty("expires_in")
+  public Integer expires;
+
   @JsonProperty("scope")
   public String scope;
 
-  public OAuth2AccessToken() {}
+  @JsonProperty("error")
+  public String error;
 
-  public OAuth2AccessToken(String token, String type) {
-    this.token = token;
+  public OAuth2Token() {}
+
+  public OAuth2Token(String accessToken, String type) {
+    this.accessToken = accessToken;
     this.type = type;
   }
 

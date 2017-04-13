@@ -7,6 +7,7 @@ import static se.atg.sam.auth.OAuth2Service.JWT_NOT_VALID_BEFORE;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.auth0.jwt.JWTVerifyException;
@@ -77,7 +78,7 @@ public class OAuth2Command extends ConfiguredCommand<SamConfiguration> {
   }
 
   private void create(String subject, OAuth2Service service, SamConfiguration configuration) {
-    final OAuth2IdToken token = service.createIdToken(subject);
+    final OAuth2IdToken token = service.createIdToken(subject, Optional.empty());
     configuration.getSystemOut().println("JSON Web Token for (" + subject + "): " + token.token);
   }
 

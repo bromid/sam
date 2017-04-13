@@ -1,12 +1,14 @@
 package se.atg.sam.ui.rest.integrationtest;
 
 import java.util.Optional;
+import java.util.logging.Level;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.glassfish.jersey.filter.LoggingFilter;
+import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
@@ -37,7 +39,7 @@ import se.atg.sam.ui.dropwizard.db.MongoDatabaseHealthCheck;
 
 public class TestCommand extends EnvironmentCommand<SamConfiguration> {
 
-  private static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFilter.class.getName());
+  private static final java.util.logging.Logger HTTP_LOGGER = java.util.logging.Logger.getLogger(LoggingFeature.class.getName());
   private static final Logger LOGGER = LoggerFactory.getLogger("integration-test");
 
   private Class<?>[] testClasses;
@@ -124,7 +126,7 @@ public class TestCommand extends EnvironmentCommand<SamConfiguration> {
 
     final JerseyClientBuilder builder = new JerseyClientBuilder(environment).using(configuration.getJerseyClientConfiguration());
     if (configuration.isLogRequests()) {
-      builder.withProvider(new LoggingFilter(HTTP_LOGGER, true));
+      builder.withProvider(new LoggingFeature(HTTP_LOGGER, Level.INFO, Verbosity.PAYLOAD_ANY, LoggingFeature.DEFAULT_MAX_ENTITY_SIZE));
     }
     return builder;
   }

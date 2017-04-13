@@ -5,14 +5,16 @@ mongoDatabase:
       port: 27017
 
 oauthConfig:
-  clientId: ${OAUTH_CLIENT_ID}
-  clientSecret: ${OAUTH_CLIENT_SECRET}
+  clientId: Not required for tests
+  clientSecret: Not required for tests
+  scopes: Not required for tests
   authorizeEndpoint: Not requried for tests
   accessTokenEndpoint: Not requried for tests
-  userEndpoint: Not requried for tests
+  origin: Not required for tests
   idTokenIssuer: https://sam.atg.se
   idTokenSignKey: topsecret
-  origin: Not required for tests
+  userConfig:
+    githubEndpoint: Not required for tests
 
 testEndpoint: http://localhost:8080/services/
 
@@ -23,6 +25,9 @@ jerseyClientConfig:
   timeout: 1s
   connectionTimeout: 1s
   connectionRequestTimeout: 1s
+  tls:
+    trustSelfSignedCertificates: false
+  
 
 logging:
   level: INFO

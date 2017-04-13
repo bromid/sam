@@ -1,6 +1,7 @@
 package se.atg.sam.ui.dropwizard.auth;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +31,7 @@ public class ClientTokenFilter implements ClientRequestFilter {
     tokenCache = CacheBuilder.newBuilder()
       .expireAfterWrite(OAuth2Service.EXPIRY, TimeUnit.SECONDS)
       .build(CacheLoader.from(() ->
-        oAuth2Service.createIdToken(username)
+        oAuth2Service.createIdToken(username, Optional.empty())
       ));
   }
 

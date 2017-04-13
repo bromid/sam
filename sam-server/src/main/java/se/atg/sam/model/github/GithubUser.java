@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import se.atg.sam.ui.rest.Defaults;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class User {
+public class GithubUser {
 
   @JsonProperty
   public String login;
