@@ -1,7 +1,7 @@
 {
-  "name": "Asset-management-dashboard",
+  "name": "simple-asset-management",
   "version": "0.0.0",
-  "description": "Dashboard for managing assets",
+  "description": "Simple asset management system for applications.",
   "scripts": {
     "start": "babel-node devServer.js",
     "startFancy": "webpack-dashboard -- babel-node devServer.js",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "http://github.hh.atg.se/atg/assets-dashboard"
+    "url": "https://github.com/atgse/sam"
   },
   "dependencies": {
     "babel-polyfill": "^6.9.1",

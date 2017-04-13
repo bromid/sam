@@ -3,7 +3,6 @@ import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import validate from 'webpack-validator';
-import envVarConfig from './dev-env-vars';
 
 const Paths = {
     SRC: path.resolve('src'),
@@ -12,6 +11,15 @@ const Paths = {
     DIST: path.resolve('dist/static'),
     PUBLIC: '/static/',
 };
+
+const Config = JSON.stringify({
+    oauth: {
+        url: process.env.OAUTH_AUTHORIZE_ENDPOINT,
+        clientId: process.env.OAUTH_CLIENT_ID,
+        origin: 'http://localhost:3001',
+        scopes: process.env.OAUTH_SCOPES
+    },
+}, null, '  ');
 
 const config = {
     devtool: 'eval',
@@ -24,7 +32,7 @@ const config = {
     plugins: [
         new HtmlWebpackPlugin({
             template: 'index.mustache',
-            env: envVarConfig,
+            env: Config,
         }),
         new CopyWebpackPlugin([
             {
